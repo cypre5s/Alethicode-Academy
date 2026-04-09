@@ -1,5 +1,6 @@
 # dependencies
 node_modules/
+package-lock.json
 
 # build output
 dist/
@@ -11,6 +12,7 @@ release/
 .env.production
 
 # editor / OS
+.cursor/
 .vscode/
 .idea/
 *.swp
@@ -24,3 +26,5 @@ npm-debug.log*
 # capacitor native builds
 android/app/build/
 harmony/build/
+
+.vercel
