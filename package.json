@@ -2,7 +2,10 @@
   "name": "alethicode-academy-galgame",
   "version": "1.0.0",
   "description": "Alethicode Academy Galgame desktop build. Developed by dhu_cypress, assisted with opus.",
-  "author": "dhu_cypress (assisted with opus)",
+  "author": {
+    "name": "dhu_cypress",
+    "email": "dhu_cypress@alethicode.dev"
+  },
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",

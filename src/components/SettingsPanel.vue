@@ -89,7 +89,7 @@
           </div>
 
           <div class="setting-section">AI 对话设置</div>
-          <p class="llm-hint">配置 LLM API 以启用自由对话功能。无 API Key 时将使用预设对话，不影响主线体验。</p>
+          <p class="llm-hint">配置任意 OpenAI 兼容 API 以启用自由对话功能（DeepSeek / OpenAI / Claude / 通义千问 / 本地 Ollama 等均可）。无 API Key 时将使用预设对话，不影响主线体验。</p>
 
           <div class="setting-row">
             <label>API Key</label>
@@ -98,7 +98,7 @@
                 :type="showApiKey ? 'text' : 'password'"
                 class="llm-input"
                 :value="llm.apiKey.value"
-                placeholder="sk-..."
+                placeholder="sk-... 你的 API 密钥"
                 @change="e => llm.setApiKey(e.target.value)"
               />
               <button class="eye-btn" @click="showApiKey = !showApiKey">{{ showApiKey ? '隐' : '显' }}</button>
@@ -117,6 +117,7 @@
               />
             </div>
           </div>
+          <p class="llm-hint endpoint-examples">常用端点：DeepSeek <code>https://api.deepseek.com</code> · OpenAI <code>https://api.openai.com</code> · 通义千问 <code>https://dashscope.aliyuncs.com/compatible-mode</code> · 本地 Ollama <code>http://localhost:11434</code></p>
 
           <div class="setting-row">
             <label>模型名称</label>
@@ -125,7 +126,7 @@
                 type="text"
                 class="llm-input"
                 :value="llm.model.value"
-                placeholder="deepseek-chat"
+                placeholder="deepseek-chat / gpt-4o / qwen-turbo ..."
                 @change="e => llm.setModel(e.target.value)"
               />
             </div>
@@ -423,6 +424,20 @@ async function runTestConnection() {
   color: var(--vn-text-dim);
   font-size: 12px;
   line-height: 1.6;
+}
+
+.llm-hint.endpoint-examples {
+  padding: 2px 0 6px;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.llm-hint code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(216, 177, 110, 0.12);
+  font-family: var(--vn-font-code);
+  font-size: 10.5px;
 }
 
 .llm-input {
