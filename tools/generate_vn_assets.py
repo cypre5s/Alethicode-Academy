@@ -547,9 +547,11 @@ def generate_cg() -> None:
 
 def generate_title_hero() -> None:
     image = Image.open(BACKGROUND_ROOT / 'school_gate' / 'day.webp').convert('RGBA')
-    image = add_character(image, {'id': 'nene', 'expression': 'gentle_smile', 'x': 0.18, 'scale': 0.84, 'alpha': 0.9, 'glow': '#f5bfd4'})
-    image = add_character(image, {'id': 'ayase', 'expression': 'soft_smile', 'x': 0.5, 'scale': 0.82, 'alpha': 0.92, 'glow': '#ffbb7f'})
-    image = add_character(image, {'id': 'murasame', 'expression': 'genuine_smile', 'x': 0.82, 'scale': 0.84, 'alpha': 0.9, 'glow': '#f0b27a'})
+    image = add_character(image, {'id': 'kanna', 'expression': 'slight_smile', 'x': 0.08, 'scale': 0.78, 'alpha': 0.85, 'glow': '#a8c8e8'})
+    image = add_character(image, {'id': 'nene', 'expression': 'gentle_smile', 'x': 0.27, 'scale': 0.84, 'alpha': 0.92, 'glow': '#f5bfd4'})
+    image = add_character(image, {'id': 'ayase', 'expression': 'grin', 'x': 0.5, 'scale': 0.86, 'alpha': 0.95, 'glow': '#ffbb7f'})
+    image = add_character(image, {'id': 'yoshino', 'expression': 'slight_smile', 'x': 0.73, 'scale': 0.84, 'alpha': 0.92, 'glow': '#d4b8f0'})
+    image = add_character(image, {'id': 'murasame', 'expression': 'smirk', 'x': 0.92, 'scale': 0.80, 'alpha': 0.87, 'glow': '#f0a0a0'})
     for effect in ['petals', 'warm_bloom']:
         image = add_particles(image, effect, 'title_hero')
     save_webp(add_vignette(add_bloom(image, 10, 0.07), 0.14), UI_ROOT / 'title-hero.webp')
