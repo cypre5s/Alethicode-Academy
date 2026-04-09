@@ -46,6 +46,7 @@
         <div class="input-row">
           <input v-model="inputText" class="text-input"
                  placeholder="输入你想说的话..."
+                 maxlength="500"
                  @keydown.enter="sendMessage(inputText)"
                  :disabled="llm.isGenerating.value" />
           <button class="send-btn" @click="sendMessage(inputText)"

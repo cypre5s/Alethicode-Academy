@@ -3,6 +3,11 @@ import { characters } from '../data/characters.js'
 import { fallbackDialogues } from '../data/fallbackDialogues.js'
 
 const LLM_CONFIG_KEY = 'alethicode_llm_config'
+const MAX_INPUT_LENGTH = 500
+const MAX_RESPONSE_TEXT_LENGTH = 1000
+const MIN_REQUEST_INTERVAL_MS = 2000
+
+let _lastRequestTime = 0
 const ENV_API_KEY = (import.meta.env.VITE_DEEPSEEK_API_KEY || '').trim()
 const ENV_BASE_URL = (import.meta.env.VITE_DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/+$/, '')
 const ENV_MODEL = import.meta.env.VITE_DEEPSEEK_MODEL || 'deepseek-chat'
@@ -38,6 +43,52 @@ function _saveConfig() {
       model: model.value
     }))
   } catch {}
+}
+
+function _sanitizeText(str) {
+  if (typeof str !== 'string') return ''
+  return str
+    .replace(/<script[\s>][\s\S]*?<\/script>/gi, '')
+    .replace(/<iframe[\s>][\s\S]*?<\/iframe>/gi, '')
+    .replace(/<object[\s>][\s\S]*?<\/object>/gi, '')
+    .replace(/<embed[\s>][\s\S]*?>/gi, '')
+    .replace(/<link[\s>][\s\S]*?>/gi, '')
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/javascript\s*:/gi, '')
+    .replace(/data\s*:\s*text\/html/gi, '')
+    .slice(0, MAX_RESPONSE_TEXT_LENGTH)
+    .trim()
+}
+
+function _sanitizeLLMResponse(parsed) {
+  const validExpressions = [
+    'normal', 'smile', 'gentle_smile', 'blush', 'surprised', 'sad',
+    'angry', 'thinking', 'confused', 'cold', 'pout', 'tsundere_pout',
+    'slight_smile', 'rare_gentle', 'glasses_adjust', 'competitive',
+    'fired_up', 'grin', 'soft_smile', 'absorbed', 'contemplative',
+    'teary', 'warm_smile', 'fierce', 'smirk', 'impressed',
+    'genuine_smile', 'vulnerable', 'heart_eyes'
+  ]
+
+  const expr = typeof parsed.expression === 'string'
+    ? parsed.expression.replace(/[^a-z_]/g, '')
+    : 'normal'
+
+  return {
+    text: _sanitizeText(parsed.text || ''),
+    expression: validExpressions.includes(expr) ? expr : 'normal',
+    action: _sanitizeText(parsed.action || ''),
+    affectionChange: Math.min(Math.max(parseInt(parsed.affection_change) || 0, 0), 2),
+    innerThought: _sanitizeText(parsed.inner_thought || ''),
+    source: 'llm'
+  }
+}
+
+function _throttleCheck() {
+  const now = Date.now()
+  if (now - _lastRequestTime < MIN_REQUEST_INTERVAL_MS) return false
+  _lastRequestTime = now
+  return true
 }
 
 export function useLLMManager() {
@@ -161,6 +212,16 @@ ${char.affectionBehavior ? `
       return getFallbackDialogue(characterId, gameState)
     }
 
+    const safeInput = typeof playerInput === 'string'
+      ? playerInput.slice(0, MAX_INPUT_LENGTH).trim()
+      : ''
+    if (!safeInput) return getFallbackDialogue(characterId, gameState)
+
+    if (!_throttleCheck()) {
+      lastError.value = '请求过于频繁，请稍后再试'
+      return getFallbackDialogue(characterId, gameState)
+    }
+
     isGenerating.value = true
     lastError.value = null
     const MAX_RETRIES = 2
@@ -187,7 +248,7 @@ ${char.affectionBehavior ? `
             messages: [
               { role: 'system', content: buildCharacterPrompt(characterId, gameState) },
               ...conversationHistory,
-              { role: 'user', content: playerInput }
+              { role: 'user', content: safeInput }
             ]
           })
         })
@@ -203,14 +264,7 @@ ${char.affectionBehavior ? `
         const parsed = JSON.parse(cleaned)
 
         isGenerating.value = false
-        return {
-          text: parsed.text,
-          expression: parsed.expression || 'normal',
-          action: parsed.action || null,
-          affectionChange: Math.min(Math.max(parsed.affection_change || 0, 0), 2),
-          innerThought: parsed.inner_thought || null,
-          source: 'llm'
-        }
+        return _sanitizeLLMResponse(parsed)
       } catch (error) {
         lastError.value = error.message
         if (attempt === MAX_RETRIES) {

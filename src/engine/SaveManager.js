@@ -7,6 +7,30 @@ const SETTINGS_KEY = 'alethicode_settings'
 const GLOBAL_KEY = 'alethicode_global'
 const MAX_SLOTS = 6
 const CURRENT_VERSION = '3.0.0'
+const CHECKSUM_SALT = 'alethicode_v3_salt'
+const MAX_SAVE_SIZE = 512 * 1024
+
+function _computeChecksum(obj) {
+  const copy = { ...obj }
+  delete copy._checksum
+  const str = JSON.stringify(copy)
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0
+  }
+  return (CHECKSUM_SALT + Math.abs(hash).toString(36))
+}
+
+function _validateSaveStructure(data) {
+  if (!data || typeof data !== 'object') return false
+  if (typeof data.currentChapter !== 'string') return false
+  if (typeof data.affection !== 'object' || data.affection === null) return false
+  if (typeof data.timestamp !== 'number' || data.timestamp > Date.now() + 86400000) return false
+  for (const [, val] of Object.entries(data.affection)) {
+    if (typeof val !== 'number' || val < 0 || val > 200) return false
+  }
+  return true
+}
 
 export function useSaveManager() {
   const saves = ref(loadAllSaves())
@@ -45,8 +69,11 @@ export function useSaveManager() {
       version: CURRENT_VERSION,
       dateStr: new Date().toLocaleString('zh-CN')
     }
+    data._checksum = _computeChecksum(data)
     try {
-      localStorage.setItem(SAVE_PREFIX + slotIndex, JSON.stringify(data))
+      const serialized = JSON.stringify(data)
+      if (serialized.length > MAX_SAVE_SIZE) return { error: 'save_too_large' }
+      localStorage.setItem(SAVE_PREFIX + slotIndex, serialized)
       saves.value[slotIndex] = data
       return { ok: true }
     } catch (e) {
@@ -62,9 +89,13 @@ export function useSaveManager() {
     try {
       const raw = localStorage.getItem(SAVE_PREFIX + slotIndex)
       if (!raw) return null
+      if (raw.length > MAX_SAVE_SIZE) return { error: 'corrupted' }
       const data = JSON.parse(raw)
-      if (!data.currentChapter || !data.affection) {
+      if (!_validateSaveStructure(data)) {
         return { error: 'corrupted', data }
+      }
+      if (data._checksum && data._checksum !== _computeChecksum(data)) {
+        return { error: 'tampered' }
       }
       if (data.version && data.version !== CURRENT_VERSION) {
         return { error: 'version_mismatch', data, savedVersion: data.version, currentVersion: CURRENT_VERSION }
@@ -81,7 +112,8 @@ export function useSaveManager() {
 
   function saveAuto(state) {
     if (!isStorageHealthy()) return
-    const data = { ...state, timestamp: Date.now(), dateStr: new Date().toLocaleString('zh-CN'), version: '3.0.0' }
+    const data = { ...state, timestamp: Date.now(), dateStr: new Date().toLocaleString('zh-CN'), version: CURRENT_VERSION }
+    data._checksum = _computeChecksum(data)
     try { localStorage.setItem(AUTO_KEY, JSON.stringify(data)) }
     catch (e) { console.warn('Auto save failed:', e) }
   }
@@ -106,6 +138,7 @@ export function useSaveManager() {
   function quickSave(state) {
     if (!isStorageHealthy()) return
     const data = { ...state, timestamp: Date.now(), dateStr: new Date().toLocaleString('zh-CN'), version: CURRENT_VERSION }
+    data._checksum = _computeChecksum(data)
     try { localStorage.setItem(QUICK_KEY, JSON.stringify(data)) }
     catch {}
   }
