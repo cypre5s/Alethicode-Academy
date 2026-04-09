@@ -135,6 +135,7 @@ function goTitle() {
   persistGlobal()
   engine.flushSeen()
   audio.stopBgm(500)
+  showTitleSettings.value = false
   screen.value = 'title'
 }
 </script>
