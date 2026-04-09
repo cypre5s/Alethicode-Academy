@@ -1,0 +1,941 @@
+import { ref, reactive, computed } from 'vue'
+import { characters } from '../data/characters.js'
+import { locations, resolveBackgroundId, sceneIdFromBackgroundId } from '../data/locations.js'
+import { challenges } from '../data/challenges.js'
+import { scriptIndex } from '../scripts/index.js'
+
+export function useVNEngine() {
+  const currentScript = ref([])
+  const scriptPointer = ref(0)
+  const currentChapter = ref('prologue')
+  const currentNode = ref(null)
+
+  const speaker = ref(null)
+  const dialogueText = ref('')
+  const dialogueType = ref('normal')
+  const speakerExpression = ref('normal')
+  const visibleCharacters = reactive({})
+  const currentBg = ref('school_gate_day')
+  const currentBgVariant = ref('day')
+  const currentBgTransition = ref('fade')
+
+  const playerName = ref('藤堂 和真')
+  const affection = reactive({ nene: 0, yoshino: 0, ayase: 0, kanna: 0, murasame: 0 })
+  const flags = reactive({})
+  const challengeResults = reactive({})
+  const conversationHistory = reactive({ nene: [], yoshino: [], ayase: [], kanna: [], murasame: [] })
+  const unlockedCGs = reactive(new Set())
+  const unlockedBGM = reactive(new Set())
+  const history = reactive([])
+
+  const SEEN_KEY = 'alethicode_seen_dialogues'
+  const seenDialogues = reactive(new Set(_loadSeenDialogues()))
+  const skipOnlyRead = ref(true)
+
+  function _loadSeenDialogues() {
+    try { return JSON.parse(localStorage.getItem(SEEN_KEY)) || [] }
+    catch { return [] }
+  }
+
+  function _persistSeen() {
+    try {
+      if (seenDialogues.size > 0) {
+        localStorage.setItem(SEEN_KEY, JSON.stringify([...seenDialogues]))
+      }
+    } catch {}
+  }
+
+  function markSeen(chapterId, index) {
+    seenDialogues.add(`${chapterId}:${index}`)
+  }
+
+  function isSeen(chapterId, index) {
+    return seenDialogues.has(`${chapterId}:${index}`)
+  }
+
+  function flushSeen() {
+    _persistSeen()
+  }
+
+  const showPanel = ref(null)
+  const isChoosing = ref(false)
+  const choicePrompt = ref('')
+  const choiceOptions = ref([])
+  const isChallenge = ref(false)
+  const challengeData = ref(null)
+  const isLocationSelect = ref(false)
+  const locationOptions = ref([])
+  const isFreeTalk = ref(false)
+  const freeTalkData = ref(null)
+
+  const isTransitioning = ref(false)
+  const transitionType = ref('fade')
+  const transitionDuration = ref(1000)
+  const screenEffect = ref(null)
+  const showTitleCard = ref(false)
+  const titleCardText = ref('')
+  const titleCardSubtitle = ref('')
+  const showCG = ref(false)
+  const currentCG = ref(null)
+  const showEnding = ref(false)
+  const endingData = ref(null)
+  const affectionToast = ref(null)
+
+  const showSkipSummary = ref(false)
+  const skipSummary = ref([])
+
+  const textSpeed = ref(30)
+  const autoPlay = ref(false)
+  const autoPlayDelay = ref(3000)
+  const bgmVolume = ref(0.5)
+  const seVolume = ref(0.7)
+  const fontSize = ref('medium')
+
+  const gamePhase = ref('prologue')
+  const currentRoute = ref(null)
+  const currentTimeSlot = ref('morning')
+
+  const hasSave = computed(() => {
+    try { return !!localStorage.getItem('alethicode_save_auto') }
+    catch { return false }
+  })
+
+  const audioCallbacks = {
+    playBgm: null,
+    stopBgm: null,
+    playSfx: null,
+  }
+
+  function registerAudioCallbacks(cbs) {
+    Object.assign(audioCallbacks, cbs)
+  }
+
+  function newGame(name) {
+    if (name) playerName.value = name
+    scriptPointer.value = 0
+    currentChapter.value = 'prologue'
+    Object.keys(affection).forEach(k => affection[k] = 0)
+    Object.keys(flags).forEach(k => delete flags[k])
+    Object.keys(challengeResults).forEach(k => delete challengeResults[k])
+    Object.keys(conversationHistory).forEach(k => conversationHistory[k] = [])
+    Object.keys(visibleCharacters).forEach(k => delete visibleCharacters[k])
+    history.length = 0
+    unlockedCGs.clear()
+    unlockedBGM.clear()
+    speaker.value = null
+    dialogueText.value = ''
+    dialogueType.value = 'normal'
+    currentBg.value = 'school_gate_day'
+    currentBgVariant.value = 'day'
+    showPanel.value = null
+    isChoosing.value = false
+    isChallenge.value = false
+    isLocationSelect.value = false
+    isFreeTalk.value = false
+    showCG.value = false
+    showEnding.value = false
+    showTitleCard.value = false
+    gamePhase.value = 'prologue'
+    currentRoute.value = null
+    currentTimeSlot.value = 'morning'
+    loadChapter('prologue')
+  }
+
+  function loadChapter(chapterId) {
+    const script = scriptIndex[chapterId]
+    if (!script) return
+    currentChapter.value = chapterId
+    currentScript.value = script
+    scriptPointer.value = 0
+    executeNext()
+  }
+
+  function jumpToLabel(label) {
+    const idx = currentScript.value.findIndex(cmd => cmd.label === label)
+    if (idx >= 0) {
+      scriptPointer.value = idx
+      executeNext()
+    }
+  }
+
+  function executeNext() {
+    if (scriptPointer.value >= currentScript.value.length) {
+      onChapterEnd()
+      return
+    }
+    const cmd = currentScript.value[scriptPointer.value]
+    scriptPointer.value++
+    executeCommand(cmd)
+  }
+
+  function executeCommand(cmd) {
+    if (!cmd) { executeNext(); return }
+
+    switch (cmd.type) {
+      case 'dialogue': handleDialogue(cmd); break
+      case 'monologue': handleMonologue(cmd); break
+      case 'narration': handleNarration(cmd); break
+
+      case 'choice': handleChoice(cmd); break
+      case 'condition': handleCondition(cmd); break
+      case 'jump': loadChapter(cmd.target); break
+      case 'jump_label': jumpToLabel(cmd.target); break
+
+      case 'bg': handleBg(cmd); break
+      case 'char_enter': handleCharEnter(cmd); break
+      case 'char_exit': handleCharExit(cmd); break
+      case 'char_expression': handleCharExpression(cmd); break
+      case 'char_move': handleCharMove(cmd); break
+      case 'show': handleCharEnter(cmd); break
+      case 'hide': handleCharExit(cmd); break
+      case 'hideAll': handleHideAll(); break
+
+      case 'bgm': handleBgm(cmd); break
+      case 'bgm_stop': handleBgmStop(cmd); break
+      case 'se': handleSe(cmd); break
+      case 'sfx': handleSe(cmd); break
+
+      case 'screen_effect': handleScreenEffect(cmd); break
+      case 'wait': handleWait(cmd); break
+      case 'auto_save': handleAutoSave(); break
+
+      case 'challenge': handleChallenge(cmd); break
+      case 'location_select': handleLocationSelect(cmd); break
+      case 'free_talk': handleFreeTalk(cmd); break
+      case 'competition': handleCompetition(cmd); break
+
+      case 'flag': handleFlag(cmd); break
+      case 'set_flag': handleFlag({ set: cmd.key, value: cmd.value }); break
+      case 'affection': handleAffection(cmd); break
+      case 'route_decision': handleRouteDecision(cmd); break
+      case 'route_branch': handleRouteDecision(cmd); break
+
+      case 'cg': handleCG(cmd); break
+      case 'title_card': handleTitleCard(cmd); break
+      case 'chapter_title': handleTitleCard({ text: cmd.text }); break
+      case 'ending': handleEnding(cmd); break
+      case 'unlock_cg': unlockedCGs.add(cmd.id); executeNext(); break
+
+      default: executeNext()
+    }
+  }
+
+  function handleDialogue(cmd) {
+    markSeen(currentChapter.value, scriptPointer.value - 1)
+    const charId = cmd.speaker
+    const char = characters[charId]
+    speaker.value = char || (charId === '???' ? { id: '???', name: '???', color: '#aaa' } : null)
+    dialogueText.value = cmd.text.replace(/{playerName}/g, playerName.value)
+    dialogueType.value = 'normal'
+    speakerExpression.value = cmd.expression || 'normal'
+
+    if (char && charId !== 'narrator' && visibleCharacters[charId]) {
+      visibleCharacters[charId].expression = cmd.expression || visibleCharacters[charId].expression
+    }
+
+    history.push({
+      type: 'dialogue',
+      speaker: char?.name || charId || '',
+      speakerColor: char?.color || '#aaa',
+      text: cmd.text.replace(/{playerName}/g, playerName.value),
+      expression: cmd.expression
+    })
+  }
+
+  function handleMonologue(cmd) {
+    markSeen(currentChapter.value, scriptPointer.value - 1)
+    speaker.value = null
+    dialogueText.value = cmd.text.replace(/{playerName}/g, playerName.value)
+    dialogueType.value = 'monologue'
+    history.push({ type: 'monologue', text: dialogueText.value })
+  }
+
+  function handleNarration(cmd) {
+    markSeen(currentChapter.value, scriptPointer.value - 1)
+    speaker.value = null
+    dialogueText.value = cmd.text.replace(/{playerName}/g, playerName.value)
+    dialogueType.value = 'narration'
+    history.push({ type: 'narration', text: dialogueText.value })
+  }
+
+  function handleChoice(cmd) {
+    isChoosing.value = true
+    choicePrompt.value = cmd.prompt || ''
+    choiceOptions.value = cmd.options.map(o => ({
+      text: o.text,
+      effects: o.effects || {},
+      next: o.next || null,
+      flags: o.flags || o.flag || null,
+      condition: o.condition || null
+    }))
+  }
+
+  function selectChoice(index) {
+    const option = choiceOptions.value[index]
+    isChoosing.value = false
+    choicePrompt.value = ''
+    choiceOptions.value = []
+    history.push({ type: 'choice', text: option.text })
+
+    if (option.effects) {
+      Object.entries(option.effects).forEach(([k, v]) => {
+        if (k in affection) {
+          showAffectionToast(k, v)
+        }
+      })
+    }
+    if (option.flags) {
+      if (typeof option.flags === 'object' && !Array.isArray(option.flags)) {
+        Object.entries(option.flags).forEach(([k, v]) => { flags[k] = v })
+      } else if (option.flags.key) {
+        flags[option.flags.key] = option.flags.value
+      }
+    }
+    if (option.next) {
+      if (scriptIndex[option.next]) {
+        loadChapter(option.next)
+      } else {
+        jumpToLabel(option.next)
+      }
+    } else {
+      executeNext()
+    }
+  }
+
+  function handleCondition(cmd) {
+    const result = evaluateConditionExpr(cmd.check || cmd.condition)
+    if (result) {
+      if (cmd.true_branch) {
+        if (scriptIndex[cmd.true_branch]) loadChapter(cmd.true_branch)
+        else jumpToLabel(cmd.true_branch)
+      } else {
+        executeNext()
+      }
+    } else {
+      if (cmd.false_branch) {
+        if (scriptIndex[cmd.false_branch]) loadChapter(cmd.false_branch)
+        else jumpToLabel(cmd.false_branch)
+      } else {
+        executeNext()
+      }
+    }
+  }
+
+  function evaluateConditionExpr(expr) {
+    if (!expr) return true
+    if (typeof expr === 'object') {
+      if (expr.flag) return flags[expr.flag] === expr.value
+      if (expr.affection) {
+        const val = affection[expr.character] || 0
+        if (expr.op === '>=') return val >= expr.value
+        if (expr.op === '>') return val > expr.value
+        if (expr.op === '<') return val < expr.value
+        if (expr.op === '<=') return val <= expr.value
+        if (expr.op === '==') return val === expr.value
+      }
+      return true
+    }
+    if (typeof expr === 'string') {
+      try {
+        const safeExpr = expr
+          .replace(/flags\.(\w+)/g, (_, k) => JSON.stringify(flags[k]))
+          .replace(/affection\.(\w+)/g, (_, k) => String(affection[k] || 0))
+          .replace(/\bflags\b/g, '{}')
+        return new Function(`return (${safeExpr})`)()
+      } catch {
+        return false
+      }
+    }
+    return true
+  }
+
+  function handleBg(cmd) {
+    const bgSrc = cmd.src || cmd.location || cmd.id
+    const transition = cmd.transition || 'fade'
+    const duration = cmd.duration || 800
+
+    isTransitioning.value = true
+    transitionType.value = transition
+    transitionDuration.value = duration
+
+    setTimeout(() => {
+      currentBg.value = bgSrc
+      if (cmd.variant) currentBgVariant.value = cmd.variant
+      setTimeout(() => { isTransitioning.value = false }, duration / 2)
+    }, duration / 2)
+
+    executeNext()
+  }
+
+  function handleCharEnter(cmd) {
+    const charId = cmd.character
+    visibleCharacters[charId] = {
+      id: charId,
+      expression: cmd.expression || 'normal',
+      position: cmd.position || 'center',
+      animation: cmd.animation || 'fade_in',
+      entering: true
+    }
+    setTimeout(() => {
+      if (visibleCharacters[charId]) {
+        visibleCharacters[charId].entering = false
+        visibleCharacters[charId].animation = null
+      }
+    }, 600)
+    executeNext()
+  }
+
+  function handleCharExit(cmd) {
+    const charId = cmd.character
+    if (visibleCharacters[charId]) {
+      visibleCharacters[charId].exiting = true
+      visibleCharacters[charId].animation = cmd.animation || 'fade_out'
+      setTimeout(() => {
+        delete visibleCharacters[charId]
+      }, 500)
+    }
+    executeNext()
+  }
+
+  function handleCharExpression(cmd) {
+    const charId = cmd.character
+    if (visibleCharacters[charId]) {
+      visibleCharacters[charId].expression = cmd.expression
+    }
+    executeNext()
+  }
+
+  function handleCharMove(cmd) {
+    const charId = cmd.character
+    if (visibleCharacters[charId]) {
+      visibleCharacters[charId].position = cmd.to || cmd.position
+    }
+    const dur = cmd.duration || 500
+    setTimeout(() => executeNext(), dur)
+  }
+
+  function handleHideAll() {
+    Object.keys(visibleCharacters).forEach(k => delete visibleCharacters[k])
+    executeNext()
+  }
+
+  function handleBgm(cmd) {
+    const bgmId = cmd.src || cmd.id
+    unlockedBGM.add(bgmId)
+    audioCallbacks.playBgm?.(bgmId, cmd.fadeIn || cmd.crossfade || 1500)
+    executeNext()
+  }
+
+  function handleBgmStop(cmd) {
+    audioCallbacks.stopBgm?.(cmd.fadeOut || 1000)
+    executeNext()
+  }
+
+  function handleSe(cmd) {
+    const seId = cmd.src || cmd.id
+    audioCallbacks.playSfx?.(seId)
+    executeNext()
+  }
+
+  function handleScreenEffect(cmd) {
+    screenEffect.value = {
+      effect: cmd.effect,
+      duration: cmd.duration || 500
+    }
+    setTimeout(() => {
+      screenEffect.value = null
+    }, cmd.duration || 500)
+    executeNext()
+  }
+
+  function handleWait(cmd) {
+    const ms = cmd.duration || cmd.ms || 1000
+    setTimeout(() => executeNext(), ms)
+  }
+
+  function handleAutoSave() {
+    const state = getState()
+    try {
+      localStorage.setItem('alethicode_save_auto', JSON.stringify({
+        ...state, timestamp: Date.now(), dateStr: new Date().toLocaleString('zh-CN')
+      }))
+    } catch {}
+    executeNext()
+  }
+
+  function handleChallenge(cmd) {
+    const ch = challenges[cmd.id]
+    if (ch) {
+      isChallenge.value = true
+      challengeData.value = {
+        ...ch,
+        contextDialogue: cmd.context_dialogue || cmd.contextDialogue || null,
+        rewards: cmd.rewards || cmd.success_affection || {},
+        failRewards: cmd.fail_affection || {},
+        failConsequence: cmd.fail_consequence || null,
+        successConsequence: cmd.success_consequence || null
+      }
+    } else {
+      executeNext()
+    }
+  }
+
+  function resolveChallenge(success, challengeId) {
+    const data = challengeData.value
+    if (!data) { executeNext(); return }
+
+    challengeResults[data.id || challengeId] = { passed: success, timestamp: Date.now() }
+
+    if (success) {
+      const rewards = data.rewards || data.success_affection || {}
+      Object.entries(rewards).forEach(([k, v]) => {
+        if (k in affection) {
+          showAffectionToast(k, v)
+        }
+      })
+      if (data.successConsequence?.flag) {
+        Object.entries(data.successConsequence.flag).forEach(([k, v]) => { flags[k] = v })
+      }
+      if (data.successConsequence?.effects) {
+        Object.entries(data.successConsequence.effects).forEach(([k, v]) => {
+          if (k in affection) { showAffectionToast(k, v) }
+        })
+      }
+    } else {
+      const failRewards = data.failRewards || data.fail_affection || {}
+      Object.entries(failRewards).forEach(([k, v]) => {
+        if (k in affection) { showAffectionToast(k, v) }
+      })
+      if (data.failConsequence?.flag) {
+        Object.entries(data.failConsequence.flag).forEach(([k, v]) => { flags[k] = v })
+      }
+    }
+
+    isChallenge.value = false
+    challengeData.value = null
+    executeNext()
+  }
+
+  function handleLocationSelect(cmd) {
+    isLocationSelect.value = true
+    const available = cmd.available || cmd.locations || []
+    locationOptions.value = available.map(loc => {
+      const locId = typeof loc === 'string' ? loc : loc.id
+      const sceneId = sceneIdFromBackgroundId(locId)
+      const locData = locations[sceneId]
+      return {
+        id: locId,
+        name: locData?.name || locId,
+        character: (typeof loc === 'object' ? loc.character : null) || locData?.meetCharacter || null,
+        next: typeof loc === 'object' ? loc.next : null,
+        description: locData?.description || ''
+      }
+    })
+  }
+
+  function selectLocation(locId) {
+    const loc = locationOptions.value.find(l => l.id === locId)
+    isLocationSelect.value = false
+    locationOptions.value = []
+
+    if (loc?.character && loc.character in affection) {
+      showAffectionToast(loc.character, 1)
+    }
+
+    if (loc?.next) {
+      if (scriptIndex[loc.next]) loadChapter(loc.next)
+      else jumpToLabel(loc.next)
+    } else {
+      currentBg.value = resolveBackgroundId(locId, currentTimeSlot.value)
+      executeNext()
+    }
+  }
+
+  function handleFreeTalk(cmd) {
+    isFreeTalk.value = true
+    freeTalkData.value = {
+      character: cmd.character,
+      maxTurns: cmd.max_turns || 5,
+      context: cmd.context || '',
+      currentTurn: 0
+    }
+  }
+
+  function resolveFreeTalk(affectionChanges) {
+    isFreeTalk.value = false
+    if (affectionChanges) {
+      Object.entries(affectionChanges).forEach(([k, v]) => {
+        if (k in affection) { showAffectionToast(k, v, true) }
+      })
+    }
+    freeTalkData.value = null
+    executeNext()
+  }
+
+  function handleCompetition(cmd) {
+    isChallenge.value = true
+    const rounds = (cmd.rounds || []).map(r => ({
+      ...r,
+      challengeData: challenges[r.challenge_id] || null
+    }))
+    challengeData.value = {
+      ...cmd,
+      isCompetition: true,
+      title: cmd.title || '编程竞赛',
+      rounds,
+      currentRound: 0,
+      scores: { player: 0, opponent: 0 },
+      final_ranking_effects: cmd.final_ranking_effects || {}
+    }
+  }
+
+  function handleFlag(cmd) {
+    if (cmd.set) flags[cmd.set] = cmd.value !== undefined ? cmd.value : true
+    executeNext()
+  }
+
+  function handleAffection(cmd) {
+    if (cmd.changes) {
+      Object.entries(cmd.changes).forEach(([k, v]) => {
+        if (k in affection) { showAffectionToast(k, v) }
+      })
+    } else if (cmd.character && cmd.change !== undefined) {
+      if (cmd.character in affection) {
+        showAffectionToast(cmd.character, cmd.change)
+      }
+    }
+    executeNext()
+  }
+
+  function handleRouteDecision(cmd) {
+    const allMet = Object.entries(affection).every(([, v]) => v >= 30)
+    const murasameOk = affection.murasame >= 50 && allMet && flags.murasame_gate_passed
+
+    if (murasameOk) {
+      currentRoute.value = 'murasame'
+      loadChapter('route_murasame')
+      return
+    }
+
+    const sorted = Object.entries(affection)
+      .filter(([k]) => k !== 'murasame')
+      .sort((a, b) => b[1] - a[1])
+    const [topChar] = sorted[0]
+
+    if (sorted[0][1] >= 20) {
+      currentRoute.value = topChar
+      loadChapter(`route_${topChar}`)
+    } else {
+      currentRoute.value = 'nene'
+      loadChapter('route_nene')
+    }
+  }
+
+  function handleCG(cmd) {
+    showCG.value = true
+    currentCG.value = cmd.id
+    unlockedCGs.add(cmd.id)
+  }
+
+  function dismissCG() {
+    showCG.value = false
+    currentCG.value = null
+    executeNext()
+  }
+
+  function handleTitleCard(cmd) {
+    showTitleCard.value = true
+    titleCardText.value = cmd.text || ''
+    titleCardSubtitle.value = cmd.subtitle || ''
+    audioCallbacks.playSfx?.('chapter')
+    setTimeout(() => {
+      showTitleCard.value = false
+      titleCardText.value = ''
+      titleCardSubtitle.value = ''
+      executeNext()
+    }, 3000)
+  }
+
+  function handleEnding(cmd) {
+    showEnding.value = true
+    endingData.value = {
+      endingType: cmd.endingType || cmd.type || 'normal',
+      route: cmd.route || currentRoute.value,
+      title: cmd.title || '结局',
+      text: cmd.text || '',
+      cg: cmd.cg || null
+    }
+    if (cmd.cg) unlockedCGs.add(cmd.cg)
+    flags[`ending_${cmd.route || currentRoute.value}_${cmd.endingType || cmd.type}`] = true
+    history.push({ type: 'ending', text: cmd.title })
+  }
+
+  function showAffectionToast(charId, change, skipAdd = false) {
+    if (change <= 0) return
+    const char = characters[charId]
+    if (!char) return
+    if (!skipAdd) {
+      affection[charId] = Math.min((affection[charId] || 0) + change, 100)
+    }
+    affectionToast.value = { character: charId, name: char.nameShort || char.name, change, color: char.color }
+    setTimeout(() => { affectionToast.value = null }, 2000)
+  }
+
+  function onChapterEnd() {
+    const nextMap = {
+      prologue: 'chapter1',
+      chapter1: 'chapter2',
+      chapter2: 'chapter3',
+      chapter3: null
+    }
+    const next = nextMap[currentChapter.value]
+    if (next) {
+      loadChapter(next)
+    }
+  }
+
+  const INTERACTIVE_TYPES = ['challenge', 'choice', 'location_select', 'free_talk', 'ending', 'route_decision']
+  const TEXT_TYPES = ['dialogue', 'monologue', 'narration']
+
+  function scanNextInteractive(startIdx) {
+    const script = currentScript.value
+    for (let i = startIdx; i < script.length; i++) {
+      if (INTERACTIVE_TYPES.includes(script[i].type)) {
+        return { index: i, type: script[i].type }
+      }
+    }
+    return { index: script.length, type: 'end' }
+  }
+
+  const canSkipSection = computed(() => {
+    if (isChoosing.value || isChallenge.value || isLocationSelect.value ||
+        isFreeTalk.value || showEnding.value || showSkipSummary.value || showCG.value) {
+      return false
+    }
+    const next = scanNextInteractive(scriptPointer.value)
+    if (next.type === 'challenge') return false
+    if (next.type === 'end' && next.index <= scriptPointer.value) return false
+    const hasText = currentScript.value
+      .slice(scriptPointer.value, next.index)
+      .some(cmd => TEXT_TYPES.includes(cmd.type))
+    return hasText
+  })
+
+  function skipSection() {
+    if (!canSkipSection.value) return
+
+    const script = currentScript.value
+    const next = scanNextInteractive(scriptPointer.value)
+    const collected = []
+
+    for (let i = scriptPointer.value; i < next.index; i++) {
+      const cmd = script[i]
+
+      if (TEXT_TYPES.includes(cmd.type)) {
+        const charId = cmd.speaker
+        const char = charId ? (characters[charId] || (charId === '???' ? { name: '???' } : null)) : null
+        const text = (cmd.text || '').replace(/{playerName}/g, playerName.value)
+        collected.push({
+          type: cmd.type,
+          speaker: char?.name || null,
+          text
+        })
+        history.push({
+          type: cmd.type,
+          speaker: char?.name || '',
+          speakerColor: char?.color || '#aaa',
+          text
+        })
+        continue
+      }
+
+      switch (cmd.type) {
+        case 'bg':
+          currentBg.value = cmd.src || cmd.location || cmd.id
+          if (cmd.variant) currentBgVariant.value = cmd.variant
+          break
+        case 'char_enter':
+          visibleCharacters[cmd.character] = {
+            id: cmd.character,
+            expression: cmd.expression || 'normal',
+            position: cmd.position || 'center',
+            animation: null,
+            entering: false
+          }
+          break
+        case 'char_exit':
+          delete visibleCharacters[cmd.character]
+          break
+        case 'char_expression':
+          if (visibleCharacters[cmd.character]) {
+            visibleCharacters[cmd.character].expression = cmd.expression
+          }
+          break
+        case 'bgm':
+          unlockedBGM.add(cmd.src || cmd.id)
+          audioCallbacks.playBgm?.(cmd.src || cmd.id, cmd.fadeIn || cmd.crossfade || 1500)
+          break
+        case 'bgm_stop':
+          audioCallbacks.stopBgm?.(cmd.fadeOut || 1000)
+          break
+        case 'flag':
+        case 'set_flag':
+          if (cmd.set) flags[cmd.set] = cmd.value !== undefined ? cmd.value : true
+          else if (cmd.key) flags[cmd.key] = cmd.value !== undefined ? cmd.value : true
+          break
+        case 'affection':
+          if (cmd.changes) {
+            Object.entries(cmd.changes).forEach(([k, v]) => {
+              if (k in affection) affection[k] += v
+            })
+          } else if (cmd.character && cmd.change !== undefined) {
+            if (cmd.character in affection) affection[cmd.character] += cmd.change
+          }
+          break
+        case 'auto_save':
+          handleAutoSave()
+          break
+      }
+    }
+
+    scriptPointer.value = next.index
+
+    const maxLines = 8
+    let summary = collected
+    if (summary.length > maxLines) {
+      const head = summary.slice(0, 3)
+      const tail = summary.slice(-3)
+      const mid = [{ type: 'narration', speaker: null, text: `……（省略了 ${summary.length - 6} 段对话）……` }]
+      summary = [...head, ...mid, ...tail]
+    }
+
+    skipSummary.value = summary
+    showSkipSummary.value = true
+    dialogueText.value = ''
+    speaker.value = null
+  }
+
+  function dismissSkipSummary() {
+    showSkipSummary.value = false
+    skipSummary.value = []
+    if (scriptPointer.value < currentScript.value.length) {
+      executeNext()
+    } else {
+      onChapterEnd()
+    }
+  }
+
+  function advanceText() {
+    if (isChoosing.value || isChallenge.value || isLocationSelect.value || isFreeTalk.value) return
+    if (showSkipSummary.value) return
+    if (showCG.value) { dismissCG(); return }
+    if (showEnding.value) return
+    executeNext()
+  }
+
+  function getState() {
+    return {
+      scriptPointer: scriptPointer.value,
+      currentChapter: currentChapter.value,
+      playerName: playerName.value,
+      affection: { ...affection },
+      flags: { ...flags },
+      challengeResults: { ...challengeResults },
+      currentBg: currentBg.value,
+      currentBgVariant: currentBgVariant.value,
+      currentTimeSlot: currentTimeSlot.value,
+      visibleCharacters: JSON.parse(JSON.stringify(visibleCharacters)),
+      history: history.slice(-200),
+      unlockedCGs: [...unlockedCGs],
+      unlockedBGM: [...unlockedBGM],
+      gamePhase: gamePhase.value,
+      currentRoute: currentRoute.value,
+      dialogueText: dialogueText.value,
+      dialogueType: dialogueType.value,
+      speakerName: speaker.value?.name || '',
+      speakerId: speaker.value?.id || null,
+      conversationHistory: Object.fromEntries(
+        Object.entries(conversationHistory).map(([k, v]) => [k, v.slice(-10)])
+      ),
+      settings: {
+        textSpeed: textSpeed.value,
+        autoSpeed: autoPlayDelay.value,
+        bgmVolume: bgmVolume.value,
+        seVolume: seVolume.value,
+        fontSize: fontSize.value,
+      }
+    }
+  }
+
+  function restoreState(state) {
+    if (!state) return
+    playerName.value = state.playerName || '藤堂 和真'
+    Object.keys(affection).forEach(k => affection[k] = state.affection?.[k] || 0)
+    Object.keys(flags).forEach(k => delete flags[k])
+    if (state.flags) Object.assign(flags, state.flags)
+    Object.keys(challengeResults).forEach(k => delete challengeResults[k])
+    if (state.challengeResults) Object.assign(challengeResults, state.challengeResults)
+    Object.keys(visibleCharacters).forEach(k => delete visibleCharacters[k])
+    if (state.visibleCharacters) Object.assign(visibleCharacters, state.visibleCharacters)
+    Object.keys(conversationHistory).forEach(k => conversationHistory[k] = [])
+    if (state.conversationHistory) {
+      Object.entries(state.conversationHistory).forEach(([k, v]) => {
+        if (k in conversationHistory) conversationHistory[k] = v
+      })
+    }
+    history.length = 0
+    if (state.history) history.push(...state.history)
+    unlockedCGs.clear()
+    if (state.unlockedCGs) state.unlockedCGs.forEach(id => unlockedCGs.add(id))
+    unlockedBGM.clear()
+    if (state.unlockedBGM) state.unlockedBGM.forEach(id => unlockedBGM.add(id))
+    gamePhase.value = state.gamePhase || 'prologue'
+    currentRoute.value = state.currentRoute || null
+    currentTimeSlot.value = state.currentTimeSlot || 'morning'
+    currentBg.value = state.currentBg || 'school_gate_day'
+    currentBgVariant.value = state.currentBgVariant || 'day'
+
+    if (state.settings) {
+      textSpeed.value = state.settings.textSpeed || 30
+      autoPlayDelay.value = state.settings.autoSpeed || 3000
+      bgmVolume.value = state.settings.bgmVolume ?? 0.5
+      seVolume.value = state.settings.seVolume ?? 0.7
+      fontSize.value = state.settings.fontSize || 'medium'
+    }
+
+    const script = scriptIndex[state.currentChapter]
+    if (script) {
+      currentChapter.value = state.currentChapter
+      currentScript.value = script
+      scriptPointer.value = state.scriptPointer || 0
+      if (state.speakerId) speaker.value = characters[state.speakerId] || null
+      dialogueText.value = state.dialogueText || ''
+      dialogueType.value = state.dialogueType || 'normal'
+    } else {
+      newGame()
+    }
+  }
+
+  return {
+    speaker, dialogueText, dialogueType, speakerExpression,
+    visibleCharacters, currentBg, currentBgVariant, currentBgTransition,
+    playerName, affection, flags, challengeResults,
+    conversationHistory, history, unlockedCGs, unlockedBGM,
+    showPanel, isChoosing, choicePrompt, choiceOptions,
+    isChallenge, challengeData,
+    isLocationSelect, locationOptions,
+    isFreeTalk, freeTalkData,
+    isTransitioning, transitionType, transitionDuration,
+    screenEffect, showTitleCard, titleCardText, titleCardSubtitle,
+    showCG, currentCG, showEnding, endingData, affectionToast,
+    showSkipSummary, skipSummary, canSkipSection,
+    textSpeed, autoPlay, autoPlayDelay, bgmVolume, seVolume, fontSize,
+    gamePhase, currentRoute, currentChapter, currentTimeSlot, hasSave,
+    newGame, loadChapter, executeNext, advanceText,
+    selectChoice, resolveChallenge, selectLocation,
+    resolveFreeTalk, dismissCG, skipSection, dismissSkipSummary,
+    getState, restoreState, registerAudioCallbacks,
+    showAffectionToast,
+    seenDialogues, skipOnlyRead, isSeen, markSeen, flushSeen
+  }
+}

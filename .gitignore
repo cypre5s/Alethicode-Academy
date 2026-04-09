@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+release/
+
+# env files (contain API keys)
+.env.local
+.env.*.local
+.env.production
+
+# editor / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# logs
+npm-debug.log*
+
+# capacitor native builds
+android/app/build/
+harmony/build/
