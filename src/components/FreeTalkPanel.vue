@@ -75,6 +75,7 @@ import { ref, inject, computed, watch, nextTick } from 'vue'
 import { characters } from '../data/characters.js'
 import { useLLMManager } from '../engine/LLMManager.js'
 import { getRelationshipStage } from '../data/relationshipRules.js'
+import { getRevisitDialogue, matchRevisitCondition } from '../data/revisitDialogues.js'
 
 const engine = inject('engine')
 const audio = inject('audio')
@@ -102,7 +103,7 @@ watch(() => engine.isFreeTalk.value, async (val) => {
     lastNpcLine.value = ''
     llm.loadApiKey()
 
-    const firstLine = llm.getFallbackDialogue(charId.value, getGameState())
+    const firstLine = await resolveFirstLine()
     messages.value.push({
       role: 'assistant',
       text: firstLine.text,
@@ -115,9 +116,37 @@ watch(() => engine.isFreeTalk.value, async (val) => {
       engine.visibleCharacters[charId.value].expression = firstLine.expression
     }
 
+    if (firstLine.microAction && engine.visibleCharacters[charId.value]) {
+      engine.visibleCharacters[charId.value].microAction = firstLine.microAction
+      setTimeout(() => {
+        if (engine.visibleCharacters[charId.value]?.microAction === firstLine.microAction) {
+          engine.visibleCharacters[charId.value].microAction = null
+        }
+      }, 1200)
+    }
+
     await loadOptions()
   }
 })
+
+async function resolveFirstLine() {
+  const state = getGameState()
+  const cid = charId.value
+
+  const conditionKey = matchRevisitCondition(cid, state)
+  if (conditionKey) {
+    const preset = getRevisitDialogue(cid, conditionKey)
+    if (preset) return preset
+  }
+
+  const visitCount = engine.visitLog[cid]?.totalVisits || 0
+  if (visitCount > 1 && llm.apiKey.value && !llm.offlineMode.value) {
+    const dynamic = await llm.generateRevisitGreeting(cid, state)
+    if (dynamic && dynamic.text) return dynamic
+  }
+
+  return llm.getFallbackDialogue(cid, state)
+}
 
 function getGameState() {
   return {
@@ -205,8 +234,21 @@ async function sendMessage(text) {
   if (response.memoryCandidate && response.memoryCandidate.trim()) {
     const mem = engine.memories[charId.value]
     if (mem) {
-      mem.push(response.memoryCandidate.trim())
-      if (mem.length > 5) mem.splice(0, mem.length - 5)
+      const bgId = engine.currentBg?.value || ''
+      const stage = getRelationshipStage(
+        engine.relationship[charId.value] || { affection: 0, trust: 0, comfort: 0 }
+      )
+      mem.push({
+        id: `mem_${charId.value}_${Date.now()}`,
+        text: response.memoryCandidate.trim(),
+        context: `自由对话`,
+        chapter: engine.currentChapter?.value || '',
+        timestamp: Date.now(),
+        emotion: response.memoryEmotion || 'warm',
+        relStageAtTime: stage,
+        source: 'free_talk',
+      })
+      if (mem.length > 20) mem.splice(0, mem.length - 20)
     }
   }
 
@@ -230,7 +272,7 @@ function endFreeTalk() {
       totals.trust += (m.trustDelta || 0)
       totals.comfort += (m.comfortDelta || 0)
     })
-  engine.resolveFreeTalk({})
+  engine.resolveFreeTalk(totals)
 }
 
 function scrollToBottom() {

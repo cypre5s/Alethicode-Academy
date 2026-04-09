@@ -19,6 +19,14 @@ export const characters = {
       crush: '困惑于自己的「异常数据」（心跳加速）、说话偶尔卡顿',
       love: '完全承认自己的感情，温柔而直接'
     },
+    textRhythm: {
+      baseSpeed: 1.0,
+      pauseAfterComma: 80,
+      pauseAfterPeriod: 150,
+      pauseAfterEllipsis: 350,
+      preSentenceDelay: 0,
+      letterSpacing: 'normal',
+    },
     llmStyle: {
       avgSentenceCount: 2,
       avgSentenceLength: 'medium',
@@ -57,6 +65,14 @@ export const characters = {
       friend: '嘴上严厉但暗中帮忙、借笔记时脸红',
       crush: '偶尔展露脆弱面、变成傲娇模式',
       love: '放下完美主义，承认自己的不完美'
+    },
+    textRhythm: {
+      baseSpeed: 0.85,
+      pauseAfterComma: 60,
+      pauseAfterPeriod: 120,
+      pauseAfterEllipsis: 250,
+      preSentenceDelay: 0,
+      letterSpacing: 'normal',
     },
     llmStyle: {
       avgSentenceCount: 2,
@@ -97,6 +113,14 @@ export const characters = {
       crush: '独处时罕见地安静下来、别扭地表达心意',
       love: '完全放下争强好胜，坦诚表达感情'
     },
+    textRhythm: {
+      baseSpeed: 0.65,
+      pauseAfterComma: 40,
+      pauseAfterPeriod: 80,
+      pauseAfterEllipsis: 180,
+      preSentenceDelay: 0,
+      letterSpacing: 'normal',
+    },
     llmStyle: {
       avgSentenceCount: 2,
       avgSentenceLength: 'short',
@@ -136,6 +160,14 @@ export const characters = {
       crush: '话变多了、会写小程序表达感情',
       love: '用递归画心形的程序告白'
     },
+    textRhythm: {
+      baseSpeed: 0.7,
+      pauseAfterComma: 200,
+      pauseAfterPeriod: 400,
+      pauseAfterEllipsis: 800,
+      preSentenceDelay: 200,
+      letterSpacing: 'wide',
+    },
     llmStyle: {
       avgSentenceCount: 1,
       avgSentenceLength: 'short',
@@ -174,6 +206,14 @@ export const characters = {
       friend: '以「测试」为名出题',
       crush: '承认玩家的实力、卸下盔甲露出柔软面',
       love: '第一次说出不带毒舌的真心话'
+    },
+    textRhythm: {
+      baseSpeed: 0.75,
+      pauseAfterComma: 50,
+      pauseAfterPeriod: 100,
+      pauseAfterEllipsis: 200,
+      preSentenceDelay: 100,
+      letterSpacing: 'normal',
     },
     llmStyle: {
       avgSentenceCount: 1,

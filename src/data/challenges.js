@@ -6,7 +6,7 @@ export const challenges = {
 
   tutorial_01_hello_world: {
     id: 'tutorial_01_hello_world', title: '圆面积计算', chapter: 'prologue', difficulty: 1,
-    type: 'multiple_choice', related_character: 'nene',
+    type: 'multiple_choice', related_character: 'nene', knowledge_domain: 'basics',
     question: '已知圆的半径 r = 5，π = 3.1415，下面哪行代码能正确计算并输出圆的面积？',
     code_display: 'r = 5\npi = 3.1415',
     options: [
@@ -25,7 +25,7 @@ export const challenges = {
 
   tutorial_02_print: {
     id: 'tutorial_02_print', title: '人名对话', chapter: 'prologue', difficulty: 1,
-    type: 'fill_blank', related_character: 'nene',
+    type: 'fill_blank', related_character: 'nene', knowledge_domain: 'strings',
     question: '补全代码，让程序正确输出名字的第一个字。\n已知 name = "小明"，name[0] 就是 "小"。',
     code_template: 'name = "小明"\nprint(name[_____], "大侠，学好 Python，前途无量")',
     blank_answer: '0', accept_alternatives: [],
@@ -42,7 +42,7 @@ export const challenges = {
 
   ch1_variables: {
     id: 'ch1_variables', title: '个十百千', chapter: 1, difficulty: 1,
-    type: 'multiple_choice', related_character: 'nene',
+    type: 'multiple_choice', related_character: 'nene', knowledge_domain: 'basics',
     question: '以下代码执行后，变量 b 的值是什么？\n（提取四位数 1314 的百位数字）',
     code_display: 'n = 1314\na = n // 1000        # 千位\nb = n % 1000 // 100  # 百位\nc = n % 100 // 10    # 十位\nd = n % 10           # 个位',
     options: ['1', '3', '13', '4'],
@@ -56,7 +56,7 @@ export const challenges = {
 
   ch1_string_concat: {
     id: 'ch1_string_concat', title: '凯撒密码', chapter: 1, difficulty: 1,
-    type: 'fill_blank', related_character: 'nene',
+    type: 'fill_blank', related_character: 'nene', knowledge_domain: 'strings',
     question: '凯撒密码：将字母向后移 3 位。补全代码，把大写字母 ch 向后移 3 位：',
     code_template: 'ch = "A"\ncode = ord(ch)  # 获取字符编码 65\nnew_code = code + 3\nnew_ch = _____(new_code)  # 将编码转回字符\nprint(new_ch)  # 输出 "D"',
     blank_answer: 'chr', accept_alternatives: [],
@@ -68,7 +68,7 @@ export const challenges = {
 
   ch1_debug_ayase: {
     id: 'ch1_debug_ayase', title: '日期格式化', chapter: 1, difficulty: 2,
-    type: 'code_order', related_character: 'ayase',
+    type: 'code_order', related_character: 'ayase', knowledge_domain: 'debug',
     question: 'Ayase 想从 "2026-03-18 15:30:45" 中分别提取日期和时间，但代码顺序搞混了！排列正确顺序：',
     lines: [
       'print("日期：", date_part)',
@@ -90,7 +90,7 @@ export const challenges = {
 
   ch2_for_loop: {
     id: 'ch2_for_loop', title: '自然数求和', chapter: 2, difficulty: 2,
-    type: 'multiple_choice', related_character: 'yoshino',
+    type: 'multiple_choice', related_character: 'yoshino', knowledge_domain: 'loops',
     question: '使用 for 循环计算 1 到 100 的自然数之和，结果是多少？',
     code_display: 'total = 0\nfor i in range(1, 101):\n    total += i\nprint(total)',
     options: ['4950', '5050', '5000', '10000'],
@@ -104,7 +104,7 @@ export const challenges = {
 
   ch2_while_loop: {
     id: 'ch2_while_loop', title: '猜数字游戏', chapter: 2, difficulty: 2,
-    type: 'fill_blank', related_character: 'kanna',
+    type: 'fill_blank', related_character: 'kanna', knowledge_domain: 'loops',
     question: '补全猜数字游戏：当猜测不等于目标时继续循环，猜对时跳出：',
     code_template: 'target = 7\nguess = int(input("猜一个数："))\nwhile guess _____ target:\n    if guess > target:\n        print("太大")\n    else:\n        print("太小")\n    guess = int(input("再猜："))\nprint("恭喜，猜对了！")',
     blank_answer: '!=', accept_alternatives: ['!= '],
@@ -116,7 +116,7 @@ export const challenges = {
 
   ch2_list_sort: {
     id: 'ch2_list_sort', title: '三角形图案', chapter: 2, difficulty: 2,
-    type: 'code_order', related_character: 'ayase',
+    type: 'code_order', related_character: 'ayase', knowledge_domain: 'loops',
     question: '用双重循环打印左下三角形 *（5行），排列正确代码顺序：',
     lines: [
       '        print("*", end="")',
@@ -133,7 +133,7 @@ export const challenges = {
 
   ch2_nested_loop: {
     id: 'ch2_nested_loop', title: '九九乘法表', chapter: 2, difficulty: 3,
-    type: 'multiple_choice', related_character: 'yoshino',
+    type: 'multiple_choice', related_character: 'yoshino', knowledge_domain: 'loops',
     question: '这段九九乘法表代码中，内层循环 range(1, i+1) 的作用是什么？',
     code_display: 'for i in range(1, 10):\n    for j in range(1, i+1):\n        print(f"{j}*{i}={i*j}", end=" ")\n    print()',
     options: [
@@ -157,7 +157,7 @@ export const challenges = {
 
   ch3_function_def: {
     id: 'ch3_function_def', title: '几何面积函数', chapter: 3, difficulty: 2,
-    type: 'fill_blank', related_character: 'nene',
+    type: 'fill_blank', related_character: 'nene', knowledge_domain: 'functions',
     question: '补全函数定义关键字，让这个计算矩形面积的函数能正常工作：',
     code_template: '_____ rect_area(width, height):\n    return width * height\n\nprint(rect_area(4, 7))  # 输出 28',
     blank_answer: 'def', accept_alternatives: [],
@@ -169,7 +169,7 @@ export const challenges = {
 
   ch3_return_value: {
     id: 'ch3_return_value', title: '阶乘计算', chapter: 3, difficulty: 2,
-    type: 'multiple_choice', related_character: 'yoshino',
+    type: 'multiple_choice', related_character: 'yoshino', knowledge_domain: 'functions',
     question: '这个递归阶乘函数 factorial(5) 的返回值是多少？',
     code_display: 'def factorial(n):\n    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))',
     options: ['5', '25', '120', '720'],
@@ -183,7 +183,7 @@ export const challenges = {
 
   ch3_function_order: {
     id: 'ch3_function_order', title: '生日歌函数', chapter: 3, difficulty: 3,
-    type: 'code_order', related_character: 'ayase',
+    type: 'code_order', related_character: 'ayase', knowledge_domain: 'functions',
     question: '把生日歌函数的代码排列成正确顺序：',
     lines: [
       'happy_birthday("Alethicode")',
@@ -200,7 +200,7 @@ export const challenges = {
 
   ch3_murasame_gate: {
     id: 'ch3_murasame_gate', title: 'Murasame 的考验', chapter: 3, difficulty: 3,
-    type: 'multiple_choice', related_character: 'murasame',
+    type: 'multiple_choice', related_character: 'murasame', knowledge_domain: 'advanced',
     question: '斐波那契数列中所有小于 100 的数有哪些？以下哪个序列是正确的？',
     code_display: 'def fib_under(n):\n    a, b = 0, 1\n    result = []\n    while a < n:\n        result.append(a)\n        a, b = b, a + b\n    return result\n\nprint(fib_under(100))',
     options: [
@@ -224,7 +224,7 @@ export const challenges = {
 
   nene_if_else: {
     id: 'nene_if_else', title: '成绩等级判断', chapter: 'nene', difficulty: 2,
-    type: 'fill_blank', related_character: 'nene',
+    type: 'fill_blank', related_character: 'nene', knowledge_domain: 'basics',
     question: '补全条件关键字，实现成绩等级判断：90 以上优秀，75-89 良好，60-74 及格，否则不及格：',
     code_template: 'score = 82\n_____ score >= 90:\n    print("优秀")\nelif score >= 75:\n    print("良好")\nelif score >= 60:\n    print("及格")\nelse:\n    print("不及格")',
     blank_answer: 'if', accept_alternatives: [],
@@ -236,7 +236,7 @@ export const challenges = {
 
   nene_try_except: {
     id: 'nene_try_except', title: '用户登录验证', chapter: 'nene', difficulty: 3,
-    type: 'multiple_choice', related_character: 'nene',
+    type: 'multiple_choice', related_character: 'nene', knowledge_domain: 'basics',
     question: '这段登录验证代码，当用户名 "admin"、密码 "abc" 时，输出什么？',
     code_display: 'username = "admin"\npassword = "abc"\n\nif username != "admin":\n    print("用户名输入有误")\nelif password != "123456":\n    print("密码输入有误")\nelse:\n    print("登录成功")',
     options: ['登录成功', '用户名输入有误', '密码输入有误', '报错'],
@@ -250,7 +250,7 @@ export const challenges = {
 
   nene_comments: {
     id: 'nene_comments', title: 'BMI 计算', chapter: 'nene', difficulty: 2,
-    type: 'fill_blank', related_character: 'nene',
+    type: 'fill_blank', related_character: 'nene', knowledge_domain: 'basics',
     question: '补全 BMI 计算公式。BMI = 体重(kg) ÷ 身高(m) 的平方：',
     code_template: 'height = 1.75\nweight = 75\nbmi = weight / (height _____ 2)\nprint(f"BMI数值为：{bmi:.2f}")  # 输出 24.49',
     blank_answer: '**', accept_alternatives: [],
@@ -267,7 +267,7 @@ export const challenges = {
 
   yoshino_refactor: {
     id: 'yoshino_refactor', title: '订单生成重构', chapter: 'yoshino', difficulty: 3,
-    type: 'code_order', related_character: 'yoshino',
+    type: 'code_order', related_character: 'yoshino', knowledge_domain: 'conventions',
     question: '将电子商务订单计算的代码重构为正确顺序：',
     lines: [
       'print(f"订单总金额: {total}")',
@@ -284,7 +284,7 @@ export const challenges = {
 
   yoshino_boundary: {
     id: 'yoshino_boundary', title: '三角形判断', chapter: 'yoshino', difficulty: 3,
-    type: 'multiple_choice', related_character: 'yoshino',
+    type: 'multiple_choice', related_character: 'yoshino', knowledge_domain: 'conventions',
     question: '判断三边能否构成三角形的条件是"任意两边之和大于第三边"。以下哪组边不能构成三角形？',
     code_display: 'def is_triangle(a, b, c):\n    return a+b>c and a+c>b and b+c>a',
     options: ['3, 4, 5', '5, 5, 8', '1, 2, 3', '7, 10, 12'],
@@ -298,7 +298,7 @@ export const challenges = {
 
   yoshino_pair: {
     id: 'yoshino_pair', title: '用户系统协作', chapter: 'yoshino', difficulty: 2,
-    type: 'fill_blank', related_character: 'yoshino',
+    type: 'fill_blank', related_character: 'yoshino', knowledge_domain: 'conventions',
     question: '补全用户注册系统——检查用户名是否已存在：',
     code_template: 'users = {"alice": "pwd123", "bob": "pwd456"}\nnew_user = "charlie"\n\nif new_user _____ users:\n    print("用户名已存在!")\nelse:\n    print(f"用户 {new_user} 注册成功!")',
     blank_answer: 'in', accept_alternatives: [],
@@ -315,7 +315,7 @@ export const challenges = {
 
   ayase_find_bug: {
     id: 'ayase_find_bug', title: '偶数求和 Bug', chapter: 'ayase', difficulty: 2,
-    type: 'multiple_choice', related_character: 'ayase',
+    type: 'multiple_choice', related_character: 'ayase', knowledge_domain: 'debug',
     question: '这段代码想计算 1~10 的偶数之和（应为 30），但结果不对。Bug 在第几行？',
     code_display: '1. total = 0\n2. for i in range(1, 11):\n3.     if i % 2 == 0:\n4.         total = i\n5. print(total)',
     options: ['第 2 行', '第 3 行', '第 4 行', '第 5 行'],
@@ -329,7 +329,7 @@ export const challenges = {
 
   ayase_game_logic: {
     id: 'ayase_game_logic', title: '简易计算器', chapter: 'ayase', difficulty: 3,
-    type: 'fill_blank', related_character: 'ayase',
+    type: 'fill_blank', related_character: 'ayase', knowledge_domain: 'debug',
     question: '补全这个计算器——当运算符是 * 时执行乘法：',
     code_template: 'a = 3\nop = "*"\nb = 4\nif op == "+":\n    print(a + b)\nelif op == "-":\n    print(a - b)\n_____ op == "*":\n    print(a * b)\nelif op == "/":\n    print(a / b)',
     blank_answer: 'elif', accept_alternatives: [],
@@ -341,7 +341,7 @@ export const challenges = {
 
   ayase_final_race: {
     id: 'ayase_final_race', title: '击鼓传花', chapter: 'ayase', difficulty: 3,
-    type: 'code_order', related_character: 'ayase',
+    type: 'code_order', related_character: 'ayase', knowledge_domain: 'algorithms',
     question: '限时挑战！约瑟夫环问题——5 人围圈，每数到 3 淘汰一人。排列代码顺序：',
     lines: [
       '    players.pop(index)',
@@ -363,7 +363,7 @@ export const challenges = {
 
   kanna_recursion: {
     id: 'kanna_recursion', title: '阶乘之美', chapter: 'kanna', difficulty: 3,
-    type: 'multiple_choice', related_character: 'kanna',
+    type: 'multiple_choice', related_character: 'kanna', knowledge_domain: 'algorithms',
     question: '递归计算 factorial(4) 时，函数被调用了几次（包括初始调用）？',
     code_display: 'def factorial(n):\n    if n == 0:\n        return 1\n    return n * factorial(n - 1)',
     options: ['3 次', '4 次', '5 次', '6 次'],
@@ -377,7 +377,7 @@ export const challenges = {
 
   kanna_star_pattern: {
     id: 'kanna_star_pattern', title: 'π 的近似', chapter: 'kanna', difficulty: 3,
-    type: 'fill_blank', related_character: 'kanna',
+    type: 'fill_blank', related_character: 'kanna', knowledge_domain: 'algorithms',
     question: '莱布尼茨公式：π/4 = 1 - 1/3 + 1/5 - 1/7 + ...\n补全代码中的符号交替：',
     code_template: 'pi_quarter = 0\nsign = 1\nfor i in range(1000):\n    pi_quarter += sign / (2 * i + 1)\n    sign _____ -1  # 每次符号取反\nprint(pi_quarter * 4)',
     blank_answer: '*=', accept_alternatives: ['*= '],
@@ -389,7 +389,7 @@ export const challenges = {
 
   kanna_search: {
     id: 'kanna_search', title: '词频统计', chapter: 'kanna', difficulty: 3,
-    type: 'multiple_choice', related_character: 'kanna',
+    type: 'multiple_choice', related_character: 'kanna', knowledge_domain: 'algorithms',
     question: '这段词频统计代码处理 "to be or not to be" 后，word_count["to"] 的值是？',
     code_display: 'text = "to be or not to be"\nwords = text.lower().split()\nword_count = {}\nfor w in words:\n    if w in word_count:\n        word_count[w] += 1\n    else:\n        word_count[w] = 1',
     options: ['1', '2', '3', '0'],
@@ -408,7 +408,7 @@ export const challenges = {
 
   murasame_optimize: {
     id: 'murasame_optimize', title: '凯撒密码完整版', chapter: 'murasame', difficulty: 4,
-    type: 'fill_blank', related_character: 'murasame',
+    type: 'fill_blank', related_character: 'murasame', knowledge_domain: 'advanced',
     question: '实现完整凯撒加密——小写字母后移 3 位并循环（z→c）。补全取余运算：',
     code_template: 'def caesar(text):\n    result = ""\n    for ch in text:\n        if ch.islower():\n            new = chr((ord(ch) - ord("a") + 3) % _____ + ord("a"))\n            result += new\n        else:\n            result += ch\n    return result\n\nprint(caesar("hello, zoo"))  # khoor, crr',
     blank_answer: '26', accept_alternatives: [],
@@ -420,7 +420,7 @@ export const challenges = {
 
   murasame_merge: {
     id: 'murasame_merge', title: '成绩统计合并', chapter: 'murasame', difficulty: 3,
-    type: 'code_order', related_character: 'murasame',
+    type: 'code_order', related_character: 'murasame', knowledge_domain: 'advanced',
     question: '将成绩等级统计的代码合并为正确顺序：',
     lines: [
       'for grade in sorted(count.keys()):\n    print(f"{grade}有{count[grade]}个")',
@@ -437,7 +437,7 @@ export const challenges = {
 
   murasame_final: {
     id: 'murasame_final', title: '学科等级评定', chapter: 'murasame', difficulty: 4,
-    type: 'multiple_choice', related_character: 'murasame',
+    type: 'multiple_choice', related_character: 'murasame', knowledge_domain: 'advanced',
     question: '学生成绩：编程 100, 生物 50, 科学 100。\n规则：三门≥85且总分≥260为优秀；生物和科学≥60且总分≥180为及格；否则不及格。\n该学生的等级是？',
     code_display: 'prog, bio, sci = 100, 50, 100\ntotal = prog + bio + sci  # 250\n\nif bio >= 85 and sci >= 85 and prog >= 85 and total >= 260:\n    level = "优秀"\nelif bio >= 60 and sci >= 60 and total >= 180:\n    level = "及格"\nelse:\n    level = "不及格"',
     options: ['优秀', '及格', '不及格', '报错'],
@@ -454,7 +454,7 @@ export const challenges = {
   // =====================================================================
   hello_world: {
     id: 'hello_world', title: '第一个程序', chapter: 'prologue', difficulty: 1,
-    type: 'multiple_choice', related_character: 'nene',
+    type: 'multiple_choice', related_character: 'nene', knowledge_domain: 'basics',
     question: '以下哪行代码可以正确输出 "Hello, World!"？',
     options: [
       { id: 'a', text: 'print("Hello, World!")', correct: true },

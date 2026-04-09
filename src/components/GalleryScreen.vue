@@ -61,7 +61,9 @@
       </div>
 
       <div v-if="tab === 'chars'" class="char-gallery">
-        <div v-for="char in charList" :key="char.id" class="char-card">
+        <div v-for="char in charList" :key="char.id"
+             class="char-card" :class="{ expanded: expandedChar === char.id }"
+             @click="toggleCharExpand(char.id)">
           <div class="char-portrait" :style="{ borderColor: char.color }">
             <img
               class="char-portrait-image"
@@ -78,6 +80,68 @@
             <p class="char-desc">{{ char.description }}</p>
             <div v-if="char.catchphrases" class="char-catchphrases">
               <p v-for="(cp, i) in char.catchphrases" :key="i" class="catchphrase">「{{ cp }}」</p>
+            </div>
+
+            <div v-if="expandedChar === char.id" class="char-expanded-info" @click.stop>
+              <div class="char-section">
+                <h4 class="section-title">关系进度</h4>
+                <div class="rel-bars">
+                  <div class="rel-bar-row">
+                    <span class="rel-label">好感</span>
+                    <div class="rel-track">
+                      <div class="rel-fill" :style="{ width: getRelPercent(char.id, 'affection') + '%', background: char.color }"></div>
+                    </div>
+                    <span class="rel-value">{{ getRelValue(char.id, 'affection') }}</span>
+                  </div>
+                  <div class="rel-bar-row">
+                    <span class="rel-label">信任</span>
+                    <div class="rel-track">
+                      <div class="rel-fill" :style="{ width: getRelPercent(char.id, 'trust') + '%', background: char.color + 'cc' }"></div>
+                    </div>
+                    <span class="rel-value">{{ getRelValue(char.id, 'trust') }}</span>
+                  </div>
+                  <div class="rel-bar-row">
+                    <span class="rel-label">安心</span>
+                    <div class="rel-track">
+                      <div class="rel-fill" :style="{ width: getRelPercent(char.id, 'comfort') + '%', background: char.color + '99' }"></div>
+                    </div>
+                    <span class="rel-value">{{ getRelValue(char.id, 'comfort') }}</span>
+                  </div>
+                </div>
+                <div class="rel-stage-badge" :style="{ borderColor: char.color }">
+                  {{ getRelStage(char.id) }}
+                </div>
+              </div>
+
+              <div class="char-section" v-if="getMemories(char.id).length > 0">
+                <h4 class="section-title">共同回忆</h4>
+                <div class="memory-timeline">
+                  <div v-for="mem in getMemories(char.id)" :key="mem.id" class="memory-entry">
+                    <span class="memory-emotion-dot" :class="'emotion-' + (mem.emotion || 'warm')"></span>
+                    <div class="memory-content">
+                      <span class="memory-text">{{ mem.text }}</span>
+                      <span class="memory-meta">
+                        {{ mem.relStageAtTime || '' }}
+                        <span v-if="mem.context"> · {{ mem.context }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="char-section" v-else>
+                <h4 class="section-title">共同回忆</h4>
+                <p class="empty-hint">尚未建立共同回忆</p>
+              </div>
+
+              <div class="char-section" v-if="getImpressionKeywords(char.id).length > 0">
+                <h4 class="section-title">她对你的印象</h4>
+                <div class="impression-tags">
+                  <span v-for="kw in getImpressionKeywords(char.id)" :key="kw"
+                        class="impression-tag" :style="{ borderColor: char.color + '44' }">
+                    {{ kw }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -103,6 +167,7 @@ import { inject, onUnmounted, ref } from 'vue'
 import { cgList } from '../data/cgCatalog.js'
 import { characterList } from '../data/characters.js'
 import { getCharacterSprite } from '../data/characterSprites.js'
+import { getRelationshipStage } from '../data/relationshipRules.js'
 import { assetPath } from '../utils/assetPath.js'
 
 defineEmits(['back'])
@@ -114,6 +179,7 @@ const tab = ref('cg')
 const charList = characterList
 const currentPlaying = ref(null)
 const selectedCg = ref(null)
+const expandedChar = ref(null)
 const titleHero = assetPath('assets/ui/title-hero.webp')
 
 const bgmList = [
@@ -146,6 +212,47 @@ function getPortrait(id) {
 function openCg(cg) {
   if (!isUnlocked(cg.id)) return
   selectedCg.value = cg
+}
+
+function toggleCharExpand(id) {
+  expandedChar.value = expandedChar.value === id ? null : id
+}
+
+function getRelValue(charId, dim) {
+  return engine.relationship[charId]?.[dim] || 0
+}
+
+function getRelPercent(charId, dim) {
+  return Math.min(getRelValue(charId, dim), 100)
+}
+
+function getRelStage(charId) {
+  const rel = engine.relationship[charId] || { affection: 0, trust: 0, comfort: 0 }
+  return getRelationshipStage(rel)
+}
+
+function getMemories(charId) {
+  const mems = engine.memories[charId] || []
+  return mems.slice().reverse()
+}
+
+function getImpressionKeywords(charId) {
+  const mems = engine.memories[charId] || []
+  if (mems.length === 0) return []
+
+  const wordCounts = {}
+  for (const mem of mems) {
+    const text = typeof mem === 'string' ? mem : (mem.text || '')
+    const words = text.replace(/[，。！？、…\s]+/g, ' ').split(' ').filter(w => w.length >= 2 && w.length <= 6)
+    for (const w of words) {
+      wordCounts[w] = (wordCounts[w] || 0) + 1
+    }
+  }
+
+  return Object.entries(wordCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([word]) => word)
 }
 
 function toggleBgm(bgm) {
@@ -466,6 +573,149 @@ onUnmounted(() => {
 
 .catchphrase {
   font-size: 13px;
+}
+
+.char-card {
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.char-card:hover {
+  box-shadow: 0 20px 44px rgba(69, 45, 24, 0.18);
+}
+
+.char-card.expanded {
+  grid-template-columns: 1fr;
+}
+
+.char-expanded-info {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(219, 182, 123, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.char-section { }
+
+.section-title {
+  font-size: 13px;
+  color: var(--vn-gold);
+  letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
+
+.rel-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rel-bar-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 32px;
+  align-items: center;
+  gap: 10px;
+}
+
+.rel-label {
+  font-size: 12px;
+  color: var(--vn-text-dim);
+}
+
+.rel-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(219, 182, 123, 0.15);
+  overflow: hidden;
+}
+
+.rel-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.rel-value {
+  font-size: 12px;
+  color: var(--vn-text-dim);
+  text-align: right;
+}
+
+.rel-stage-badge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 14px;
+  border-radius: 12px;
+  border: 1px solid;
+  font-size: 12px;
+  color: var(--vn-text);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.memory-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memory-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.memory-emotion-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.emotion-warm { background: #F4C2D0; }
+.emotion-funny { background: #FFB74D; }
+.emotion-bittersweet { background: #7BA7C9; }
+.emotion-tense { background: #DC3545; }
+.emotion-romantic { background: #c4b5fd; }
+
+.memory-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.memory-text {
+  font-size: 14px;
+  color: var(--vn-text);
+  line-height: 1.6;
+}
+
+.memory-meta {
+  font-size: 11px;
+  color: var(--vn-text-dim);
+}
+
+.empty-hint {
+  font-size: 13px;
+  color: var(--vn-text-dim);
+  font-style: italic;
+}
+
+.impression-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.impression-tag {
+  padding: 3px 10px;
+  border-radius: 10px;
+  border: 1px solid;
+  font-size: 12px;
+  color: var(--vn-text);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .preview-overlay {

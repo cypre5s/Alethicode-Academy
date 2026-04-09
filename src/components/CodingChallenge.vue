@@ -444,7 +444,10 @@ function continueGame() {
       engine.showAffectionToast(k, v)
     })
   }
-  engine.resolveChallenge(isCorrect.value, (activeChallenge.value || challenge.value)?.id)
+  engine.resolveChallenge(isCorrect.value, (activeChallenge.value || challenge.value)?.id, {
+    hintsUsed: hintsUsed.value,
+    totalHints: totalHints.value,
+  })
 }
 </script>
 

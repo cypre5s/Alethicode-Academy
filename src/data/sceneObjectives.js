@@ -173,6 +173,26 @@ export const semiPresetTemplates = {
     mustNotMention: ['主线剧透'],
     relationshipTarget: '通过编程话题自然拉近关系',
   },
+  post_challenge_solo_pass: {
+    mustMention: ['刚才的编程题', '独立做对了'],
+    mustNotMention: ['主线剧透'],
+    relationshipTarget: '用认可和欣赏拉近关系',
+  },
+  post_challenge_assisted_pass: {
+    mustMention: ['刚才的编程题', '提示帮到了'],
+    mustNotMention: ['主线剧透'],
+    relationshipTarget: '用陪伴和鼓励建立安全感',
+  },
+  post_challenge_thoughtful_fail: {
+    mustMention: ['刚才的编程题', '哪里卡住了'],
+    mustNotMention: ['主线剧透', '嘲笑'],
+    relationshipTarget: '用包容传达"失败也被接纳"',
+  },
+  post_challenge_careless_fail: {
+    mustMention: ['刚才的编程题', '上次也类似'],
+    mustNotMention: ['主线剧透', '人身攻击'],
+    relationshipTarget: '温柔地指出重复问题，推动改进',
+  },
   revisit_after_event: {
     mustMention: ['上次发生的事'],
     mustNotMention: ['跳跃式告白', '主线剧透'],

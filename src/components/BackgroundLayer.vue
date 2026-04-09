@@ -3,7 +3,8 @@
     <div v-if="entry?.image" class="bg-base" :style="bgStyle"></div>
     <div class="bg-color-grade" :class="`preset-${preset}`"></div>
     <div class="bg-haze" :class="`preset-${preset}`"></div>
-    <div class="bg-vignette"></div>
+    <div class="bg-vignette" :class="vignetteClass"></div>
+    <div v-if="emotionOverlay" class="bg-emotion-overlay" :class="'emotion-' + emotionOverlay"></div>
 
     <div v-if="showStars" class="bg-stars">
       <span v-for="star in stars" :key="star.id" class="star" :style="star.style"></span>
@@ -73,6 +74,12 @@ const bgStyle = computed(() => ({
 const showStars = computed(() => ['blue_night', 'lab_night_glow', 'fireworks_bloom'].includes(preset.value))
 const showLanterns = computed(() => preset.value === 'festival_lantern')
 const showSparkles = computed(() => ['spring_day', 'golden_hour', 'festival_lantern', 'fireworks_bloom'].includes(preset.value))
+
+const emotionOverlay = computed(() => engine.sceneEmotion?.value || null)
+
+const vignetteClass = computed(() => ({
+  'vignette-heavy': emotionOverlay.value === 'vignette' || emotionOverlay.value === 'aftermath',
+}))
 </script>
 
 <style scoped>
@@ -174,6 +181,43 @@ const showSparkles = computed(() => ['spring_day', 'golden_hour', 'festival_lant
   background:
     radial-gradient(circle at center, transparent 44%, rgba(27, 17, 11, 0.12) 100%),
     linear-gradient(180deg, rgba(48, 28, 17, 0.05), transparent 28%, transparent 74%, rgba(40, 22, 14, 0.08));
+  transition: all 0.8s ease;
+}
+
+.bg-vignette.vignette-heavy {
+  background:
+    radial-gradient(circle at center, transparent 28%, rgba(27, 17, 11, 0.35) 100%),
+    linear-gradient(180deg, rgba(48, 28, 17, 0.12), transparent 28%, transparent 64%, rgba(40, 22, 14, 0.2));
+}
+
+.bg-emotion-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 1s ease, filter 1s ease;
+}
+
+.emotion-aftermath {
+  background: rgba(15, 10, 20, 0.12);
+  filter: saturate(0.85);
+}
+
+.emotion-vignette {
+  background: radial-gradient(circle at center, transparent 30%, rgba(10, 5, 15, 0.3) 100%);
+}
+
+.emotion-tension {
+  background: rgba(20, 5, 5, 0.1);
+  filter: saturate(0.9) contrast(1.05);
+}
+
+.emotion-warmth {
+  background: radial-gradient(circle at 50% 60%, rgba(255, 200, 150, 0.08), transparent 60%);
+}
+
+.emotion-melancholy {
+  background: rgba(10, 15, 30, 0.15);
+  filter: saturate(0.8);
 }
 
 .bg-stars,

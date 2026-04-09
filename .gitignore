@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+package-lock.json
+
+# build output
+dist/
+release/
+
+# env files (contain API keys)
+.env.local
+.env.*.local
+.env.production
+.env.deploy
+
+# editor / OS
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# logs
+npm-debug.log*
+
+# external asset sources (large binaries, see tmp_assets/README.md)
+tmp_assets/
+
+# native platform builds
+android/
+harmony/
+electron/
+capacitor.config.ts
+app-icon.icns
+app-icon.ico
+app-icon.png
+
+.vercel

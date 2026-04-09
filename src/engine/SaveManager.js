@@ -6,7 +6,7 @@ const QUICK_KEY = 'alethicode_save_quick'
 const SETTINGS_KEY = 'alethicode_settings'
 const GLOBAL_KEY = 'alethicode_global'
 const MAX_SLOTS = 6
-const CURRENT_VERSION = '3.0.0'
+const CURRENT_VERSION = '3.1.0'
 const CHECKSUM_SALT = 'alethicode_v3_salt'
 const MAX_SAVE_SIZE = 512 * 1024
 
@@ -19,6 +19,30 @@ function _computeChecksum(obj) {
     hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0
   }
   return (CHECKSUM_SALT + Math.abs(hash).toString(36))
+}
+
+function _migrateMemories(memories) {
+  if (!memories || typeof memories !== 'object') return {}
+  const result = {}
+  for (const [charId, entries] of Object.entries(memories)) {
+    if (!Array.isArray(entries)) { result[charId] = []; continue }
+    result[charId] = entries.map((entry, idx) => {
+      if (typeof entry === 'string') {
+        return {
+          id: `mem_${charId}_migrated_${idx}`,
+          text: entry,
+          context: '',
+          chapter: '',
+          timestamp: Date.now() - (entries.length - idx) * 60000,
+          emotion: 'warm',
+          relStageAtTime: '',
+          source: 'free_talk',
+        }
+      }
+      return entry
+    })
+  }
+  return result
 }
 
 function _validateSaveStructure(data) {
@@ -102,7 +126,13 @@ export function useSaveManager() {
         return { error: 'tampered' }
       }
       if (data.version && data.version !== CURRENT_VERSION) {
-        return { error: 'version_mismatch', data, savedVersion: data.version, currentVersion: CURRENT_VERSION }
+        if (data.version === '3.0.0') {
+          data.version = CURRENT_VERSION
+          data.memories = _migrateMemories(data.memories)
+          data.visitLog = data.visitLog || {}
+        } else {
+          return { error: 'version_mismatch', data, savedVersion: data.version, currentVersion: CURRENT_VERSION }
+        }
       }
       return data
     } catch { return { error: 'corrupted' } }

@@ -7,8 +7,11 @@
              'pos-' + (char.position || 'center'),
              char.entering ? 'anim-' + (char.animation || 'fade_in') : '',
              char.exiting ? 'anim-exit-' + (char.animation || 'fade_out') : '',
-             isSpeaking(id) ? 'speaking' : 'idle'
-           ]">
+             isSpeaking(id) ? 'speaking' : 'idle',
+             char.microAction ? 'has-micro-action' : '',
+             hasFlash(char) ? 'micro-flash' : '',
+           ]"
+           :style="microActionStyle(char)">
         <img
           v-if="!spriteErrors[id]"
           class="character-image"
@@ -27,15 +30,62 @@
 </template>
 
 <script setup>
-import { inject, reactive } from 'vue'
+import { inject, reactive, computed } from 'vue'
 import { characters } from '../data/characters.js'
 import { getCharacterSprite } from '../data/characterSprites.js'
+import { getPreset } from '../data/characterAnimPresets.js'
 
 const engine = inject('engine')
 const spriteErrors = reactive({})
 
 function isSpeaking(id) {
   return engine.speaker.value?.id === id
+}
+
+function hasFlash(char) {
+  if (!char.microAction) return false
+  const preset = getPreset(char.microAction)
+  return preset?.flash === true
+}
+
+function microActionStyle(char) {
+  const styles = {}
+  if (!char.microAction) {
+    if (isSpeaking(char.id || '')) {
+      styles.transform = appendCenterOffset(char, 'translateY(-2px) scale(1.01)')
+      styles.transitionDuration = '0.8s'
+      styles.transitionTimingFunction = 'ease-in-out'
+    }
+    return styles
+  }
+
+  const preset = getPreset(char.microAction)
+  if (!preset) return styles
+
+  if (preset.transform) {
+    styles.transform = appendCenterOffset(char, preset.transform)
+  }
+  if (preset.filter) {
+    styles.filter = `drop-shadow(0 4px 20px rgba(0,0,0,0.4)) ${preset.filter}`
+  }
+  if (preset.animation) {
+    styles.animation = preset.animation
+  }
+  if (preset.transitionDuration) {
+    styles.transitionDuration = preset.transitionDuration
+  }
+  if (preset.transitionTimingFunction) {
+    styles.transitionTimingFunction = preset.transitionTimingFunction
+  }
+
+  return styles
+}
+
+function appendCenterOffset(char, transform) {
+  if ((char.position || 'center') === 'center') {
+    return `translateX(-50%) ${transform}`
+  }
+  return transform
 }
 
 function getSpriteSrc(id, expression) {
@@ -101,6 +151,14 @@ function handleSpriteError(id) {
   animation: breathe 3.6s ease-in-out infinite;
 }
 
+.speaking:not(.has-micro-action) {
+  animation: breathe 3.6s ease-in-out infinite;
+}
+
+.has-micro-action.speaking {
+  animation: none;
+}
+
 .idle {
   filter: drop-shadow(0 4px 20px rgba(0,0,0,0.3)) brightness(0.85);
   z-index: 1;
@@ -108,14 +166,28 @@ function handleSpriteError(id) {
   animation: breathe-idle 4.2s ease-in-out infinite;
 }
 
-.pos-center.speaking {
+.idle:not(.has-micro-action) {
+  animation: breathe-idle 4.2s ease-in-out infinite;
+}
+
+.has-micro-action.idle {
+  animation: none;
+}
+
+.pos-center.speaking:not(.has-micro-action) {
   transform: translateX(-50%) translateY(-2px);
   animation-name: breathe-center;
 }
 
-.pos-center.idle {
+.pos-center.idle:not(.has-micro-action) {
   animation-name: breathe-idle-center;
 }
+
+.micro-flash {
+  animation: char-flash 0.15s ease-out !important;
+}
+
+/* --- Breathe keyframes --- */
 
 @keyframes breathe {
   0%, 100% { transform: translateY(-2px) scaleY(1); }
@@ -136,6 +208,48 @@ function handleSpriteError(id) {
   0%, 100% { transform: translateX(-50%) translateY(0) scaleY(1); }
   50% { transform: translateX(-50%) translateY(0) scaleY(1.003); }
 }
+
+/* --- Micro-action keyframes --- */
+
+@keyframes char-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+@keyframes char-nod {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(6px); }
+  60% { transform: translateY(2px); }
+  80% { transform: translateY(5px); }
+}
+
+@keyframes char-tilt {
+  0%, 100% { transform: rotate(0deg); }
+  40% { transform: rotate(3deg); }
+  70% { transform: rotate(-1deg); }
+}
+
+@keyframes char-tremble {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(-1px) translateY(1px); }
+  50% { transform: translateX(1px) translateY(-1px); }
+  75% { transform: translateX(-1px) translateY(0); }
+}
+
+@keyframes char-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes char-flash {
+  0% { filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4)) brightness(2); }
+  100% { filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4)) brightness(1); }
+}
+
+/* --- Enter / exit --- */
 
 .sprite-fallback {
   width: clamp(200px, 24vw, 320px);

@@ -3,6 +3,8 @@ import { characters } from '../data/characters.js'
 import { fallbackDialogues } from '../data/fallbackDialogues.js'
 import { locations, sceneIdFromBackgroundId } from '../data/locations.js'
 import { getRelationshipStage, getStageRules, getStageBoundaries } from '../data/relationshipRules.js'
+import { getPostChallengeEvent } from '../data/postChallengeEvents.js'
+import { knowledgeDomains } from '../data/learningDomains.js'
 
 const LLM_CONFIG_KEY = 'alethicode_llm_config'
 const MAX_INPUT_LENGTH = 500
@@ -105,6 +107,7 @@ function _sanitizeLLMResponse(parsed, characterId) {
     comfortDelta: clamp(parsed.comfort_delta, -2, 2),
     topicTags: Array.isArray(parsed.topic_tags) ? parsed.topic_tags.filter(t => typeof t === 'string').slice(0, 5) : [],
     memoryCandidate: _sanitizeText(parsed.memory_candidate || ''),
+    memoryEmotion: ['warm', 'funny', 'bittersweet', 'tense', 'romantic'].includes(parsed.memory_emotion) ? parsed.memory_emotion : 'warm',
     source: 'llm'
   }
 }
@@ -209,7 +212,13 @@ function buildRelationshipCard(character, gameState) {
 affection=${rel.affection} / trust=${rel.trust} / comfort=${rel.comfort}
 本阶段行为准则：${rules}
 行为边界：${boundaryLines.join('、') || '无特殊限制'}
-亲密上限：${boundaries.maxIntimacy}`
+亲密上限：${boundaries.maxIntimacy}
+
+【负反馈规则】
+- 如果玩家言行超越当前亲密上限（如初识阶段就说暧昧的话），应降低 comfort_delta（-1 或 -2）
+- 如果玩家反复越界或轻浮，应降低 trust_delta
+- 如果玩家触碰角色敏感点或说了伤人的话，应降低 affection_delta
+- 负反馈要通过角色自己的方式表达（回避、冷处理、吐槽、沉默），而不是说教`
 }
 
 function buildSceneCard(character, gameState) {
@@ -234,7 +243,30 @@ function buildSceneCard(character, gameState) {
 
   if (freeTalk?.lastChallengeResult) {
     const cr = freeTalk.lastChallengeResult
-    lines.push(`最近编程挑战：${cr.passed ? '通过' : '未通过'}（${cr.title || cr.challengeId || ''}）`)
+    const outcomeLabels = {
+      solo_pass: '独立通过',
+      assisted_pass: '提示后通过',
+      thoughtful_fail: '未通过但有思考',
+      careless_fail: '重复犯错',
+    }
+    const outcomeLabel = outcomeLabels[cr.outcome] || (cr.passed ? '通过' : '未通过')
+    lines.push(`最近编程挑战：${outcomeLabel}（${cr.title || cr.challengeId || ''}）`)
+    if (cr.hintsUsed > 0) lines.push(`使用提示次数：${cr.hintsUsed}`)
+
+    const domainInfo = cr.knowledge_domain ? knowledgeDomains[cr.knowledge_domain] : null
+    if (domainInfo) lines.push(`知识领域：${domainInfo.label}`)
+
+    const postEvent = getPostChallengeEvent(cr.challengeId, character.id, cr.outcome)
+    if (postEvent) {
+      lines.push(`\n【题后教学约束】`)
+      lines.push(`涉及知识点：${postEvent.knowledge_point}`)
+      lines.push(`常见错误：${postEvent.common_mistakes.join('、')}`)
+      lines.push(`情绪基调：${postEvent.emotional_tone}`)
+      if (postEvent.must_mention) lines.push(`本轮必须自然提及：${postEvent.must_mention.join('、')}`)
+      if (postEvent.relationship_goal) lines.push(`关系推进目标：${postEvent.relationship_goal}`)
+      lines.push(`参考台词风格：${postEvent.template}`)
+      lines.push(`注意：以上仅为基调参考，请用角色自己的方式自然表达，不要照搬原文。`)
+    }
   }
 
   const triggeredEvents = Object.keys(gameState.flags || {})
@@ -259,8 +291,46 @@ function buildMemoryCard(gameState, characterId) {
     }
   }
 
+  const learningMems = mems.filter(m => m.source === 'challenge')
+  const socialMems = mems.filter(m => m.source !== 'challenge')
+
   const lines = []
-  if (mems.length > 0) lines.push(`最近共同经历：\n${mems.map(m => `- ${m}`).join('\n')}`)
+
+  if (learningMems.length > 0) {
+    const domainGroups = {}
+    for (const m of learningMems) {
+      const domain = m.knowledge_domain || 'other'
+      if (!domainGroups[domain]) domainGroups[domain] = []
+      domainGroups[domain].push(m)
+    }
+
+    const domainLines = []
+    for (const [domain, entries] of Object.entries(domainGroups)) {
+      const domainLabel = knowledgeDomains[domain]?.label || domain
+      const recent = entries.slice(-3)
+      const entryTexts = recent.map(m => {
+        const emotionTag = m.emotion ? `[${m.emotion}]` : ''
+        const isFirst = entries.indexOf(m) === 0
+        const firstTag = isFirst ? '★' : ''
+        return `  ${firstTag}${emotionTag} ${m.text}`
+      })
+      domainLines.push(`${domainLabel}：\n${entryTexts.join('\n')}`)
+    }
+    lines.push(`学习回忆簿：\n${domainLines.join('\n')}`)
+    lines.push('如果回忆中有与当前知识点相关的学习经历，请自然提及，让玩家感到「她记得我们一起学过这个」。标注★的是「第一次」经历，可以特别提及。')
+  }
+
+  if (socialMems.length > 0) {
+    const memLines = socialMems.slice(-5).map(m => {
+      if (typeof m === 'string') return `- ${m}`
+      const emotionTag = m.emotion ? `[${m.emotion}]` : ''
+      const contextTag = m.context ? ` (${m.context})` : ''
+      return `- ${emotionTag} ${m.text}${contextTag}`
+    })
+    lines.push(`共同回忆：\n${memLines.join('\n')}`)
+    lines.push('如果回忆中有与当前话题相关的内容，请自然地提及它，让玩家感到「她记得我们之间发生过的事」。')
+  }
+
   if (openThreads.length > 0) lines.push(`悬而未决的话题：${openThreads.slice(0, 3).join('、')}`)
 
   if (lines.length === 0) return '【记忆卡】\n暂无共同记忆'
@@ -308,7 +378,8 @@ function buildOutputContract(character) {
   "trust_delta": -2到2的整数,
   "comfort_delta": -2到2的整数,
   "topic_tags": ["当前话题标签"],
-  "memory_candidate": "值得写入短期记忆的一句话，没有则空字符串"
+  "memory_candidate": "值得作为「共同回忆」沉淀的一句话摘要（如'第一次被她夸代码整洁'），没有则空字符串",
+  "memory_emotion": "回忆的情绪标签，从 warm/funny/bittersweet/tense/romantic 中选一个，无回忆则空字符串"
 }`
 }
 
@@ -631,12 +702,99 @@ export function useLLMManager() {
     }
   }
 
+  async function generateRevisitGreeting(characterId, gameState) {
+    if (!apiKey.value || offlineMode.value || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+      return null
+    }
+
+    const char = characters[characterId]
+    if (!char) return null
+
+    const visit = gameState.visitLog?.[characterId]
+    const mems = gameState.memories?.[characterId] || []
+    const recentConv = gameState.conversationHistory?.[characterId]?.slice(-3) || []
+    const lastAssistant = recentConv.filter(m => m.role === 'assistant').pop()
+
+    const rel = gameState.relationship?.[characterId] || { affection: 0, trust: 0, comfort: 0 }
+    const stage = getRelationshipStage(rel)
+
+    const visitInfo = visit
+      ? `这是你们第 ${visit.totalVisits} 次见面。上次是在「${visit.lastVisitTimeSlot || '未知'}」时段。`
+      : '这是你们第一次见面。'
+
+    const memSummary = mems.slice(-3).map(m => typeof m === 'string' ? m : m.text).join('、') || '无'
+    const lastLine = lastAssistant?.content?.slice(0, 80) || '无'
+
+    const prompt = `${buildPersonaCard(char)}
+
+${buildRelationshipCard(char, gameState)}
+
+【回访差分任务】
+你要生成一句角色的回访开场白。这不是日常对话，而是「再次见面时的第一句话」。
+
+${visitInfo}
+最近共同回忆：${memSummary}
+上次对话最后一句：${lastLine}
+当前时间段：${gameState.currentTimeSlot || '未知'}
+
+要求：
+- 只输出一句开场白，要体现「她记得上次的你」
+- 如果是同一天第二次见面，要有不同反应
+- 不能像第一次见面那样打招呼
+- 保持角色一贯的说话风格
+
+只输出 JSON：
+{ "text": "开场白台词", "expression": "表情", "action": "简短动作" }`
+
+    const endpoint = `${baseUrl.value}/chat/completions`
+    if (!_isValidApiUrl(endpoint)) return null
+
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 6000)
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey.value}`
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: model.value,
+          max_tokens: 150,
+          temperature: 0.85,
+          messages: [
+            { role: 'system', content: prompt },
+            { role: 'user', content: '生成回访开场白。' }
+          ]
+        })
+      })
+
+      clearTimeout(timeoutId)
+      if (!response.ok) return null
+
+      const data = await response.json()
+      const text = data.choices?.[0]?.message?.content || ''
+      const parsed = _safeJsonParse(text)
+
+      return {
+        text: _sanitizeText(parsed.text || ''),
+        expression: (char.expressions || []).includes(parsed.expression) ? parsed.expression : 'normal',
+        action: _sanitizeText(parsed.action || ''),
+      }
+    } catch {
+      return null
+    }
+  }
+
   return {
     apiKey, baseUrl, model, isGenerating, lastError, offlineMode,
     setApiKey, setBaseUrl, setModel, loadApiKey, testConnection,
     buildCharacterPrompt,
     generateCharacterDialogue,
     generatePlayerOptions,
+    generateRevisitGreeting,
     getFallbackDialogue
   }
 }

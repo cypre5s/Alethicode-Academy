@@ -32,14 +32,16 @@
 
     <transition name="cg-transition">
       <div v-if="engine.showCG.value" class="cg-overlay" @click="engine.dismissCG()">
-        <div class="cg-display">
+        <div class="cg-display" :class="cgDisplayClass">
           <img
             v-if="currentCg"
             class="cg-image"
+            :class="{ 'cg-zoom-in': cgOptions.zoom !== false }"
             :src="currentCg.image"
             :alt="currentCg.title"
             decoding="async"
           />
+          <div class="cg-vignette" v-if="cgOptions.vignette !== false"></div>
           <div class="cg-frame"></div>
           <div class="cg-info">
             <span class="cg-route">{{ currentCg?.route || 'CG' }}</span>
@@ -75,8 +77,25 @@ defineEmits(['title'])
 
 const engine = inject('engine')
 const effect = computed(() => engine.screenEffect.value)
-const currentCg = computed(() => getCgEntry(engine.currentCG.value))
+const currentCg = computed(() => {
+  const raw = engine.currentCG.value
+  const id = (typeof raw === 'object' && raw !== null) ? raw.id : raw
+  return getCgEntry(id)
+})
 const endingCg = computed(() => getCgEntry(engine.endingData.value?.cg))
+
+const cgOptions = computed(() => {
+  const raw = engine.currentCG.value
+  if (typeof raw === 'object' && raw !== null) {
+    return { zoom: raw.zoom !== false, vignette: raw.vignette !== false, crop: raw.crop || null }
+  }
+  return { zoom: true, vignette: true, crop: null }
+})
+
+const cgDisplayClass = computed(() => ({
+  'cg-crop-top': cgOptions.value.crop === 'top',
+  'cg-crop-bottom': cgOptions.value.crop === 'bottom',
+}))
 
 const transitionClass = computed(() => {
   const type = engine.transitionType.value
@@ -279,6 +298,26 @@ const endingBackdropStyle = computed(() => (
   animation: cg-push 0.9s ease both;
 }
 
+.cg-image.cg-zoom-in {
+  animation: cg-push 0.9s ease both, cg-slow-zoom 10s ease-in-out 0.9s both;
+}
+
+.cg-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 80px 30px rgba(0, 0, 0, 0.35);
+  border-radius: 28px;
+}
+
+.cg-crop-top .cg-image {
+  object-position: center top;
+}
+
+.cg-crop-bottom .cg-image {
+  object-position: center bottom;
+}
+
 .cg-frame {
   position: absolute;
   inset: 0;
@@ -327,6 +366,11 @@ const endingBackdropStyle = computed(() => (
 @keyframes cg-push {
   0% { transform: scale(1.04); filter: blur(3px); }
   100% { transform: scale(1); filter: blur(0); }
+}
+
+@keyframes cg-slow-zoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
 }
 
 .ending-overlay {

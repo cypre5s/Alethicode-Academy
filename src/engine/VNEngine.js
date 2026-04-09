@@ -5,6 +5,8 @@ import { challenges } from '../data/challenges.js'
 import { scriptIndex } from '../scripts/index.js'
 import { getRelationshipStage } from '../data/relationshipRules.js'
 import { pickSceneObjective } from '../data/sceneObjectives.js'
+import { classifyChallengeOutcome, calculateRelationshipDelta } from '../data/learningDomains.js'
+import { getPostChallengeEvent } from '../data/postChallengeEvents.js'
 
 export function useVNEngine() {
   const currentScript = ref([])
@@ -55,6 +57,13 @@ export function useVNEngine() {
   const challengeResults = reactive({})
   const conversationHistory = reactive({ nene: [], yoshino: [], ayase: [], kanna: [], murasame: [] })
   const memories = reactive({ nene: [], yoshino: [], ayase: [], kanna: [], murasame: [] })
+  const visitLog = reactive({
+    nene: { totalVisits: 0, lastVisitChapter: '', lastVisitTimeSlot: '', lastTopics: [] },
+    yoshino: { totalVisits: 0, lastVisitChapter: '', lastVisitTimeSlot: '', lastTopics: [] },
+    ayase: { totalVisits: 0, lastVisitChapter: '', lastVisitTimeSlot: '', lastTopics: [] },
+    kanna: { totalVisits: 0, lastVisitChapter: '', lastVisitTimeSlot: '', lastTopics: [] },
+    murasame: { totalVisits: 0, lastVisitChapter: '', lastVisitTimeSlot: '', lastTopics: [] },
+  })
   const lastChallengeResult = ref(null)
   const unlockedCGs = reactive(new Set())
   const unlockedBGM = reactive(new Set())
@@ -104,6 +113,8 @@ export function useVNEngine() {
   const transitionType = ref('fade')
   const transitionDuration = ref(1000)
   const screenEffect = ref(null)
+  const dialogueBoxEffect = ref(null)
+  const sceneEmotion = ref(null)
   const showTitleCard = ref(false)
   const titleCardText = ref('')
   const titleCardSubtitle = ref('')
@@ -155,6 +166,9 @@ export function useVNEngine() {
     Object.keys(challengeResults).forEach(k => delete challengeResults[k])
     Object.keys(conversationHistory).forEach(k => conversationHistory[k] = [])
     Object.keys(memories).forEach(k => memories[k] = [])
+    Object.keys(visitLog).forEach(k => {
+      visitLog[k] = { totalVisits: 0, lastVisitChapter: '', lastVisitTimeSlot: '', lastTopics: [] }
+    })
     lastChallengeResult.value = null
     Object.keys(visibleCharacters).forEach(k => delete visibleCharacters[k])
     history.length = 0
@@ -234,6 +248,10 @@ export function useVNEngine() {
       case 'sfx': handleSe(cmd); break
 
       case 'screen_effect': handleScreenEffect(cmd); break
+      case 'silence_beat': handleSilenceBeat(cmd); break
+      case 'char_action': handleCharAction(cmd); break
+      case 'set_emotion': sceneEmotion.value = cmd.emotion || null; executeNext(); break
+      case 'dialogue_effect': dialogueBoxEffect.value = cmd.effect || null; executeNext(); break
       case 'wait': handleWait(cmd); break
       case 'auto_save': handleAutoSave(); break
 
@@ -258,6 +276,47 @@ export function useVNEngine() {
     }
   }
 
+  function handleSilenceBeat(cmd) {
+    const duration = Math.min(cmd.duration || 400, 5000)
+    const mode = cmd.mode || 'blank'
+
+    if (mode === 'blackout') {
+      screenEffect.value = { type: 'fade-to-black' }
+      setTimeout(() => {
+        screenEffect.value = null
+        executeNext()
+      }, duration)
+    } else if (mode === 'nameplate_first') {
+      const charId = cmd.character
+      const char = characters[charId]
+      speaker.value = char || null
+      dialogueText.value = ''
+      dialogueType.value = 'normal'
+      setTimeout(() => {
+        executeNext()
+      }, duration || 600)
+    } else {
+      setTimeout(() => executeNext(), duration)
+    }
+  }
+
+  function handleCharAction(cmd) {
+    const charId = cmd.character
+    if (visibleCharacters[charId]) {
+      visibleCharacters[charId].microAction = cmd.action || null
+      const holdDuration = cmd.hold || 1200
+      setTimeout(() => {
+        if (visibleCharacters[charId]?.microAction === cmd.action) {
+          visibleCharacters[charId].microAction = null
+        }
+      }, holdDuration)
+    }
+    if (cmd.bgVignette !== undefined) {
+      sceneEmotion.value = cmd.bgVignette ? 'vignette' : null
+    }
+    executeNext()
+  }
+
   function handleDialogue(cmd) {
     markSeen(currentChapter.value, scriptPointer.value - 1)
     const charId = cmd.speaker
@@ -267,8 +326,20 @@ export function useVNEngine() {
     dialogueType.value = 'normal'
     speakerExpression.value = cmd.expression || 'normal'
 
+    if (cmd.dialogueEffect) {
+      dialogueBoxEffect.value = cmd.dialogueEffect
+    }
+
     if (char && charId !== 'narrator' && visibleCharacters[charId]) {
       visibleCharacters[charId].expression = cmd.expression || visibleCharacters[charId].expression
+      if (cmd.microAction) {
+        visibleCharacters[charId].microAction = cmd.microAction
+        setTimeout(() => {
+          if (visibleCharacters[charId]?.microAction === cmd.microAction) {
+            visibleCharacters[charId].microAction = null
+          }
+        }, 1200)
+      }
     }
 
     history.push({
@@ -545,36 +616,96 @@ export function useVNEngine() {
     }
   }
 
-  function resolveChallenge(success, challengeId) {
+  function resolveChallenge(success, challengeId, meta = {}) {
     const data = challengeData.value
     if (!data) { executeNext(); return }
 
-    const resultEntry = { passed: success, timestamp: Date.now(), challengeId: data.id || challengeId, title: data.title || '' }
-    challengeResults[data.id || challengeId] = resultEntry
+    const id = data.id || challengeId
+    const hintsUsed = meta.hintsUsed || 0
+    const outcome = classifyChallengeOutcome(success, hintsUsed, id, challengeResults, challenges)
+    const domain = data.knowledge_domain || challenges[id]?.knowledge_domain || null
+    const relatedChar = data.related_character || challenges[id]?.related_character || null
+
+    const resultEntry = {
+      passed: success,
+      timestamp: Date.now(),
+      challengeId: id,
+      title: data.title || '',
+      outcome,
+      hintsUsed,
+      knowledge_domain: domain,
+    }
+    challengeResults[id] = resultEntry
     lastChallengeResult.value = resultEntry
 
-    if (success) {
-      const rewards = data.rewards || data.success_affection || {}
-      Object.entries(rewards).forEach(([k, v]) => {
-        if (k in affection) {
-          showAffectionToast(k, v)
+    if (relatedChar && relationship[relatedChar]) {
+      const delta = calculateRelationshipDelta(outcome, relatedChar, domain)
+      applyRelationshipDelta(relatedChar, delta)
+      const aggregate = Math.round((delta.affection + delta.trust + delta.comfort) / 3) || (delta.affection + delta.trust + delta.comfort > 0 ? 1 : delta.affection + delta.trust + delta.comfort < 0 ? -1 : 0)
+      if (aggregate !== 0) {
+        const char = characters[relatedChar]
+        if (char) {
+          affectionToast.value = { character: relatedChar, name: char.nameShort || char.name, change: aggregate, color: char.color }
+          setTimeout(() => { affectionToast.value = null }, 2000)
         }
-      })
+      }
+    }
+
+    if (success) {
       if (data.successConsequence?.flag) {
         Object.entries(data.successConsequence.flag).forEach(([k, v]) => { flags[k] = v })
       }
       if (data.successConsequence?.effects) {
         Object.entries(data.successConsequence.effects).forEach(([k, v]) => {
-          if (k in affection) { showAffectionToast(k, v) }
+          if (k in affection && k !== relatedChar) { showAffectionToast(k, v) }
         })
       }
     } else {
-      const failRewards = data.failRewards || data.fail_affection || {}
-      Object.entries(failRewards).forEach(([k, v]) => {
-        if (k in affection) { showAffectionToast(k, v) }
-      })
       if (data.failConsequence?.flag) {
         Object.entries(data.failConsequence.flag).forEach(([k, v]) => { flags[k] = v })
+      }
+    }
+
+    if (relatedChar && memories[relatedChar]) {
+      const postEvent = getPostChallengeEvent(id, relatedChar, outcome)
+      let memText = ''
+      if (postEvent?.memory_template) {
+        const charName = characters[relatedChar]?.nameShort || characters[relatedChar]?.name || relatedChar
+        memText = postEvent.memory_template
+          .replace('${name}', playerName.value)
+          .replace('${character_name}', charName)
+          .replace('${title}', data.title || id)
+      }
+      if (!memText) {
+        const outcomeTexts = {
+          solo_pass: `独立做对了「${data.title || id}」`,
+          assisted_pass: `在提示下做对了「${data.title || id}」`,
+          thoughtful_fail: `在「${data.title || id}」上暂时失败了`,
+          careless_fail: `在「${data.title || id}」上又犯了类似的错`,
+        }
+        memText = outcomeTexts[outcome] || `完成了「${data.title || id}」`
+      }
+      const emotionMap = {
+        solo_pass: 'warm',
+        assisted_pass: 'warm',
+        thoughtful_fail: 'bittersweet',
+        careless_fail: 'tense',
+      }
+      memories[relatedChar].push({
+        id: `learn_${id}_${Date.now()}`,
+        text: memText,
+        context: 'challenge',
+        chapter: currentChapter.value,
+        timestamp: Date.now(),
+        emotion: emotionMap[outcome] || 'warm',
+        relStageAtTime: getRelationshipStage(relationship[relatedChar]),
+        source: 'challenge',
+        challenge_id: id,
+        knowledge_domain: domain,
+        outcome,
+      })
+      if (memories[relatedChar].length > 30) {
+        memories[relatedChar] = memories[relatedChar].slice(-30)
       }
     }
 
@@ -634,6 +765,12 @@ export function useVNEngine() {
     const stage = rel ? getRelationshipStage(rel) : '初识'
     const objective = cmd.sceneObjective || pickSceneObjective(charId, stage)
 
+    if (visitLog[charId]) {
+      visitLog[charId].totalVisits++
+      visitLog[charId].lastVisitChapter = currentChapter.value
+      visitLog[charId].lastVisitTimeSlot = currentTimeSlot.value
+    }
+
     isFreeTalk.value = true
     freeTalkData.value = {
       character: charId,
@@ -646,6 +783,7 @@ export function useVNEngine() {
       mustNotMention: cmd.mustNotMention || null,
       relationshipTarget: cmd.relationshipTarget || null,
       lastChallengeResult: lastChallengeResult.value,
+      visitCount: visitLog[charId]?.totalVisits || 1,
     }
   }
 
@@ -728,9 +866,26 @@ export function useVNEngine() {
   }
 
   function handleCG(cmd) {
-    showCG.value = true
-    currentCG.value = cmd.id
-    unlockedCGs.add(cmd.id)
+    const cgId = cmd.id
+    const preBeat = cmd.preBeat !== false ? 400 : 0
+
+    unlockedCGs.add(cgId)
+
+    if (preBeat > 0) {
+      screenEffect.value = { type: 'fade-to-black' }
+      setTimeout(() => {
+        screenEffect.value = null
+        showCG.value = true
+        currentCG.value = cmd.zoom !== undefined || cmd.vignette !== undefined || cmd.crop
+          ? { id: cgId, zoom: cmd.zoom, vignette: cmd.vignette, crop: cmd.crop }
+          : cgId
+      }, preBeat)
+    } else {
+      showCG.value = true
+      currentCG.value = cmd.zoom !== undefined || cmd.vignette !== undefined || cmd.crop
+        ? { id: cgId, zoom: cmd.zoom, vignette: cmd.vignette, crop: cmd.crop }
+        : cgId
+    }
   }
 
   function dismissCG() {
@@ -968,6 +1123,7 @@ export function useVNEngine() {
         Object.entries(conversationHistory).map(([k, v]) => [k, v.slice(-10)])
       ),
       memories: JSON.parse(JSON.stringify(memories)),
+      visitLog: JSON.parse(JSON.stringify(visitLog)),
       settings: {
         textSpeed: textSpeed.value,
         autoSpeed: autoPlayDelay.value,
@@ -1014,7 +1170,32 @@ export function useVNEngine() {
     Object.keys(memories).forEach(k => memories[k] = [])
     if (state.memories) {
       Object.entries(state.memories).forEach(([k, v]) => {
-        if (k in memories) memories[k] = Array.isArray(v) ? v.slice(-5) : []
+        if (!(k in memories) || !Array.isArray(v)) return
+        memories[k] = v.map((entry, idx) => {
+          if (typeof entry === 'string') {
+            return {
+              id: `mem_${k}_migrated_${idx}`,
+              text: entry,
+              context: '',
+              chapter: state.currentChapter || '',
+              timestamp: Date.now() - (v.length - idx) * 60000,
+              emotion: 'warm',
+              relStageAtTime: '',
+              source: 'free_talk',
+            }
+          }
+          return entry
+        }).slice(-20)
+      })
+    }
+    Object.keys(visitLog).forEach(k => {
+      visitLog[k] = { totalVisits: 0, lastVisitChapter: '', lastVisitTimeSlot: '', lastTopics: [] }
+    })
+    if (state.visitLog) {
+      Object.entries(state.visitLog).forEach(([k, v]) => {
+        if (k in visitLog && typeof v === 'object') {
+          visitLog[k] = { ...visitLog[k], ...v }
+        }
       })
     }
     lastChallengeResult.value = null
@@ -1055,14 +1236,15 @@ export function useVNEngine() {
     speaker, dialogueText, dialogueType, speakerExpression,
     visibleCharacters, currentBg, currentBgVariant, currentBgTransition,
     playerName, affection, relationship, flags, challengeResults,
-    conversationHistory, memories, lastChallengeResult,
+    conversationHistory, memories, visitLog, lastChallengeResult,
     history, unlockedCGs, unlockedBGM,
     showPanel, isChoosing, choicePrompt, choiceOptions,
     isChallenge, challengeData,
     isLocationSelect, locationOptions,
     isFreeTalk, freeTalkData,
     isTransitioning, transitionType, transitionDuration,
-    screenEffect, showTitleCard, titleCardText, titleCardSubtitle,
+    screenEffect, dialogueBoxEffect, sceneEmotion,
+    showTitleCard, titleCardText, titleCardSubtitle,
     showCG, currentCG, showEnding, endingData, affectionToast,
     showSkipSummary, skipSummary, canSkipSection,
     textSpeed, autoPlay, autoPlayDelay, bgmVolume, seVolume, fontSize,
