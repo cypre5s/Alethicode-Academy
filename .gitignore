@@ -23,8 +23,13 @@ Thumbs.db
 # logs
 npm-debug.log*
 
-# capacitor native builds
-android/app/build/
-harmony/build/
+# native platform builds
+android/
+harmony/
+electron/
+capacitor.config.ts
+app-icon.icns
+app-icon.ico
+app-icon.png
 
 .vercel
