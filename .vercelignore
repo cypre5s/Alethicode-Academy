@@ -1,0 +1,11 @@
+release/
+android/
+harmony/
+electron/
+design-system/
+tools/
+tests/
+dist/
+*.ico
+*.icns
+todo_gal.md
