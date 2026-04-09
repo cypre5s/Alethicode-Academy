@@ -952,7 +952,13 @@ export function useVNEngine() {
       chapter2: 'chapter3',
       chapter3: null
     }
-    const next = nextMap[currentChapter.value]
+    const ch = currentChapter.value
+    let next = nextMap[ch]
+    if (next === undefined) {
+      if (ch.startsWith('ch1_')) next = 'chapter2'
+      else if (ch.startsWith('ch2_')) next = 'chapter3'
+      else if (ch.startsWith('ch3_')) next = nextMap.chapter3
+    }
     if (next) {
       loadChapter(next)
     }
