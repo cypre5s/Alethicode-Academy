@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>视觉小说 × Python 编程挑战 × 恋爱养成</strong><br>
-  品质对标柚子社（千恋万花 / RIDDLE JOKER）的 Web Galgame
+  一款原创 Web Galgame
 </p>
 
 ---
@@ -18,19 +18,18 @@
 - **完整剧情线** — 序章 + 3 章共通线 + 5 条角色线，共 11 个结局（Good End / Normal End / True End）
 - **编程挑战** — 20+ 道 Python 题目（选择 / 填空 / 排序），答对涨好感，答错触发角色吐槽
 - **LLM 智能对话** — 自由时段与角色闲聊，AI 基于角色人设 + 好感度动态生成回复
-- **5 位可攻略角色** — 各含 SVG 立绘 + 8 种表情差分
+- **5 位可攻略角色** — 各含立绘 + 8 种表情差分
 - **完整系统** — 对话（逐字显示 / 自动 / 快进 / Backlog）、选择肢、存读档、CG 鉴赏、设置面板
-- **桌面客户端** — 基于 Electron 打包 Windows 可执行文件
 
 ## 角色一览
 
-| 角色 | 定位 | 原作出处 | 编程风格 |
-|------|------|----------|----------|
-| **綾地寧々** (Nene) | AI 助教 · 温柔导师 | サノバウィッチ | 基础语法导师，擅长生活比喻 |
-| **朝武芳乃** (Yoshino) | 班长 · 编程高手 | 千恋\*万花 | 代码审查官，追求 Clean Code |
-| **三司あやせ** (Ayase) | 同桌 · 元气少女 | RIDDLE JOKER | 学得快但粗心，暴躁 Debug |
-| **明月栞那** (Kanna) | 图书馆常客 · 算法迷 | 喫茶ステラと死神の蝶 | 算法天才，用最少代码解题 |
-| **ムラサメ** (Murasame) | 传说学姐 · 竞赛冠军 | 千恋\*万花 | 顶级全栈，直接扔难题 |
+| 角色 | 定位 | 编程风格 |
+|------|------|----------|
+| **綾地寧々** (Nene) | AI 助教 · 温柔导师 | 基础语法导师，擅长生活比喻 |
+| **朝武芳乃** (Yoshino) | 班长 · 编程高手 | 代码审查官，追求 Clean Code |
+| **三司あやせ** (Ayase) | 同桌 · 元气少女 | 学得快但粗心，暴躁 Debug |
+| **明月栞那** (Kanna) | 图书馆常客 · 算法迷 | 算法天才，用最少代码解题 |
+| **ムラサメ** (Murasame) | 传说学姐 · 竞赛冠军 | 顶级全栈，直接扔难题 |
 
 ## 技术栈
 
@@ -38,9 +37,8 @@
 |------|------|
 | 前端框架 | Vue 3 |
 | 构建工具 | Vite |
-| 桌面端 | Electron |
-| LLM 对话 | DeepSeek API（兼容 OpenAI 格式） |
-| 打包 | electron-builder（Windows portable） |
+| 部署 | Vercel |
+| LLM 对话 | 兼容 OpenAI 格式的 API（默认 DeepSeek） |
 
 ## 快速开始
 
@@ -53,8 +51,8 @@
 
 ```bash
 # 克隆项目
-git clone <repo-url>
-cd Alethicode_Academy
+git clone https://github.com/cypre5s/Alethicode-Academy.git
+cd Alethicode-Academy
 
 # 安装依赖
 npm install
@@ -65,7 +63,7 @@ npm run dev
 
 ### LLM 对话配置（可选）
 
-自由时段的 AI 对话需要配置 DeepSeek API 密钥。在项目根目录创建 `.env.local`：
+自由时段的 AI 对话需要配置 API 密钥。在项目根目录创建 `.env.local`：
 
 ```env
 VITE_DEEPSEEK_API_KEY=你的API密钥
@@ -75,23 +73,10 @@ VITE_DEEPSEEK_MODEL=deepseek-chat
 
 > 未配置 API 密钥时，游戏会自动使用预设的 fallback 对话，不影响主线剧情游玩。
 
-### 桌面客户端
-
-```bash
-# 开发模式（需先启动 dev server）
-npm run dev
-npm run desktop:start
-
-# 打包 Windows 可执行文件
-npm run desktop:pack:win
-```
-
-打包产物在 `release/` 目录下。
-
 ## 项目结构
 
 ```
-Alethicode_Academy/
+Alethicode-Academy/
 ├── public/assets/          # 静态资源
 │   ├── audio/              #   BGM + 音效
 │   ├── backgrounds/        #   场景背景（10+ 场景 × 昼/夕/夜）
@@ -99,7 +84,7 @@ Alethicode_Academy/
 │   ├── characters/         #   角色立绘（5 角色 × 8 表情）
 │   └── ui/                 #   UI 素材
 ├── src/
-│   ├── characters/         # 角色 SVG 立绘组件
+│   ├── characters/         # 角色立绘组件
 │   ├── components/         # Vue 组件
 │   │   ├── TitleScreen.vue       # 标题画面
 │   │   ├── GameScreen.vue        # 主游戏界面
@@ -123,9 +108,8 @@ Alethicode_Academy/
 │   │   ├── chapter1~3.js         # 共通线三章
 │   │   └── routes/               # 角色个人线
 │   └── styles/             # 样式
-├── electron/               # Electron 主进程
 ├── tests/                  # 测试
-└── release/                # 打包产物
+└── tools/                  # 辅助工具脚本
 ```
 
 ## 可用脚本
@@ -136,8 +120,6 @@ Alethicode_Academy/
 | `npm run build` | 构建生产版本 |
 | `npm run preview` | 预览构建产物 |
 | `npm test` | 运行测试 |
-| `npm run desktop:start` | 启动 Electron 桌面端 |
-| `npm run desktop:pack:win` | 打包 Windows 可执行文件 |
 
 ## 游玩时长
 
