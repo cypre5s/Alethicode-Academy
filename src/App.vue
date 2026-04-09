@@ -38,6 +38,11 @@ provide('engine', engine)
 provide('saveManager', saveManager)
 provide('audio', audio)
 
+if (import.meta.env.DEV) {
+  window.__engine = engine
+  window.__screen = screen
+}
+
 onMounted(() => {
   const saved = saveManager.loadSettings()
   if (saved) {

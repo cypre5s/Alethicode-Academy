@@ -119,9 +119,14 @@
                   :disabled="!canSubmit">
             ✅ 提交答案
           </button>
-          <button v-else class="continue-btn" @click="continueGame">
-            继续 ▶
-          </button>
+          <template v-else>
+            <button v-if="!isCorrect && canRetry" class="retry-btn" @click="retryChallenge">
+              🔄 再试一次（剩余 {{ maxAttempts - attempts }} 次）
+            </button>
+            <button class="continue-btn" @click="continueGame">
+              {{ isCorrect || !canRetry ? '继续 ▶' : '跳过 ▶' }}
+            </button>
+          </template>
         </div>
       </div>
     </div>
@@ -192,6 +197,9 @@ const answered = ref(false)
 const isCorrect = ref(false)
 const hintsUsed = ref(0)
 const currentHint = ref('')
+const attempts = ref(0)
+const maxAttempts = 2
+const canRetry = computed(() => !isCorrect.value && attempts.value < maxAttempts)
 
 watch(() => engine.isChallenge.value, (val) => {
   if (val && challenge.value) {
@@ -201,6 +209,7 @@ watch(() => engine.isChallenge.value, (val) => {
     isCorrect.value = false
     hintsUsed.value = 0
     currentHint.value = ''
+    attempts.value = 0
     if (challengeType.value === 'code_order') {
       const lines = challenge.value.lines || []
       sortedLines.value = [...lines].sort(() => Math.random() - 0.5)
@@ -311,6 +320,8 @@ function useHint() {
 function submitAnswer() {
   if (!canSubmit.value) return
 
+  attempts.value++
+
   if (challengeType.value === 'multiple_choice') {
     isCorrect.value = isCorrectOption(selectedOption.value)
   } else if (challengeType.value === 'fill_blank') {
@@ -325,6 +336,17 @@ function submitAnswer() {
   if (isCorrect.value) {
     showConfetti.value = true
     setTimeout(() => { showConfetti.value = false }, 2500)
+  }
+}
+
+function retryChallenge() {
+  answered.value = false
+  isCorrect.value = false
+  selectedOption.value = -1
+  fillAnswer.value = ''
+  if (challengeType.value === 'code_order') {
+    const lines = (activeChallenge.value || challenge.value).lines || []
+    sortedLines.value = [...lines].sort(() => Math.random() - 0.5)
   }
 }
 
@@ -731,6 +753,17 @@ function continueGame() {
 }
 
 .continue-btn:hover { background: var(--vn-primary); color: var(--vn-bg-dark); }
+
+.retry-btn {
+  padding: 12px 40px;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  color: #8b6914;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.retry-btn:hover { background: rgba(251, 191, 36, 0.3); }
 
 .confetti-container {
   position: absolute;
