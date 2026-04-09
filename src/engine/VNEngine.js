@@ -23,7 +23,7 @@ export function useVNEngine() {
   const currentBgVariant = ref('day')
   const currentBgTransition = ref('fade')
 
-  const playerName = ref('藤堂 和真')
+  const playerName = ref('')
   const relationship = reactive({
     nene:     { affection: 0, trust: 0, comfort: 0 },
     yoshino:  { affection: 0, trust: 0, comfort: 0 },
@@ -1136,7 +1136,7 @@ export function useVNEngine() {
 
   function restoreState(state) {
     if (!state) return
-    playerName.value = state.playerName || '藤堂 和真'
+    playerName.value = state.playerName || ''
 
     Object.keys(relationship).forEach(k => {
       if (state.relationship && state.relationship[k]) {

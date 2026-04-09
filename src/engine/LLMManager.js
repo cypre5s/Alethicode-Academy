@@ -393,7 +393,7 @@ function buildCharacterPrompt(characterId, gameState) {
   const memory = buildMemoryCard(gameState, characterId)
   const output = buildOutputContract(char)
 
-  const playerLine = `【玩家身份】\n主角名字：${gameState.playerName || '藤堂 和真'}`
+  const playerLine = `【玩家身份】\n主角名字：${gameState.playerName || '玩家'}`
 
   return [persona, playerLine, rel, scene, memory, output].join('\n\n')
 }

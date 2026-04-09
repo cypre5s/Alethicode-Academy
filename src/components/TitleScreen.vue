@@ -25,7 +25,7 @@
           <input
             v-model="playerName"
             class="name-input"
-            placeholder="藤堂 和真"
+            placeholder=""
             maxlength="12"
             @keydown.enter="confirmStart"
           />
@@ -92,6 +92,10 @@ const petals = Array.from({ length: 20 }, (_, index) => ({
 }))
 
 function confirmStart() {
+  if (!playerName.value.trim()) {
+    verificationError.value = '请输入你的名字。'
+    return
+  }
   const answer = verificationAnswer.value.trim().replace(/\s+/g, '')
   if (answer !== '镜月湖') {
     verificationError.value = '回答错误，请重新输入。'
@@ -99,7 +103,7 @@ function confirmStart() {
     return
   }
   verificationError.value = ''
-  emit('start', playerName.value.trim() || undefined)
+  emit('start', playerName.value.trim())
   closeNameInput()
 }
 
