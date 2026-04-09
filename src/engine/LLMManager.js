@@ -23,14 +23,13 @@ function _loadConfig() {
   const defaults = { apiKey: ENV_API_KEY, baseUrl: ENV_BASE_URL, model: ENV_MODEL }
   try {
     const raw = localStorage.getItem(LLM_CONFIG_KEY)
-    if (raw) {
-      const saved = JSON.parse(raw)
-      return {
-        apiKey: saved.apiKey || defaults.apiKey,
-        baseUrl: (saved.baseUrl || defaults.baseUrl).replace(/\/+$/, ''),
-        model: saved.model || defaults.model
-      }
-    }
+    if (!raw || raw.length > 10000) return defaults
+    const saved = JSON.parse(raw)
+    if (typeof saved !== 'object' || saved === null) return defaults
+    const loadedKey = typeof saved.apiKey === 'string' ? saved.apiKey.slice(0, 256) : defaults.apiKey
+    const loadedUrl = typeof saved.baseUrl === 'string' ? saved.baseUrl.slice(0, 512).replace(/\/+$/, '') : defaults.baseUrl
+    const loadedModel = typeof saved.model === 'string' ? saved.model.slice(0, 128) : defaults.model
+    return { apiKey: loadedKey || defaults.apiKey, baseUrl: loadedUrl || defaults.baseUrl, model: loadedModel || defaults.model }
   } catch {}
   return defaults
 }
@@ -91,6 +90,40 @@ function _throttleCheck() {
   return true
 }
 
+function _isValidApiUrl(url) {
+  try {
+    const parsed = new URL(url)
+    if (!['https:', 'http:'].includes(parsed.protocol)) return false
+    if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') return true
+    if (/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(parsed.hostname)) return false
+    return true
+  } catch {
+    return false
+  }
+}
+
+function _safeJsonParse(text) {
+  const cleaned = text.replace(/```json\n?|```/g, '').trim()
+  const parsed = JSON.parse(cleaned)
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Invalid response structure')
+  }
+  if ('__proto__' in parsed || 'constructor' in parsed || 'prototype' in parsed) {
+    throw new Error('Prototype pollution detected')
+  }
+  return parsed
+}
+
+function _validateApiResponse(response) {
+  const ct = response.headers.get('content-type') || ''
+  if (!ct.includes('application/json') && !ct.includes('text/json') && !ct.includes('text/event-stream')) {
+    throw new Error('Unexpected response content-type: ' + ct.split(';')[0])
+  }
+  if (response.status === 429) throw new Error('API 速率限制，请稍后再试')
+  if (response.status === 401 || response.status === 403) throw new Error('API Key 无效或已过期')
+  if (!response.ok) throw new Error(`API error: ${response.status}`)
+}
+
 export function useLLMManager() {
 
   function setApiKey(key) {
@@ -99,7 +132,11 @@ export function useLLMManager() {
   }
 
   function setBaseUrl(url) {
-    baseUrl.value = (url || ENV_BASE_URL).replace(/\/+$/, '')
+    const cleaned = (url || ENV_BASE_URL).replace(/\/+$/, '')
+    if (cleaned && !_isValidApiUrl(cleaned + '/v1')) {
+      return
+    }
+    baseUrl.value = cleaned
     _saveConfig()
   }
 
@@ -222,6 +259,12 @@ ${char.affectionBehavior ? `
       return getFallbackDialogue(characterId, gameState)
     }
 
+    const endpoint = `${baseUrl.value}/chat/completions`
+    if (!_isValidApiUrl(endpoint)) {
+      lastError.value = 'API 地址无效'
+      return getFallbackDialogue(characterId, gameState)
+    }
+
     isGenerating.value = true
     lastError.value = null
     const MAX_RETRIES = 2
@@ -234,7 +277,7 @@ ${char.affectionBehavior ? `
 
         const conversationHistory = gameState.conversationHistory?.[characterId]?.slice(-10) || []
 
-        const response = await fetch(`${baseUrl.value}/chat/completions`, {
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -254,14 +297,11 @@ ${char.affectionBehavior ? `
         })
 
         clearTimeout(timeoutId)
-
-        if (!response.ok) throw new Error(`API error: ${response.status}`)
+        _validateApiResponse(response)
 
         const data = await response.json()
         const text = data.choices?.[0]?.message?.content || ''
-
-        const cleaned = text.replace(/```json\n?|```/g, '').trim()
-        const parsed = JSON.parse(cleaned)
+        const parsed = _safeJsonParse(text)
 
         isGenerating.value = false
         return _sanitizeLLMResponse(parsed)
@@ -285,11 +325,16 @@ ${char.affectionBehavior ? `
       return getDefaultOptions(characterId)
     }
 
+    const endpoint = `${baseUrl.value}/chat/completions`
+    if (!_isValidApiUrl(endpoint)) return getDefaultOptions(characterId)
+
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 8000)
 
-      const response = await fetch(`${baseUrl.value}/chat/completions`, {
+      const safeContext = typeof context === 'string' ? context.slice(0, 200) : ''
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -303,7 +348,7 @@ ${char.affectionBehavior ? `
           messages: [
             {
               role: 'system',
-              content: `根据上下文为视觉小说玩家生成3个对话选项。角色：${characters[characterId]?.name}，场景：${context}。
+              content: `根据上下文为视觉小说玩家生成3个对话选项。角色：${characters[characterId]?.name}，场景：${safeContext}。
 回复严格JSON数组格式：["选项1", "选项2", "选项3"]
 选项应自然、有趣、符合场景。`
             },
@@ -313,10 +358,17 @@ ${char.affectionBehavior ? `
       })
 
       clearTimeout(timeoutId)
+      _validateApiResponse(response)
+
       const data = await response.json()
       const text = data.choices?.[0]?.message?.content || '[]'
       const cleaned = text.replace(/```json\n?|```/g, '').trim()
-      return JSON.parse(cleaned)
+      const options = JSON.parse(cleaned)
+      if (!Array.isArray(options)) return getDefaultOptions(characterId)
+      return options
+        .filter(o => typeof o === 'string')
+        .map(o => _sanitizeText(o).slice(0, 100))
+        .slice(0, 5)
     } catch {
       return getDefaultOptions(characterId)
     }
