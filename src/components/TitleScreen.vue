@@ -109,6 +109,7 @@ function confirmStart() {
 
 function openNewStory() {
   showNameInput.value = true
+  playerName.value = ''
   verificationAnswer.value = ''
   verificationError.value = ''
 }
