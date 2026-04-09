@@ -23,6 +23,9 @@ Thumbs.db
 # logs
 npm-debug.log*
 
+# external asset sources (large binaries, see tmp_assets/README.md)
+tmp_assets/
+
 # native platform builds
 android/
 harmony/

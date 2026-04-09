@@ -52,14 +52,27 @@
             </button>
           </div>
 
-          <div class="setting-section">角色好感度</div>
+          <div class="setting-section">角色关系</div>
           <div class="affection-grid">
-            <div v-for="(val, key) in engine.affection" :key="key" class="aff-item">
+            <div v-for="(rel, key) in engine.relationship" :key="key" class="aff-item">
               <span class="aff-name" :style="{ color: charColor(key) }">{{ charName(key) }}</span>
-              <div class="aff-bar">
-                <div class="aff-fill" :style="{ width: Math.min(val, 100) + '%', background: charColor(key) }"></div>
+              <div class="aff-bars-3d">
+                <div class="aff-bar-row">
+                  <span class="aff-dim-label">好感</span>
+                  <div class="aff-bar"><div class="aff-fill" :style="{ width: Math.min(rel.affection, 100) + '%', background: charColor(key) }"></div></div>
+                  <span class="aff-val">{{ rel.affection }}</span>
+                </div>
+                <div class="aff-bar-row">
+                  <span class="aff-dim-label">信任</span>
+                  <div class="aff-bar"><div class="aff-fill" :style="{ width: Math.min(rel.trust, 100) + '%', background: charColor(key), opacity: 0.7 }"></div></div>
+                  <span class="aff-val">{{ rel.trust }}</span>
+                </div>
+                <div class="aff-bar-row">
+                  <span class="aff-dim-label">安心</span>
+                  <div class="aff-bar"><div class="aff-fill" :style="{ width: Math.min(rel.comfort, 100) + '%', background: charColor(key), opacity: 0.5 }"></div></div>
+                  <span class="aff-val">{{ rel.comfort }}</span>
+                </div>
               </div>
-              <span class="aff-val">{{ val }}</span>
             </div>
           </div>
 
@@ -362,10 +375,10 @@ async function runTestConnection() {
 
 .aff-item {
   display: grid;
-  grid-template-columns: 86px 1fr 32px;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
+  grid-template-columns: 86px 1fr;
+  align-items: start;
+  gap: 8px;
+  padding: 10px 0;
 }
 
 .aff-name {
@@ -387,8 +400,28 @@ async function runTestConnection() {
 
 .aff-val {
   color: var(--vn-text-dim);
-  font-size: 12px;
+  font-size: 11px;
   text-align: right;
+  min-width: 24px;
+}
+
+.aff-bars-3d {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.aff-bar-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 24px;
+  align-items: center;
+  gap: 6px;
+}
+
+.aff-dim-label {
+  font-size: 10px;
+  color: var(--vn-text-dim);
+  opacity: 0.7;
 }
 
 .action-row {

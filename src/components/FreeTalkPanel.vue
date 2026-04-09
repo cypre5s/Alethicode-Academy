@@ -6,6 +6,7 @@
           <span class="char-indicator" :style="{ background: charColor }"></span>
           <span class="char-name">{{ charName }}</span>
           <span class="turn-counter">对话 {{ currentTurn }} / {{ maxTurns }}</span>
+          <span v-if="freeTalkMode === 'semi_preset'" class="mode-tag semi">半预设</span>
           <span v-if="llm.offlineMode.value" class="offline-tag">离线模式</span>
         </div>
         <button class="freetalk-close" @click="endFreeTalk">结束对话</button>
@@ -24,8 +25,8 @@
           <div class="msg-bubble" :style="msg.role === 'assistant' ? { borderColor: charColor } : {}">
             {{ msg.text }}
           </div>
-          <div v-if="msg.role === 'assistant' && msg.innerThought" class="msg-inner-thought">
-            （{{ msg.innerThought }}）
+          <div v-if="msg.role === 'assistant' && msg.relationshipSummary" class="msg-rel-delta">
+            {{ msg.relationshipSummary }}
           </div>
         </div>
 
@@ -36,10 +37,13 @@
       </div>
 
       <div class="freetalk-input-area">
-        <div v-if="showOptions" class="option-buttons">
+        <div v-if="showOptions && playerOptions.length" class="option-buttons">
           <button v-for="(opt, i) in playerOptions" :key="i"
-                  class="option-btn" @click="sendMessage(opt)">
-            {{ opt }}
+                  class="option-btn" :class="'option-' + opt.type"
+                  @click="sendMessage(opt.text)">
+            <span v-if="opt.type === 'spicy'" class="option-icon">✦</span>
+            <span v-if="opt.type === 'warm'" class="option-icon">♡</span>
+            {{ opt.text }}
           </button>
         </div>
 
@@ -70,6 +74,7 @@
 import { ref, inject, computed, watch, nextTick } from 'vue'
 import { characters } from '../data/characters.js'
 import { useLLMManager } from '../engine/LLMManager.js'
+import { getRelationshipStage } from '../data/relationshipRules.js'
 
 const engine = inject('engine')
 const audio = inject('audio')
@@ -81,17 +86,20 @@ const showOptions = ref(true)
 const playerOptions = ref([])
 const currentTurn = ref(0)
 const messagesRef = ref(null)
+const lastNpcLine = ref('')
 
 const charId = computed(() => engine.freeTalkData.value?.character)
 const charName = computed(() => characters[charId.value]?.name || '???')
 const charColor = computed(() => characters[charId.value]?.color || '#999')
 const maxTurns = computed(() => engine.freeTalkData.value?.maxTurns || 5)
+const freeTalkMode = computed(() => engine.freeTalkData.value?.mode || 'free')
 
 watch(() => engine.isFreeTalk.value, async (val) => {
   if (val) {
     messages.value = []
     currentTurn.value = 0
     inputText.value = ''
+    lastNpcLine.value = ''
     llm.loadApiKey()
 
     const firstLine = llm.getFallbackDialogue(charId.value, getGameState())
@@ -100,8 +108,8 @@ watch(() => engine.isFreeTalk.value, async (val) => {
       text: firstLine.text,
       expression: firstLine.expression,
       action: firstLine.action,
-      innerThought: firstLine.innerThought
     })
+    lastNpcLine.value = firstLine.text
 
     if (firstLine.expression && engine.visibleCharacters[charId.value]) {
       engine.visibleCharacters[charId.value].expression = firstLine.expression
@@ -115,16 +123,32 @@ function getGameState() {
   return {
     playerName: engine.playerName.value,
     affection: { ...engine.affection },
+    relationship: JSON.parse(JSON.stringify(engine.relationship)),
     flags: { ...engine.flags },
     currentChapter: engine.currentChapter.value,
     currentTimeSlot: engine.currentTimeSlot.value,
-    conversationHistory: engine.conversationHistory
+    currentBg: engine.currentBg.value,
+    conversationHistory: engine.conversationHistory,
+    memories: engine.memories,
+    freeTalkData: engine.freeTalkData.value,
+    _lastNpcLine: lastNpcLine.value,
   }
 }
 
 async function loadOptions() {
   const context = engine.freeTalkData.value?.context || ''
   playerOptions.value = await llm.generatePlayerOptions(charId.value, getGameState(), context)
+}
+
+function formatRelDelta(aff, trust, comfort) {
+  const parts = []
+  if (aff > 0) parts.push(`好感+${aff}`)
+  else if (aff < 0) parts.push(`好感${aff}`)
+  if (trust > 0) parts.push(`信任+${trust}`)
+  else if (trust < 0) parts.push(`信任${trust}`)
+  if (comfort > 0) parts.push(`安心+${comfort}`)
+  else if (comfort < 0) parts.push(`安心${comfort}`)
+  return parts.length ? parts.join(' ') : null
 }
 
 async function sendMessage(text) {
@@ -144,14 +168,19 @@ async function sendMessage(text) {
 
   const response = await llm.generateCharacterDialogue(charId.value, playerMsg, getGameState())
 
+  const relSummary = formatRelDelta(response.affectionDelta, response.trustDelta, response.comfortDelta)
+
   messages.value.push({
     role: 'assistant',
     text: response.text,
     expression: response.expression,
     action: response.action,
-    innerThought: response.innerThought,
-    affectionChange: response.affectionChange || 0
+    affectionDelta: response.affectionDelta || 0,
+    trustDelta: response.trustDelta || 0,
+    comfortDelta: response.comfortDelta || 0,
+    relationshipSummary: relSummary,
   })
+  lastNpcLine.value = response.text
 
   engine.conversationHistory[charId.value].push({ role: 'assistant', content: response.text })
 
@@ -159,11 +188,26 @@ async function sendMessage(text) {
     engine.visibleCharacters[charId.value].expression = response.expression
   }
 
-  if (response.affectionChange > 0) {
-    engine.affection[charId.value] = Math.min(
-      (engine.affection[charId.value] || 0) + response.affectionChange, 100
-    )
-    engine.showAffectionToast(charId.value, response.affectionChange)
+  const deltas = {
+    affection: response.affectionDelta || 0,
+    trust: response.trustDelta || 0,
+    comfort: response.comfortDelta || 0,
+  }
+  const hasChange = deltas.affection !== 0 || deltas.trust !== 0 || deltas.comfort !== 0
+  if (hasChange) {
+    engine.applyRelationshipDelta(charId.value, deltas)
+    const netChange = Math.round((deltas.affection + deltas.trust + deltas.comfort) / 3)
+    if (netChange !== 0) {
+      engine.showAffectionToast(charId.value, netChange, true)
+    }
+  }
+
+  if (response.memoryCandidate && response.memoryCandidate.trim()) {
+    const mem = engine.memories[charId.value]
+    if (mem) {
+      mem.push(response.memoryCandidate.trim())
+      if (mem.length > 5) mem.splice(0, mem.length - 5)
+    }
   }
 
   await nextTick()
@@ -178,15 +222,15 @@ async function sendMessage(text) {
 }
 
 function endFreeTalk() {
-  const totalAffection = {}
+  const totals = { affection: 0, trust: 0, comfort: 0 }
   messages.value
     .filter(m => m.role === 'assistant')
     .forEach(m => {
-      if (m.affectionChange) {
-        totalAffection[charId.value] = (totalAffection[charId.value] || 0) + m.affectionChange
-      }
+      totals.affection += (m.affectionDelta || 0)
+      totals.trust += (m.trustDelta || 0)
+      totals.comfort += (m.comfortDelta || 0)
     })
-  engine.resolveFreeTalk(totalAffection)
+  engine.resolveFreeTalk({})
 }
 
 function scrollToBottom() {
@@ -240,6 +284,17 @@ function scrollToBottom() {
   background: rgba(214, 182, 136, 0.18);
   padding: 2px 10px;
   border-radius: 10px;
+}
+
+.mode-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.mode-tag.semi {
+  color: #5a7a55;
+  background: rgba(114, 200, 114, 0.12);
 }
 
 .offline-tag {
@@ -318,12 +373,12 @@ function scrollToBottom() {
   padding-left: 4px;
 }
 
-.msg-inner-thought {
-  font-size: 13px;
-  color: #866f65;
-  font-style: italic;
+.msg-rel-delta {
+  font-size: 11px;
+  color: #8a7a6a;
   margin-top: 4px;
   padding-left: 4px;
+  opacity: 0.7;
 }
 
 .generating {
@@ -365,11 +420,45 @@ function scrollToBottom() {
   color: var(--vn-text);
   font-size: 13px;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.option-icon {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.option-safe {
+  border-color: rgba(160, 170, 180, 0.35);
+}
+.option-safe:hover {
+  border-color: rgba(160, 170, 180, 0.6);
+  background: rgba(240, 245, 250, 0.6);
+}
+
+.option-warm {
+  border-color: rgba(232, 160, 191, 0.35);
+  color: #7a4a5a;
+}
+.option-warm:hover {
+  border-color: rgba(232, 160, 191, 0.65);
+  background: rgba(255, 230, 240, 0.4);
+}
+
+.option-spicy {
+  border-color: rgba(255, 170, 80, 0.35);
+  color: #8a5a2a;
+}
+.option-spicy:hover {
+  border-color: rgba(255, 170, 80, 0.65);
+  background: rgba(255, 240, 220, 0.4);
 }
 
 .option-btn:hover {
-  border-color: var(--vn-primary);
-  background: rgba(232, 160, 191, 0.1);
+  transform: translateY(-1px);
 }
 
 .input-row {

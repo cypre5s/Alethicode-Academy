@@ -1,10 +1,11 @@
 <template>
   <transition name="toast-pop">
     <div v-if="engine.affectionToast.value" class="status-toast"
-         :style="{ '--toast-color': engine.affectionToast.value.color }">
+         :class="{ 'toast-negative': isNegative }"
+         :style="{ '--toast-color': isNegative ? '#c97070' : engine.affectionToast.value.color }">
       <div class="toast-hearts">
-        <span v-for="i in heartCount" :key="i" class="heart"
-              :style="{ animationDelay: (i * 0.1) + 's' }">♥</span>
+        <span v-for="i in symbolCount" :key="i" class="heart"
+              :style="{ animationDelay: (i * 0.1) + 's' }">{{ isNegative ? '♡' : '♥' }}</span>
       </div>
       <div class="toast-name">{{ engine.affectionToast.value.name }}</div>
     </div>
@@ -16,8 +17,10 @@ import { inject, computed } from 'vue'
 
 const engine = inject('engine')
 
-const heartCount = computed(() => {
-  const change = engine.affectionToast.value?.change || 0
+const isNegative = computed(() => (engine.affectionToast.value?.change || 0) < 0)
+
+const symbolCount = computed(() => {
+  const change = Math.abs(engine.affectionToast.value?.change || 0)
   return Math.min(Math.max(change, 1), 5)
 })
 </script>
@@ -76,5 +79,9 @@ const heartCount = computed(() => {
 .toast-pop-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+.toast-negative .heart {
+  opacity: 0.7;
 }
 </style>

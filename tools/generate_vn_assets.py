@@ -8,8 +8,7 @@ from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageEnhance, ImageFil
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE_ROOT = PROJECT_ROOT.parent
-SOURCE_ROOT = WORKSPACE_ROOT / 'tmp_assets' / 'background_sources'
+SOURCE_ROOT = PROJECT_ROOT / 'tmp_assets' / 'background_sources'
 PUBLIC_ROOT = PROJECT_ROOT / 'public' / 'assets'
 BACKGROUND_ROOT = PUBLIC_ROOT / 'backgrounds'
 CG_ROOT = PUBLIC_ROOT / 'cg'

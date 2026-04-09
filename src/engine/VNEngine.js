@@ -3,6 +3,8 @@ import { characters } from '../data/characters.js'
 import { locations, resolveBackgroundId, sceneIdFromBackgroundId } from '../data/locations.js'
 import { challenges } from '../data/challenges.js'
 import { scriptIndex } from '../scripts/index.js'
+import { getRelationshipStage } from '../data/relationshipRules.js'
+import { pickSceneObjective } from '../data/sceneObjectives.js'
 
 export function useVNEngine() {
   const currentScript = ref([])
@@ -20,10 +22,40 @@ export function useVNEngine() {
   const currentBgTransition = ref('fade')
 
   const playerName = ref('藤堂 和真')
-  const affection = reactive({ nene: 0, yoshino: 0, ayase: 0, kanna: 0, murasame: 0 })
+  const relationship = reactive({
+    nene:     { affection: 0, trust: 0, comfort: 0 },
+    yoshino:  { affection: 0, trust: 0, comfort: 0 },
+    ayase:    { affection: 0, trust: 0, comfort: 0 },
+    kanna:    { affection: 0, trust: 0, comfort: 0 },
+    murasame: { affection: 0, trust: 0, comfort: 0 },
+  })
+  const affection = new Proxy({}, {
+    get(_, key) {
+      if (key === '__v_isReactive' || key === '__v_isRef') return undefined
+      return relationship[key] ? Math.round((relationship[key].affection + relationship[key].trust + relationship[key].comfort) / 3) : 0
+    },
+    set(_, key, val) {
+      if (relationship[key]) {
+        const current = Math.round((relationship[key].affection + relationship[key].trust + relationship[key].comfort) / 3)
+        const delta = val - current
+        relationship[key].affection = Math.min(Math.max(relationship[key].affection + delta, 0), 100)
+        relationship[key].trust = Math.min(Math.max(relationship[key].trust + delta, 0), 100)
+        relationship[key].comfort = Math.min(Math.max(relationship[key].comfort + delta, 0), 100)
+      }
+      return true
+    },
+    has(_, key) { return key in relationship },
+    ownKeys() { return Object.keys(relationship) },
+    getOwnPropertyDescriptor(_, key) {
+      if (key in relationship) return { configurable: true, enumerable: true, value: this.get(_, key) }
+      return undefined
+    }
+  })
   const flags = reactive({})
   const challengeResults = reactive({})
   const conversationHistory = reactive({ nene: [], yoshino: [], ayase: [], kanna: [], murasame: [] })
+  const memories = reactive({ nene: [], yoshino: [], ayase: [], kanna: [], murasame: [] })
+  const lastChallengeResult = ref(null)
   const unlockedCGs = reactive(new Set())
   const unlockedBGM = reactive(new Set())
   const history = reactive([])
@@ -114,10 +146,16 @@ export function useVNEngine() {
     if (name) playerName.value = name
     scriptPointer.value = 0
     currentChapter.value = 'prologue'
-    Object.keys(affection).forEach(k => affection[k] = 0)
+    Object.keys(relationship).forEach(k => {
+      relationship[k].affection = 0
+      relationship[k].trust = 0
+      relationship[k].comfort = 0
+    })
     Object.keys(flags).forEach(k => delete flags[k])
     Object.keys(challengeResults).forEach(k => delete challengeResults[k])
     Object.keys(conversationHistory).forEach(k => conversationHistory[k] = [])
+    Object.keys(memories).forEach(k => memories[k] = [])
+    lastChallengeResult.value = null
     Object.keys(visibleCharacters).forEach(k => delete visibleCharacters[k])
     history.length = 0
     unlockedCGs.clear()
@@ -321,6 +359,37 @@ export function useVNEngine() {
     }
   }
 
+  function _safeEvalCondition(expr) {
+    const COMPARISON_RE = /^(flags|affection)\.(\w{1,32})\s*(>=|<=|>|<|===|==|!==|!=)\s*(.+)$/
+    const match = expr.trim().match(COMPARISON_RE)
+    if (!match) return false
+    const [, ns, key, op, rawVal] = match
+
+    let left
+    if (ns === 'flags') left = flags[key]
+    else if (ns === 'affection') left = affection[key] || 0
+    else return false
+
+    let right
+    const trimmed = rawVal.trim()
+    if (trimmed === 'true') right = true
+    else if (trimmed === 'false') right = false
+    else if (trimmed === 'null') right = null
+    else if (/^-?\d+(\.\d+)?$/.test(trimmed)) right = Number(trimmed)
+    else if (/^["'].*["']$/.test(trimmed)) right = trimmed.slice(1, -1)
+    else return false
+
+    switch (op) {
+      case '>=': return left >= right
+      case '<=': return left <= right
+      case '>':  return left > right
+      case '<':  return left < right
+      case '===': case '==': return left === right
+      case '!==': case '!=': return left !== right
+      default: return false
+    }
+  }
+
   function evaluateConditionExpr(expr) {
     if (!expr) return true
     if (typeof expr === 'object') {
@@ -337,11 +406,7 @@ export function useVNEngine() {
     }
     if (typeof expr === 'string') {
       try {
-        const safeExpr = expr
-          .replace(/flags\.(\w+)/g, (_, k) => JSON.stringify(flags[k]))
-          .replace(/affection\.(\w+)/g, (_, k) => String(affection[k] || 0))
-          .replace(/\bflags\b/g, '{}')
-        return new Function(`return (${safeExpr})`)()
+        return _safeEvalCondition(expr)
       } catch {
         return false
       }
@@ -484,7 +549,9 @@ export function useVNEngine() {
     const data = challengeData.value
     if (!data) { executeNext(); return }
 
-    challengeResults[data.id || challengeId] = { passed: success, timestamp: Date.now() }
+    const resultEntry = { passed: success, timestamp: Date.now(), challengeId: data.id || challengeId, title: data.title || '' }
+    challengeResults[data.id || challengeId] = resultEntry
+    lastChallengeResult.value = resultEntry
 
     if (success) {
       const rewards = data.rewards || data.success_affection || {}
@@ -552,12 +619,33 @@ export function useVNEngine() {
   }
 
   function handleFreeTalk(cmd) {
+    const mode = cmd.mode || 'free'
+
+    if (mode === 'scripted') {
+      if (cmd.dialogue) {
+        cmd.dialogue.forEach(line => executeCommand(line))
+      }
+      executeNext()
+      return
+    }
+
+    const charId = cmd.character
+    const rel = relationship[charId]
+    const stage = rel ? getRelationshipStage(rel) : '初识'
+    const objective = cmd.sceneObjective || pickSceneObjective(charId, stage)
+
     isFreeTalk.value = true
     freeTalkData.value = {
-      character: cmd.character,
+      character: charId,
       maxTurns: cmd.max_turns || 5,
       context: cmd.context || '',
-      currentTurn: 0
+      currentTurn: 0,
+      mode,
+      sceneObjective: objective,
+      mustMention: cmd.mustMention || null,
+      mustNotMention: cmd.mustNotMention || null,
+      relationshipTarget: cmd.relationshipTarget || null,
+      lastChallengeResult: lastChallengeResult.value,
     }
   }
 
@@ -607,9 +695,16 @@ export function useVNEngine() {
     executeNext()
   }
 
+  function _relAvg(charId) {
+    const r = relationship[charId]
+    if (!r) return 0
+    return Math.round((r.affection + r.trust + r.comfort) / 3)
+  }
+
   function handleRouteDecision(cmd) {
-    const allMet = Object.entries(affection).every(([, v]) => v >= 30)
-    const murasameOk = affection.murasame >= 50 && allMet && flags.murasame_gate_passed
+    const charIds = Object.keys(relationship)
+    const allMet = charIds.every(k => _relAvg(k) >= 30)
+    const murasameOk = _relAvg('murasame') >= 50 && allMet && flags.murasame_gate_passed
 
     if (murasameOk) {
       currentRoute.value = 'murasame'
@@ -617,8 +712,9 @@ export function useVNEngine() {
       return
     }
 
-    const sorted = Object.entries(affection)
-      .filter(([k]) => k !== 'murasame')
+    const sorted = charIds
+      .filter(k => k !== 'murasame')
+      .map(k => [k, _relAvg(k)])
       .sort((a, b) => b[1] - a[1])
     const [topChar] = sorted[0]
 
@@ -670,12 +766,25 @@ export function useVNEngine() {
     history.push({ type: 'ending', text: cmd.title })
   }
 
+  function applyRelationshipDelta(charId, deltas) {
+    if (!relationship[charId]) return
+    if (typeof deltas === 'number') {
+      relationship[charId].affection = Math.min(Math.max(relationship[charId].affection + deltas, 0), 100)
+      relationship[charId].trust = Math.min(Math.max(relationship[charId].trust + deltas, 0), 100)
+      relationship[charId].comfort = Math.min(Math.max(relationship[charId].comfort + deltas, 0), 100)
+    } else {
+      if (deltas.affection) relationship[charId].affection = Math.min(Math.max(relationship[charId].affection + deltas.affection, 0), 100)
+      if (deltas.trust) relationship[charId].trust = Math.min(Math.max(relationship[charId].trust + deltas.trust, 0), 100)
+      if (deltas.comfort) relationship[charId].comfort = Math.min(Math.max(relationship[charId].comfort + deltas.comfort, 0), 100)
+    }
+  }
+
   function showAffectionToast(charId, change, skipAdd = false) {
-    if (change <= 0) return
+    if (change === 0) return
     const char = characters[charId]
     if (!char) return
     if (!skipAdd) {
-      affection[charId] = Math.min((affection[charId] || 0) + change, 100)
+      applyRelationshipDelta(charId, change)
     }
     affectionToast.value = { character: charId, name: char.nameShort || char.name, change, color: char.color }
     setTimeout(() => { affectionToast.value = null }, 2000)
@@ -838,7 +947,8 @@ export function useVNEngine() {
       scriptPointer: scriptPointer.value,
       currentChapter: currentChapter.value,
       playerName: playerName.value,
-      affection: { ...affection },
+      relationship: JSON.parse(JSON.stringify(relationship)),
+      affection: Object.fromEntries(Object.keys(relationship).map(k => [k, _relAvg(k)])),
       flags: { ...flags },
       challengeResults: { ...challengeResults },
       currentBg: currentBg.value,
@@ -857,6 +967,7 @@ export function useVNEngine() {
       conversationHistory: Object.fromEntries(
         Object.entries(conversationHistory).map(([k, v]) => [k, v.slice(-10)])
       ),
+      memories: JSON.parse(JSON.stringify(memories)),
       settings: {
         textSpeed: textSpeed.value,
         autoSpeed: autoPlayDelay.value,
@@ -870,7 +981,24 @@ export function useVNEngine() {
   function restoreState(state) {
     if (!state) return
     playerName.value = state.playerName || '藤堂 和真'
-    Object.keys(affection).forEach(k => affection[k] = state.affection?.[k] || 0)
+
+    Object.keys(relationship).forEach(k => {
+      if (state.relationship && state.relationship[k]) {
+        relationship[k].affection = state.relationship[k].affection || 0
+        relationship[k].trust = state.relationship[k].trust || 0
+        relationship[k].comfort = state.relationship[k].comfort || 0
+      } else if (state.affection && typeof state.affection[k] === 'number') {
+        const old = state.affection[k]
+        relationship[k].affection = old
+        relationship[k].trust = Math.round(old * 0.8)
+        relationship[k].comfort = Math.round(old * 0.9)
+      } else {
+        relationship[k].affection = 0
+        relationship[k].trust = 0
+        relationship[k].comfort = 0
+      }
+    })
+
     Object.keys(flags).forEach(k => delete flags[k])
     if (state.flags) Object.assign(flags, state.flags)
     Object.keys(challengeResults).forEach(k => delete challengeResults[k])
@@ -883,6 +1011,13 @@ export function useVNEngine() {
         if (k in conversationHistory) conversationHistory[k] = v
       })
     }
+    Object.keys(memories).forEach(k => memories[k] = [])
+    if (state.memories) {
+      Object.entries(state.memories).forEach(([k, v]) => {
+        if (k in memories) memories[k] = Array.isArray(v) ? v.slice(-5) : []
+      })
+    }
+    lastChallengeResult.value = null
     history.length = 0
     if (state.history) history.push(...state.history)
     unlockedCGs.clear()
@@ -919,8 +1054,9 @@ export function useVNEngine() {
   return {
     speaker, dialogueText, dialogueType, speakerExpression,
     visibleCharacters, currentBg, currentBgVariant, currentBgTransition,
-    playerName, affection, flags, challengeResults,
-    conversationHistory, history, unlockedCGs, unlockedBGM,
+    playerName, affection, relationship, flags, challengeResults,
+    conversationHistory, memories, lastChallengeResult,
+    history, unlockedCGs, unlockedBGM,
     showPanel, isChoosing, choicePrompt, choiceOptions,
     isChallenge, challengeData,
     isLocationSelect, locationOptions,
@@ -935,7 +1071,7 @@ export function useVNEngine() {
     selectChoice, resolveChallenge, selectLocation,
     resolveFreeTalk, dismissCG, skipSection, dismissSkipSummary,
     getState, restoreState, registerAudioCallbacks,
-    showAffectionToast,
+    showAffectionToast, applyRelationshipDelta,
     seenDialogues, skipOnlyRead, isSeen, markSeen, flushSeen
   }
 }

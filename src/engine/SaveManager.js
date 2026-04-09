@@ -24,10 +24,14 @@ function _computeChecksum(obj) {
 function _validateSaveStructure(data) {
   if (!data || typeof data !== 'object') return false
   if (typeof data.currentChapter !== 'string') return false
-  if (typeof data.affection !== 'object' || data.affection === null) return false
   if (typeof data.timestamp !== 'number' || data.timestamp > Date.now() + 86400000) return false
-  for (const [, val] of Object.entries(data.affection)) {
-    if (typeof val !== 'number' || val < 0 || val > 200) return false
+  const hasRelationship = typeof data.relationship === 'object' && data.relationship !== null
+  const hasAffection = typeof data.affection === 'object' && data.affection !== null
+  if (!hasRelationship && !hasAffection) return false
+  if (hasAffection) {
+    for (const [, val] of Object.entries(data.affection)) {
+      if (typeof val === 'number' && (val < 0 || val > 200)) return false
+    }
   }
   return true
 }

@@ -131,6 +131,58 @@ Alethicode-Academy/
 | **单线通关** | **约 80-100 分钟** |
 | **全线通关** | **约 3-4 小时** |
 
+## 借物表（素材出处 / Credits）
+
+本项目使用了以下创作者的素材，在此表示衷心感谢。
+
+### 角色立绘
+
+所有角色立绘均来自 **[NoranekoGames](https://noranekogames.itch.io/)**，按照其使用规则免费用于游戏项目，需署名。
+
+| 游戏角色 | 素材原名 | 出处链接 | 使用服装 | 表情数 |
+|---------|---------|----------|---------|-------|
+| 綾地寧々 (Nene) | Rin | https://noranekogames.itch.io/rin | Summer Uniform | 8 |
+| 朝武芳乃 (Yoshino) | Natsumi | https://noranekogames.itch.io/natsumi | Summer Uniform | 8 |
+| 三司あやせ (Ayase) | Sabrina | https://noranekogames.itch.io/sabrina | Summer Uniform | 8 |
+| 明月栞那 (Kanna) | Kana | https://noranekogames.itch.io/kana | Winter Seifuku | 8 |
+| ムラサメ (Murasame) | Ichiko | https://noranekogames.itch.io/ichiko | Casual | 8 |
+
+**使用规则摘要：**
+- 署名 "Noraneko Games"（本表即为署名）
+- 素材不可单独转售
+- 禁止用于 AI 训练或 NFT
+- 允许改色、重命名等修改
+- 商业游戏中使用需在 Credits 中署名
+
+### 场景背景
+
+| 素材包 | 来源 | 用途 |
+|--------|------|------|
+| SchoolMiniPack 1080p | 商用背景素材 | 校门、走廊、教室、屋顶 |
+| PersonalRooms1 1080p | 商用背景素材 | 玩家房间 |
+| Academia | 商用背景素材 | 电脑教室、图书馆、食堂、中庭、樱花校园 |
+
+### BGM / 音效
+
+| 来源 | 链接 | 用途 |
+|------|------|------|
+| DOVA-SYNDROME | https://dova-s.jp/ | BGM |
+| 魔王魂 | https://maou.audio/ | BGM |
+| 効果音ラボ | https://soundeffect-lab.info/ | SE（音效） |
+
+### 开发工具与框架
+
+| 名称 | 用途 |
+|------|------|
+| [Vue 3](https://vuejs.org/) | 前端框架 |
+| [Vite](https://vite.dev/) | 构建工具 |
+| [Vercel](https://vercel.com/) | 部署平台 |
+| [Pillow](https://pillow.readthedocs.io/) | 图像处理（背景/CG 合成、立绘格式转换） |
+
+---
+
 ## 许可
 
 Developed by dhu_cypress, assisted with opus.
+
+Character sprites by [NoranekoGames](https://noranekogames.itch.io/) — used with permission under their free-to-use license.
