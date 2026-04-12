@@ -1,27 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap');
 
 :root {
-  --vn-primary: #dc8ca6;
-  --vn-primary-dark: #b56b83;
-  --vn-primary-light: #f6d3df;
-  --vn-accent: #88a8d8;
-  --vn-accent-soft: #d6e3fb;
-  --vn-bg-dark: #f5efe8;
-  --vn-bg-panel: rgba(255, 251, 246, 0.84);
-  --vn-bg-panel-strong: rgba(255, 252, 249, 0.94);
-  --vn-text: #34261f;
-  --vn-text-dim: #7b6b60;
-  --vn-border: rgba(209, 170, 108, 0.38);
-  --vn-border-strong: rgba(209, 170, 108, 0.52);
-  --vn-gold: #c69b4e;
+  --mood-primary: #e8d5b7;
+  --mood-accent: #c9a96e;
+  --mood-glow: rgba(201,169,110,0.15);
+
+  --vn-primary: #e091b4;
+  --vn-primary-dark: #c87296;
+  --vn-primary-light: #f4d0df;
+  --vn-accent: #8bacd4;
+  --vn-accent-soft: #dae6f9;
+  --vn-bg-dark: #f7f1ea;
+  --vn-bg-panel: rgba(255, 251, 246, 0.88);
+  --vn-bg-panel-strong: rgba(255, 252, 249, 0.95);
+  --vn-text: #2e2118;
+  --vn-text-dim: #7a6b60;
+  --vn-text-dialogue: #f0e6d8;
+  --vn-border: rgba(209, 175, 118, 0.32);
+  --vn-border-strong: rgba(209, 175, 118, 0.48);
+  --vn-gold: #c9a054;
   --vn-green: #6f9b74;
   --vn-red: #c87272;
   --vn-shadow: 0 18px 56px rgba(58, 36, 17, 0.18);
   --vn-shadow-strong: 0 28px 88px rgba(58, 36, 17, 0.24);
   --vn-radius: 20px;
-  --vn-font: 'Noto Sans SC', sans-serif;
-  --vn-font-title: 'Cormorant Garamond', 'Noto Serif SC', serif;
-  --vn-font-display: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+
+  --vn-font: 'Noto Sans SC', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+  --vn-font-title: 'Cormorant Garamond', 'Noto Serif SC', 'Yu Mincho', serif;
+  --vn-font-display: 'ZCOOL XiaoWei', 'Noto Serif SC', 'Yu Mincho', serif;
   --vn-font-code: 'Fira Code', 'Source Code Pro', monospace;
   --vn-dialogue-font-size: 17px;
+  --vn-dialogue-line-height: 1.95;
+  --vn-dialogue-letter-spacing: 0.04em;
+
+  --vn-nameplate-radius: 6px;
+  --vn-sidebar-opacity: 0.4;
 }

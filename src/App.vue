@@ -27,12 +27,15 @@ import SettingsPanel from './components/SettingsPanel.vue'
 import { useVNEngine } from './engine/VNEngine.js'
 import { useSaveManager } from './engine/SaveManager.js'
 import { useAudioManager } from './engine/AudioManager.js'
+import { acquireWakeLock, setupVisibilityHandler } from './engine/ExperienceEnhancer.js'
 
 const screen = ref('title')
 const showTitleSettings = ref(false)
 const engine = useVNEngine()
 const saveManager = useSaveManager()
 const audio = useAudioManager()
+setupVisibilityHandler(audio)
+acquireWakeLock()
 
 provide('engine', engine)
 provide('saveManager', saveManager)

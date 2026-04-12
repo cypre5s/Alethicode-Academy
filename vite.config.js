@@ -9,33 +9,46 @@ export default defineConfig(({ mode }) => ({
     mode === 'production' && viteObfuscateFile({
       options: {
         compact: true,
-        controlFlowFlattening: true,
-        controlFlowFlatteningThreshold: 0.6,
-        deadCodeInjection: true,
-        deadCodeInjectionThreshold: 0.3,
+        controlFlowFlattening: false,
+        deadCodeInjection: false,
         stringArray: true,
-        stringArrayEncoding: ['rc4'],
-        stringArrayThreshold: 0.7,
-        transformObjectKeys: true,
+        stringArrayEncoding: ['base64'],
+        stringArrayThreshold: 0.5,
+        transformObjectKeys: false,
         unicodeEscapeSequence: false,
         renameGlobals: false,
-        selfDefending: true,
-        debugProtection: true,
-        debugProtectionInterval: 2000,
+        selfDefending: false,
+        debugProtection: false,
         disableConsoleOutput: false,
         rotateStringArray: true,
-        splitStrings: true,
-        splitStringsChunkLength: 8,
+        splitStrings: false,
       },
     }),
   ].filter(Boolean),
+  resolve: {
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
+  },
   server: { port: 3333, open: true },
   build: {
-    target: 'es2020',
+    target: 'es2022',
     minify: 'terser',
     terserOptions: {
-      compress: { drop_console: false, drop_debugger: true, passes: 2 },
+      compress: { drop_console: false, drop_debugger: true, passes: 3, ecma: 2022 },
       mangle: { toplevel: true },
+      format: { ecma: 2022 },
+    },
+    chunkSizeWarningLimit: 800,
+    cssCodeSplit: true,
+    reportCompressedSize: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('pixi.js') || id.includes('pixi-live2d-display')) return 'live2d'
+          if (id.includes('node_modules/vue')) return 'vue-vendor'
+          if (id.includes('src/scripts/routes/')) return 'routes'
+          if (id.includes('src/engine/')) return 'engine'
+        },
+      },
     },
   },
 }))

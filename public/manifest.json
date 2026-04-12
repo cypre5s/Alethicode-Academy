@@ -1,0 +1,20 @@
+{
+  "name": "Alethicode Academy",
+  "short_name": "Alethicode",
+  "description": "以代码照亮真理 — 编程学园视觉小说",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "theme_color": "#1a1a2e",
+  "background_color": "#0d0d1a",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["games", "education"],
+  "lang": "zh-CN",
+  "dir": "ltr"
+}
