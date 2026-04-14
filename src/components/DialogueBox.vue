@@ -16,13 +16,15 @@
               :class="seg.classes" v-html="seg.html"></span>
         <span v-if="isTyping" class="cursor-blink"></span>
         <span v-else class="next-indicator">继续</span>
+        <span v-if="currentIsSeen && !isTyping" class="seen-badge">既読</span>
       </div>
     </div>
 
     <div class="dialogue-controls">
       <button
-        v-if="engine.canSkipSection.value"
         class="ctrl-btn skip-btn"
+        :class="{ disabled: !engine.canSkipSection.value }"
+        :disabled="!engine.canSkipSection.value"
         @click.stop="engine.skipSection()"
       >
         <span class="ctrl-key">Tab</span>
@@ -53,7 +55,7 @@
 </template>
 
 <script setup>
-import { computed, inject, onUnmounted, ref, watch } from 'vue'
+import { computed, inject, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { characters } from '../data/characters.js'
 import { parseTextEffects, getCharPause, SPEED_MULTIPLIERS, stripTags } from '../engine/TextEffectParser.js'
 
@@ -61,8 +63,15 @@ const emit = defineEmits(['open-backlog', 'open-save', 'open-load', 'open-menu']
 const engine = inject('engine')
 const audio = inject('audio')
 
-const renderedSegments = ref([])
+const renderedSegments = shallowRef([])
 const isTyping = ref(false)
+
+const currentIsSeen = computed(() => {
+  const chapter = engine.currentChapter?.value
+  const ptr = engine.scriptPointer?.value
+  if (!chapter || ptr === undefined || ptr === null) return false
+  return engine.isSeen(chapter, Math.max(0, ptr - 1))
+})
 let typeTimer = null
 let autoTimer = null
 let pauseTimer = null
@@ -122,7 +131,7 @@ watch(() => engine.dialogueText.value, (newText) => {
 }, { immediate: true })
 
 function startTyping(rawText) {
-  clearInterval(typeTimer)
+  if (typeTimer) { cancelAnimationFrame(typeTimer); typeTimer = null }
   clearTimeout(autoTimer)
   clearTimeout(pauseTimer)
   renderedSegments.value = []
@@ -137,29 +146,43 @@ function startTyping(rawText) {
   let charIdx = 0
   const currentSegments = []
   let activeSegment = null
+  let lastCharTime = 0
+  let paused = false
 
   function effectsKey(effects) {
     return effects.join(',')
   }
 
-  function tick() {
+  function flush() {
+    renderedSegments.value = currentSegments.map(s => ({ html: s.html, classes: s.classes }))
+  }
+
+  function rafLoop(timestamp) {
+    if (paused) return
+    const interval = baseInterval * speedMultiplier
+    if (timestamp - lastCharTime < interval) {
+      typeTimer = requestAnimationFrame(rafLoop)
+      return
+    }
+    lastCharTime = timestamp
+
     while (tokenIdx < tokens.length) {
       const token = tokens[tokenIdx]
 
       if (token.type === 'pause') {
         tokenIdx++
         charIdx = 0
-        clearInterval(typeTimer)
+        paused = true
         pauseTimer = setTimeout(() => {
-          typeTimer = setInterval(tick, baseInterval * speedMultiplier)
+          paused = false
+          lastCharTime = 0
+          typeTimer = requestAnimationFrame(rafLoop)
         }, token.duration)
         return
       }
 
       if (token.type === 'speed') {
         speedMultiplier = SPEED_MULTIPLIERS[token.value] || 1.0
-        clearInterval(typeTimer)
-        typeTimer = setInterval(tick, baseInterval * speedMultiplier)
         tokenIdx++
         charIdx = 0
         continue
@@ -188,18 +211,20 @@ function startTyping(rawText) {
 
         activeSegment.html += buildSegmentHtml(ch, token.effects)
         charIdx++
-
-        renderedSegments.value = currentSegments.map(s => ({ html: s.html, classes: s.classes }))
+        flush()
 
         const punctPause = getCharPause(ch, prevCh, rhythm)
         if (punctPause > 0) {
-          clearInterval(typeTimer)
+          paused = true
           pauseTimer = setTimeout(() => {
-            typeTimer = setInterval(tick, baseInterval * speedMultiplier)
+            paused = false
+            lastCharTime = 0
+            typeTimer = requestAnimationFrame(rafLoop)
           }, punctPause)
           return
         }
 
+        typeTimer = requestAnimationFrame(rafLoop)
         return
       }
 
@@ -207,7 +232,7 @@ function startTyping(rawText) {
       charIdx = 0
     }
 
-    clearInterval(typeTimer)
+    typeTimer = null
     isTyping.value = false
     if (engine.autoPlay.value) {
       const plain = stripTags(engine.dialogueText.value)
@@ -219,15 +244,15 @@ function startTyping(rawText) {
   const rhythmDelay = rhythm?.preSentenceDelay || 0
   if (rhythmDelay > 0) {
     pauseTimer = setTimeout(() => {
-      typeTimer = setInterval(tick, baseInterval * speedMultiplier)
+      typeTimer = requestAnimationFrame(rafLoop)
     }, rhythmDelay)
   } else {
-    typeTimer = setInterval(tick, baseInterval * speedMultiplier)
+    typeTimer = requestAnimationFrame(rafLoop)
   }
 }
 
 function finishTyping() {
-  clearInterval(typeTimer)
+  if (typeTimer) { cancelAnimationFrame(typeTimer); typeTimer = null }
   clearTimeout(pauseTimer)
 
   const tokens = parseTextEffects(engine.dialogueText.value)
@@ -270,15 +295,19 @@ function handleClick() {
 
 function toggleAuto() {
   engine.autoPlay.value = !engine.autoPlay.value
-  if (engine.autoPlay.value && !isTyping.value) {
-    autoTimer = setTimeout(() => engine.advanceText(), engine.autoPlayDelay.value)
-  } else {
-    clearTimeout(autoTimer)
-  }
 }
 
+watch(() => engine.autoPlay.value, (on) => {
+  if (on && !isTyping.value) {
+    clearTimeout(autoTimer)
+    autoTimer = setTimeout(() => engine.advanceText(), engine.autoPlayDelay.value)
+  } else if (!on) {
+    clearTimeout(autoTimer)
+  }
+})
+
 onUnmounted(() => {
-  clearInterval(typeTimer)
+  if (typeTimer) cancelAnimationFrame(typeTimer)
   clearTimeout(autoTimer)
   clearTimeout(pauseTimer)
 })
@@ -292,6 +321,11 @@ onUnmounted(() => {
   bottom: 0;
   z-index: 10;
   cursor: pointer;
+  contain: layout style;
+  will-change: transform;
+  font-family: var(--vn-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .dialogue-box {
@@ -360,16 +394,17 @@ onUnmounted(() => {
 }
 
 .speaker-chip {
-  padding: 5px 22px 6px;
-  border-radius: 4px 4px 0 0;
+  padding: 5px 20px 5px;
+  border-radius: var(--vn-nameplate-radius, 4px) var(--vn-nameplate-radius, 4px) 0 0;
   background: var(--speaker-gradient);
-  color: #fffdfb;
-  font-family: var(--vn-font-title);
-  font-size: 15px;
+  color: #fffcf8;
+  font-family: var(--vn-font);
+  font-size: 14.5px;
   font-weight: 600;
-  letter-spacing: 0.15em;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
-  animation: nameplate-appear 0.4s ease both;
+  letter-spacing: 0.18em;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
+  animation: nameplate-appear 0.35s ease both;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes nameplate-appear {
@@ -410,15 +445,17 @@ onUnmounted(() => {
 }
 
 .dialogue-text {
-  color: rgba(255, 252, 245, 0.95);
+  color: var(--vn-text-dialogue, rgba(255, 252, 245, 0.95));
   font-size: var(--vn-dialogue-font-size);
-  line-height: 2.0;
+  line-height: var(--vn-dialogue-line-height, 2.0);
+  letter-spacing: var(--vn-dialogue-letter-spacing, 0.04em);
   white-space: pre-wrap;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.3);
+  font-feature-settings: 'palt' 1;
 }
 
 .text-monologue {
-  color: rgba(190, 200, 240, 0.88);
+  color: rgba(188, 198, 235, 0.90);
   font-style: italic;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
@@ -490,6 +527,19 @@ onUnmounted(() => {
   letter-spacing: 0.05em;
 }
 
+.seen-badge {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 220, 180, 0.08);
+  color: rgba(255, 220, 180, 0.35);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+}
+
 @keyframes blink {
   50% { opacity: 0; }
 }
@@ -534,6 +584,11 @@ onUnmounted(() => {
     color: var(--vn-primary);
     border-color: rgba(220, 140, 166, 0.3);
     background: rgba(220, 140, 166, 0.1);
+  }
+
+  .ctrl-btn.disabled {
+    opacity: 0.3;
+    pointer-events: none;
   }
 
   .ctrl-key {

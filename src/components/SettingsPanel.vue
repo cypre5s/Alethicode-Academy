@@ -46,6 +46,21 @@
           </div>
 
           <div class="setting-row">
+            <label>画质等级</label>
+            <div class="setting-control chips">
+              <button
+                v-for="q in qualityLevels"
+                :key="q.id"
+                class="size-btn"
+                :class="{ active: graphicsQuality === q.id }"
+                @click="setGraphicsQuality(q.id)"
+              >
+                {{ q.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="setting-row">
             <label>自动播放</label>
             <button class="toggle-btn" :class="{ on: engine.autoPlay.value }" @click="engine.autoPlay.value = !engine.autoPlay.value">
               {{ engine.autoPlay.value ? '开启' : '关闭' }}
@@ -55,7 +70,10 @@
           <div class="setting-section">角色关系</div>
           <div class="affection-grid">
             <div v-for="(rel, key) in engine.relationship" :key="key" class="aff-item">
-              <span class="aff-name" :style="{ color: charColor(key) }">{{ charName(key) }}</span>
+              <div class="aff-name-group">
+                <span class="aff-name" :style="{ color: charColor(key) }">{{ charName(key) }}</span>
+                <span class="aff-stage-badge">{{ charStage(key) }}</span>
+              </div>
               <div class="aff-bars-3d">
                 <div class="aff-bar-row">
                   <span class="aff-dim-label">好感</span>
@@ -71,6 +89,17 @@
                   <span class="aff-dim-label">安心</span>
                   <div class="aff-bar"><div class="aff-fill" :style="{ width: Math.min(rel.comfort, 100) + '%', background: charColor(key), opacity: 0.5 }"></div></div>
                   <span class="aff-val">{{ rel.comfort }}</span>
+                </div>
+              </div>
+              <div class="stage-progress">
+                <div class="stage-track">
+                  <span v-for="stage in stageOrder" :key="stage"
+                    class="stage-dot"
+                    :class="{ reached: stageOrder.indexOf(charStage(key)) >= stageOrder.indexOf(stage) }"
+                    :style="{ borderColor: stageOrder.indexOf(charStage(key)) >= stageOrder.indexOf(stage) ? charColor(key) : undefined,
+                              background: stageOrder.indexOf(charStage(key)) >= stageOrder.indexOf(stage) ? charColor(key) : undefined }"
+                    :title="stage"
+                  ></span>
                 </div>
               </div>
             </div>
@@ -130,7 +159,7 @@
               />
             </div>
           </div>
-          <p class="llm-hint endpoint-examples">常用端点：DeepSeek <code>https://api.deepseek.com</code> · OpenAI <code>https://api.openai.com</code> · 通义千问 <code>https://dashscope.aliyuncs.com/compatible-mode</code> · 本地 Ollama <code>http://localhost:11434</code></p>
+          <p class="llm-hint endpoint-examples">常用端点：MiniMax <code>https://api.minimaxi.com/v1</code> · DeepSeek <code>https://api.deepseek.com</code> · OpenAI <code>https://api.openai.com</code> · 通义千问 <code>https://dashscope.aliyuncs.com/compatible-mode</code> · 本地 Ollama <code>http://localhost:11434</code></p>
 
           <div class="setting-row">
             <label>模型名称</label>
@@ -159,6 +188,162 @@
 
           <div v-if="llm.offlineMode.value" class="offline-badge">离线模式 — 使用预设对话</div>
 
+          <div class="setting-section">AI 意识系统</div>
+          <p class="llm-hint">六重意识栈为角色赋予跨存档记忆、心理洞察、自主行为等能力。</p>
+
+          <div class="setting-row">
+            <label>情感共鸣</label>
+            <button class="toggle-btn" :class="{ on: affectiveEnabled }" @click="toggleAffective">
+              {{ affectiveEnabled ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint">开启后角色将根据你的互动模式感应情绪，调整对话语气和场景氛围。</p>
+
+          <div class="setting-row">
+            <label>行为画像</label>
+            <div class="setting-control">
+              <span v-if="profileConfidence > 0" class="test-result ok">
+                置信度 {{ Math.round(profileConfidence * 100) }}%
+              </span>
+              <span v-else class="test-result">尚未收集足够数据</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label>跨周目记忆</label>
+            <div class="setting-control">
+              <span class="test-result ok" v-if="playthroughCount > 1">
+                第 {{ playthroughCount }} 周目
+              </span>
+              <span class="test-result" v-else>首次游玩</span>
+            </div>
+          </div>
+
+          <div class="setting-section">沉浸式体验</div>
+          <p class="llm-hint">以下功能需要桌面端 (Electron) 或特定硬件支持。</p>
+
+          <div class="setting-row">
+            <label>本地 AI 模式</label>
+            <button class="toggle-btn" :class="{ on: localModeOn }" @click="toggleLocalMode" :disabled="!isElectron">
+              {{ !isElectron ? '仅桌面端' : localModeOn ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint" v-if="isElectron">使用本地 Ollama 运行 LLM 角色对话，完全离线。需要先安装 <code>Ollama</code> 并下载模型。</p>
+
+          <div class="setting-row" v-if="localModeOn">
+            <label>本地模型</label>
+            <div class="setting-control">
+              <input type="text" class="llm-input" :value="llm.localModel.value" placeholder="qwen2.5:7b-instruct-q4_K_M" @change="e => llm.setLocalModel(e.target.value)" />
+            </div>
+          </div>
+
+          <div class="setting-row" v-if="localModeOn">
+            <label>本地 LLM 状态</label>
+            <div class="setting-control">
+              <span class="test-result" :class="llm.localStatus.value === 'connected' ? 'ok' : 'fail'">
+                {{ localStatusText }}
+              </span>
+              <button class="test-btn" @click="checkLocalLLM">检测</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label>语音合成</label>
+            <button class="toggle-btn" :class="{ on: voiceEnabled }" @click="toggleVoice" :disabled="!isElectron">
+              {{ !isElectron ? '仅桌面端' : voiceEnabled ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint" v-if="isElectron">为角色台词实时生成中文语音。需要本地 TTS 服务运行。</p>
+
+          <div class="setting-row" v-if="voiceEnabled">
+            <label>语音音量</label>
+            <div class="setting-control">
+              <input type="range" min="0" max="100" :value="voiceVolume * 100" @input="e => setVoiceVolume(e.target.value / 100)" />
+              <span class="setting-val">{{ Math.round(voiceVolume * 100) }}%</span>
+            </div>
+          </div>
+
+          <div class="setting-row" v-if="voiceEnabled">
+            <label>自动朗读</label>
+            <button class="toggle-btn" :class="{ on: voiceAutoSpeak }" @click="toggleAutoSpeak">
+              {{ voiceAutoSpeak ? '开启' : '关闭' }}
+            </button>
+          </div>
+
+          <div class="setting-row">
+            <label>表情追踪</label>
+            <button class="toggle-btn" :class="{ on: faceTrackOn }" @click="toggleFaceTracking">
+              {{ faceTrackOn ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint">通过摄像头检测你的表情，角色会做出相应反应。所有数据仅在本地处理。</p>
+
+          <div class="setting-row" v-if="faceTrackOn">
+            <label>追踪状态</label>
+            <div class="setting-control">
+              <span class="test-result" :class="faceTrackStatus">
+                {{ faceTrackStatusText }}
+              </span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label>WebGPU 粒子</label>
+            <button class="toggle-btn" :class="{ on: particlesOn }" @click="toggleParticles">
+              {{ particlesOn ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint">GPU 加速的万级粒子效果（樱花、萤火虫、代码雨等）。需要 WebGPU 支持。</p>
+
+          <div class="setting-row">
+            <label>后处理特效</label>
+            <button class="toggle-btn" :class="{ on: postFXOn }" @click="togglePostFX">
+              {{ postFXOn ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint">电影级视觉效果（景深、光晕、色彩分级、暗角等）。</p>
+
+          <div class="setting-row" v-if="isElectron">
+            <label>桌宠模式</label>
+            <button class="toggle-btn" :class="{ on: deskpetOn }" @click="toggleDeskpet">
+              {{ deskpetOn ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint" v-if="isElectron">角色会出现在你的桌面上，独立于游戏窗口运行。</p>
+
+          <div class="setting-row" v-if="isElectron && deskpetOn">
+            <label>桌宠角色</label>
+            <div class="setting-control chips">
+              <button v-for="(name, id) in deskpetCharacters" :key="id" class="size-btn" :class="{ active: deskpetChar === id }" @click="setDeskpetCharacter(id)">
+                {{ name }}
+              </button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label>动态天气</label>
+            <button class="toggle-btn" :class="{ on: weatherOn }" @click="toggleWeather">
+              {{ weatherOn ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint">场景天气会根据剧情情绪动态变化（雨天/雪天/夕阳/雾天等）。</p>
+
+          <div class="setting-row">
+            <label>角色光环</label>
+            <button class="toggle-btn" :class="{ on: auraOn }" @click="toggleAura">
+              {{ auraOn ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint">角色根据情绪和好感度发出动态光环效果。</p>
+
+          <div class="setting-row">
+            <label>性能监视器</label>
+            <button class="toggle-btn" :class="{ on: profilerOn }" @click="toggleProfiler">
+              {{ profilerOn ? '开启' : '关闭' }}
+            </button>
+          </div>
+          <p class="llm-hint">实时显示 FPS、各子系统耗时和优化建议。</p>
+
           <div class="setting-section">显示</div>
           <div class="setting-row">
             <label>全屏模式</label>
@@ -178,9 +363,11 @@
 </template>
 
 <script setup>
-import { inject, ref, onMounted, onUnmounted } from 'vue'
+import { inject, ref, computed, onMounted, onUnmounted } from 'vue'
+
 import { characters } from '../data/characters.js'
 import { useLLMManager } from '../engine/LLMManager.js'
+import { getRelationshipStage, relationshipStages } from '../data/relationshipRules.js'
 
 defineProps({ visible: Boolean })
 const emit = defineEmits(['close', 'title'])
@@ -214,11 +401,191 @@ const showApiKey = ref(false)
 const testingConnection = ref(false)
 const connectionResult = ref(null)
 
+const affectiveEnabled = computed(() => engine.affectiveResonance?.enabled?.value ?? false)
+const profileConfidence = computed(() => engine.behaviorProfiler?.confidence?.value ?? 0)
+const playthroughCount = computed(() => engine.persistentMemory?.soul?.playthroughCount ?? 1)
+
+function toggleAffective() {
+  if (engine.affectiveResonance) {
+    if (engine.affectiveResonance.enabled.value) {
+      engine.affectiveResonance.disable()
+    } else {
+      engine.affectiveResonance.enable()
+    }
+  }
+}
+
+const isElectron = typeof window !== 'undefined' && !!window.electronAPI
+
+const localModeOn = computed(() => llm.localMode?.value ?? false)
+const localStatusText = computed(() => {
+  const st = llm.localStatus?.value
+  if (st === 'connected') return '已连接'
+  if (st === 'no-models') return '已连接但无模型'
+  return '未连接'
+})
+
+function toggleLocalMode() {
+  if (!isElectron) return
+  llm.setLocalMode?.(!llm.localMode.value)
+}
+
+async function checkLocalLLM() {
+  await llm.checkLocalAvailability?.()
+}
+
+const immersive = computed(() => engine.immersiveBridge || null)
+const voiceSynth = computed(() => immersive.value?.voiceSynth || null)
+const faceTracker = computed(() => immersive.value?.faceTracker || null)
+const particleEngine = computed(() => immersive.value?.particles || null)
+const postFXEngine = computed(() => immersive.value?.postFX || null)
+
+const voiceEnabled = computed(() => voiceSynth.value?.enabled?.value ?? false)
+const voiceVolume = computed(() => voiceSynth.value?.volume?.value ?? 0.8)
+const voiceAutoSpeak = computed(() => voiceSynth.value?.autoSpeak?.value ?? true)
+
+function toggleVoice() {
+  if (!isElectron || !voiceSynth.value) return
+  voiceSynth.value.setEnabled(!voiceSynth.value.enabled.value)
+}
+
+function setVoiceVolume(val) {
+  voiceSynth.value?.setVolume(val)
+}
+
+function toggleAutoSpeak() {
+  voiceSynth.value?.setAutoSpeak(!voiceSynth.value.autoSpeak.value)
+}
+
+const faceTrackOn = computed(() => faceTracker.value?.isTracking?.value ?? false)
+const faceTrackStatus = computed(() => faceTrackOn.value ? 'ok' : '')
+const faceTrackStatusText = computed(() => {
+  if (faceTracker.value?.isTracking?.value) {
+    const emotion = faceTracker.value.playerEmotion?.value || 'neutral'
+    return `追踪中 — 当前表情: ${emotion}`
+  }
+  return '未启动'
+})
+
+async function toggleFaceTracking() {
+  if (!faceTracker.value) return
+  if (faceTracker.value.isTracking.value) {
+    faceTracker.value.stop()
+  } else {
+    await faceTracker.value.initialize()
+    await faceTracker.value.start()
+  }
+}
+
+const IMMERSIVE_KEY = 'alethicode_immersive_settings'
+const particlesOn = ref(false)
+const postFXOn = ref(true)
+const deskpetOn = ref(false)
+const deskpetChar = ref('nene')
+
+try {
+  const saved = JSON.parse(localStorage.getItem(IMMERSIVE_KEY) || '{}')
+  if (typeof saved.particles === 'boolean') particlesOn.value = saved.particles
+  if (typeof saved.postFX === 'boolean') postFXOn.value = saved.postFX
+  if (typeof saved.deskpet === 'boolean') deskpetOn.value = saved.deskpet
+  if (typeof saved.deskpetChar === 'string') deskpetChar.value = saved.deskpetChar
+} catch {}
+
+function _saveImmersiveSettings() {
+  try {
+    localStorage.setItem(IMMERSIVE_KEY, JSON.stringify({
+      particles: particlesOn.value,
+      postFX: postFXOn.value,
+      deskpet: deskpetOn.value,
+      deskpetChar: deskpetChar.value,
+    }))
+  } catch {}
+}
+
+function toggleParticles() {
+  particlesOn.value = !particlesOn.value
+  if (!particlesOn.value) particleEngine.value?.stopEffect?.()
+  _saveImmersiveSettings()
+}
+
+function togglePostFX() {
+  postFXOn.value = !postFXOn.value
+  postFXEngine.value?.enableColorGrading?.(postFXOn.value)
+  _saveImmersiveSettings()
+}
+
+async function toggleDeskpet() {
+  if (!isElectron) return
+  deskpetOn.value = !deskpetOn.value
+  if (deskpetOn.value) {
+    await window.electronAPI.invoke('deskpet:spawn', { characterId: deskpetChar.value })
+  } else {
+    await window.electronAPI.invoke('deskpet:despawn')
+  }
+  _saveImmersiveSettings()
+}
+
+const deskpetCharacters = { nene: '寧々', yoshino: '芳乃', ayase: 'あやせ', kanna: '栞那', murasame: 'ムラサメ' }
+
+const weatherEngine = computed(() => immersive.value?.weather || null)
+const auraEngine = computed(() => immersive.value?.aura || null)
+const profilerEngine = computed(() => immersive.value?.profiler || null)
+
+const weatherOn = computed(() => weatherEngine.value?.weatherConfig?.enabled ?? false)
+const auraOn = computed(() => auraEngine.value?.enabled?.value ?? true)
+const profilerOn = computed(() => profilerEngine.value?.isProfilerVisible?.value ?? false)
+
+function toggleWeather() {
+  if (weatherEngine.value) {
+    weatherEngine.value.weatherConfig.enabled = !weatherEngine.value.weatherConfig.enabled
+  }
+}
+
+function toggleAura() {
+  auraEngine.value?.setEnabled?.(!auraEngine.value.enabled.value)
+}
+
+function toggleProfiler() {
+  if (!profilerEngine.value) return
+  profilerEngine.value.toggleVisibility()
+  if (profilerEngine.value.isProfilerVisible.value) {
+    profilerEngine.value.startProfiling()
+  } else {
+    profilerEngine.value.stopProfiling()
+  }
+}
+
+async function setDeskpetCharacter(id) {
+  deskpetChar.value = id
+  if (isElectron && deskpetOn.value) {
+    await window.electronAPI.invoke('deskpet:set-character', { characterId: id })
+  }
+  _saveImmersiveSettings()
+}
+
 const fontSizes = [
   { id: 'small', label: '小' },
   { id: 'medium', label: '中' },
   { id: 'large', label: '大' },
 ]
+
+const qualityLevels = [
+  { id: 'low', label: '流畅' },
+  { id: 'medium', label: '普通' },
+  { id: 'high', label: '极致' },
+]
+
+const QUALITY_KEY = 'alethicode_graphics_quality'
+const graphicsQuality = ref(localStorage.getItem(QUALITY_KEY) || 'medium')
+
+function setGraphicsQuality(level) {
+  graphicsQuality.value = level
+  localStorage.setItem(QUALITY_KEY, level)
+  document.documentElement.dataset.quality = level
+  window.dispatchEvent(new CustomEvent('quality-change', { detail: { quality: level } }))
+}
+
+const stageOrder = ['初识', '熟悉', '亲近', '暧昧', '恋慕']
 
 function charColor(id) {
   return characters[id]?.color || '#999'
@@ -226,6 +593,19 @@ function charColor(id) {
 
 function charName(id) {
   return characters[id]?.nameShort || id
+}
+
+function charStage(id) {
+  const rel = engine.relationship[id]
+  if (!rel) return '初识'
+  return getRelationshipStage(rel)
+}
+
+function stageProgress(id) {
+  const rel = engine.relationship[id]
+  if (!rel) return 0
+  const avg = (rel.affection + rel.trust + rel.comfort) / 3
+  return Math.min(Math.round(avg), 100)
 }
 
 const fontSizeMap = { small: '14px', medium: '17px', large: '22px' }
@@ -254,6 +634,7 @@ async function runTestConnection() {
   z-index: 30;
   display: flex;
   align-items: center;
+  contain: layout style paint;
   justify-content: center;
   padding: 24px;
   background: rgba(33, 22, 15, 0.42);
@@ -381,9 +762,61 @@ async function runTestConnection() {
   padding: 10px 0;
 }
 
+.aff-name-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
 .aff-name {
   font-size: 13px;
   font-weight: 600;
+}
+
+.aff-stage-badge {
+  font-size: 10px;
+  color: var(--vn-text-dim);
+  opacity: 0.7;
+}
+
+.stage-progress {
+  grid-column: 1 / -1;
+  padding: 4px 0 2px;
+}
+
+.stage-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  justify-content: space-between;
+  position: relative;
+  padding: 0 4px;
+}
+
+.stage-track::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 50%;
+  height: 2px;
+  background: rgba(216, 177, 110, 0.15);
+  transform: translateY(-50%);
+}
+
+.stage-dot {
+  position: relative;
+  z-index: 1;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid rgba(216, 177, 110, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.stage-dot.reached {
+  transform: scale(1.15);
 }
 
 .aff-bar {

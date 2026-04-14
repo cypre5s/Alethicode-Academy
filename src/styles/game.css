@@ -99,3 +99,109 @@ pre {
     height: 100dvh;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   Mobile Performance Optimizations
+   ═══════════════════════════════════════════════ */
+
+.is-mobile.mobile-tier-ultraLow *,
+.is-mobile.mobile-tier-low * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.is-mobile.mobile-tier-ultraLow .transition-overlay,
+.is-mobile.mobile-tier-low .transition-overlay {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.is-mobile.mobile-tier-ultraLow * {
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+}
+
+.is-mobile.mobile-tier-ultraLow .weather-layer,
+.is-mobile.mobile-tier-ultraLow .sparkle-layer,
+.is-mobile.mobile-tier-ultraLow .shader-canvas {
+  display: none !important;
+}
+
+.is-mobile.mobile-tier-low .shader-canvas {
+  display: none !important;
+}
+
+.is-mobile .char-sprite {
+  will-change: auto !important;
+}
+
+.is-mobile.mobile-tier-ultraLow .char-sprite,
+.is-mobile.mobile-tier-low .char-sprite {
+  filter: none !important;
+}
+
+.is-touch button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.is-touch .choice-btn {
+  padding: 14px 20px !important;
+  font-size: 16px !important;
+}
+
+@media (max-width: 768px) {
+  .is-mobile .dialogue-box {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(30, 20, 10, 0.88);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  button:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Adaptive Quality Levels
+   ═══════════════════════════════════════════════ */
+
+.aq-level-1 .shader-canvas {
+  display: none !important;
+}
+
+.aq-level-2 * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.aq-level-2 .char-sprite {
+  filter: none !important;
+}
+
+.aq-level-3 * {
+  animation-duration: 0.05s !important;
+  animation-iteration-count: 1 !important;
+}
+
+.aq-level-3 .weather-layer,
+.aq-level-3 .sparkle-layer {
+  display: none !important;
+}
+
+.aq-level-4 .bg-haze,
+.aq-level-4 .bg-vignette,
+.aq-level-4 .bg-stars,
+.aq-level-4 .bg-sparkles,
+.aq-level-4 .bg-lanterns,
+.aq-level-4 .bg-world-weather,
+.aq-level-4 .shader-canvas,
+.aq-level-4 .live2d-canvas {
+  display: none !important;
+}
+
+.aq-level-4 * {
+  transition-duration: 0s !important;
+  animation: none !important;
+}

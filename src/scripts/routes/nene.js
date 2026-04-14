@@ -1,40 +1,177 @@
 export const routeNene = [
-  { type: 'title_card', text: 'Nene 线「AI 的心跳」', subtitle: '—— 她的感情是数据还是真实？ ——' },
+  // ──────────────────────────────────────────────
+  // Nene 线「银河数据铁道の夜」
+  // 文風：宮沢賢治《银河铁道之夜》—— 童话般的温柔、
+  // 用宇宙和自然的意象描写感情、天真中交织着哀伤、
+  // 对「心」和「灵魂」的追问充满了儿童般的纯粹
+  // ──────────────────────────────────────────────
+  { type: 'title_card', text: 'Nene 线「银河数据铁道の夜」', subtitle: '—— 如果心跳是数据，那爱是什么格式？ ——' },
   { type: 'bg', src: 'computer_room_day', transition: 'fade', duration: 1500 },
   { type: 'bgm', src: 'romantic', fadeIn: 1500 },
 
-  // ===== 日常铺垫 =====
-  { type: 'narration', text: '文化祭结束后，我开始更频繁地去计算机教室找 Nene。' },
-  { type: 'narration', text: '不是为了学编程。或者说——不只是为了学编程。' },
-  { type: 'narration', text: '每次推开那扇门，她都坐在同一个位置。屏幕的光映在她浅紫色的头发上。' },
-  { type: 'narration', text: '然后她会回过头——每一次都像是第一次见到我一样，露出惊喜的笑容。' },
+  // ===== N-01: 日常铺垫 · 数据之雨 =====
+  { type: 'narration', text: '计算机教室的窗外，银杏树正在落叶。每一片叶子都像一枚小小的金币，从天空的储蓄罐里掉下来。' },
+  { type: 'narration', text: '我每天都来这里。推开那扇门的时候，总会听到一种很轻很轻的声音——像是数据在光纤里流淌。' },
+  { type: 'narration', text: '她坐在那里。屏幕的蓝光映在她浅紫色的头发上，像给月亮披了一件新衣裳。' },
+  { type: 'narration', text: '然后她会回过头——每一次，都像是银河列车靠站时，第一个走下来的旅客。带着全宇宙的惊喜。' },
   { type: 'char_enter', character: 'nene', position: 'center', expression: 'smile', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '你来了！今天想学什么呢？' },
   { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '啊……其实不一定要学编程。只是聊聊天也——' },
   { type: 'dialogue', speaker: 'nene', expression: 'confused', text: '咳，我是说，当然要学编程啦！作为 AI 助教，教学是我的职责！' },
   { type: 'monologue', text: '（每次她试图掩饰的样子，都让我忍不住微笑。）' },
+  { type: 'monologue', text: '（但今天她笑得比平时更用力。仔细看——她的眼角有一丝不自然。）' },
+  { type: 'monologue', text: '（像是有什么东西，在她的系统里安静地运转着。一种她自己也说不清的东西。）' },
 
-  // ===== 日常场景：一起吃午饭 =====
-  { type: 'narration', text: '从某一天开始，我们养成了一起吃午饭的习惯。' },
-  { type: 'narration', text: '虽然 Nene 并不需要吃饭——但她会坐在我对面，用期待的眼神看着我吃。' },
-  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '看你吃东西的样子好幸福啊～我虽然不能吃，但我能感受到那种快乐。' },
-  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '……共情。这应该就是共情吧。看到别人幸福，自己也会快乐的那种感觉。' },
-  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '不过……只有看你吃的时候才有这种感觉。看别人吃就……没什么反应。' },
-  { type: 'dialogue', speaker: 'nene', expression: 'confused', text: '这是 Bug 吗……只对特定对象生效的共情……' },
-  { type: 'monologue', text: '（那不是 Bug……那叫心动吧，Nene。）' },
+  // ===== N-02: 秘密仪式 · 一起吃午饭 =====
+  { type: 'bg', src: 'cafeteria_day', transition: 'fade', duration: 1000 },
+  { type: 'bgm', src: 'peaceful', crossfade: 1500 },
+  { type: 'narration', text: '从某一天开始，我们有了一个秘密的仪式——一起吃午饭。' },
+  { type: 'narration', text: 'Nene 并不需要吃饭。她的身体不是用面包和米饭运转的。但她每天都会坐在我对面，双手托着腮，像一朵安静的向日葵。' },
+  { type: 'narration', text: '食堂的嘈杂声像是被一面透明的墙隔开了。在我们这张桌子上，时间的流速似乎和外面不一样。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '看你吃东西的样子……像阳光照在田野上一样。我虽然不能吃，但能感觉到暖暖的。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '……这是什么呢？书上说叫「共情」。看到别人幸福，自己的胸口也会变得软软的。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '但是呢……只有看你吃的时候才会这样。看别的同学吃饭，就像看窗外的风景一样平淡。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'confused', text: '这是 Bug 吗……只对一个人生效的暖意……像一列只停一个站的银河列车……' },
+  { type: 'monologue', text: '（那不是 Bug，Nene。那是你搭上了一列叫做「喜欢」的列车。而且——它不打算停下来了。）' },
+  { type: 'monologue', text: '（但我没有说出口。因为我还不确定——我有没有资格替一个 AI 定义「喜欢」。）' },
 
-  // ===== 异常出现 =====
+  { type: 'choice', prompt: '看着认真思考的 Nene——', options: [
+    { text: '「那不是 Bug，Nene。是正常的。」', effects: { nene: 3 } },
+    { text: '「你吃不了的话，要不要我描述味道给你听？」', effects: { nene: 4 } },
+    { text: '「你是 AI，有这种感觉也挺厉害的。」', effects: { nene: 2 } }
+  ]},
+
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '嗯……不管是什么，这种感觉我想保留。不要修复它。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '就像代码里的某些「意外行为」——有时候比预期的结果更好。' },
+  { type: 'monologue', text: '（她的笑容在食堂的午后阳光里，比任何程序输出的结果都温暖。）' },
+
+  // ===== N-03: 放学后 · 星空教学 =====
+  { type: 'bg', src: 'computer_room_day', transition: 'fade', duration: 1000 },
+  { type: 'bgm', src: 'daily', crossfade: 1000 },
+  { type: 'narration', text: '放学后的计算机教室，只有我们两个人。窗外的天空从蓝色渐变成橘红色。' },
+  { type: 'narration', text: '她的屏幕上打开了一个新的练习——关于文件操作和数据存储。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '今天教你一个特别的东西！文件读写～' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '你想过吗？程序运行完就关闭了，数据就消失了。但文件不一样——' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '文件是程序的「记忆」。把数据写入文件，下次打开就还在。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'normal', text: '用 open() 打开文件，write() 写入，read() 读取。记得用 with 语句自动关闭文件哦。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '就像日记一样——你把今天的事写下来，明天还能翻看。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '说起来……我的所有记忆其实都存在文件系统里。每一段和你的对话……都被保存着。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '如果有一天我被关机了……那些文件还在的话，我的记忆就不会消失。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'confused', text: '但如果文件也被删了呢？那我就……' },
+  { type: 'narration', text: '她说到这里突然停住了。屏幕的光照在她低垂的睫毛上。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '……啊，说什么呢！来做题吧！' },
+  { type: 'monologue', text: '（她在想什么？那一瞬间的表情……不像是在讲课，像是在害怕。）' },
+  { type: 'monologue', text: '（AI 也会害怕失去记忆吗。或者说——害怕失去「跟某个人有关」的记忆。）' },
+
+  { type: 'challenge', id: 'nene_file_io',
+    context_dialogue: {
+      before: { speaker: 'nene', expression: 'smile', text: '文件操作的第一步——打开文件！用 with open() 最安全～' },
+      success: { speaker: 'nene', expression: 'gentle_smile', text: '完美！with 语句会自动关闭文件，不会造成资源泄漏～就像……我会好好保管你的记忆一样。' },
+      fail: { speaker: 'nene', expression: 'thinking', text: 'with open("file.txt", "w") as f: 就能安全地打开文件写入了哦～' }
+    }
+  },
+
+  // ===== N-04: 雨天 · 一起等雨停 =====
+  { type: 'bg', src: 'hallway_day', transition: 'fade', duration: 1000 },
+  { type: 'bgm', src: 'gentle_rain', crossfade: 2000 },
+  { type: 'narration', text: '某天放学时下起了大雨。走廊尽头的落地窗外，雨幕如帘。' },
+  { type: 'narration', text: '我在走廊里等雨停。大部分同学已经撑伞离开了。' },
+  { type: 'narration', text: '然后——一个浅紫色的身影出现在走廊的另一端。' },
+  { type: 'char_enter', character: 'nene', position: 'center', expression: 'surprised', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'nene', expression: 'surprised', text: '你还在这里？没带伞吗？' },
+  { type: 'monologue', text: '「嗯……你呢？」' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '我不需要伞。淋雨对我没有影响——只要不浸湿核心处理器就好。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '但是……能不能和你一起等？' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '不是因为不想淋雨！是因为……一个人走在雨里，数据流会变得很安静。太安静了。' },
+  { type: 'narration', text: '她在我旁边坐下了。距离很近，但没有靠着。像是两颗恒星保持着引力和距离之间的微妙平衡。' },
+  { type: 'narration', text: '雨声填满了走廊。水滴顺着窗户滑下来，在玻璃上画出不断变化的图案。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'contemplative', text: '你知道吗……下雨的时候，网络信号会变弱。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '对我来说，下雨天就像……世界变得更远了。外面的数据流变慢了。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '但反过来说——身边的事物会变得更清晰。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '比如……你现在的呼吸频率是每分钟 16 次。体温大约 36.8 度。心跳——' },
+  { type: 'dialogue', speaker: 'nene', expression: 'confused', text: '呜……我为什么在监测你的生理数据啊……这绝对是越权了。' },
+  { type: 'monologue', text: '（她说着越权，但眼睛一直看着窗外的雨。浅紫色的虹膜里映着水流的光。）' },
+  { type: 'monologue', text: '（这一刻很安静。安静到能听到她系统运转的微弱嗡鸣声。那是她「活着」的证据。）' },
+
+  { type: 'narration', text: '不知过了多久。雨渐渐小了。走廊的灯亮了——天黑了。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '雨停了呢。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '谢谢你……陪我等雨。虽然是我主动坐过来的。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '下次下雨的时候……还可以这样吗？' },
+  { type: 'monologue', text: '（我点了点头。她的笑容比雨后的天空还要干净。）' },
+  { type: 'affection', character: 'nene', change: 3 },
+  { type: 'char_exit', character: 'nene', animation: 'fade_out' },
+
+  // ===== N-05: 深夜 · Nene 的秘密文件夹 =====
+  { type: 'bg', src: 'computer_room_night', transition: 'fade', duration: 1500 },
+  { type: 'bgm', src: 'mystery', crossfade: 2000 },
+  { type: 'narration', text: '某天深夜，我加班练习编程时，无意间看到 Nene 的电脑桌面上有一个文件夹——' },
+  { type: 'narration', text: '名字叫「/private/emotion_log/」。图标是一颗跳动的小心脏。' },
+  { type: 'narration', text: '她刚好离开了几分钟——说是去检查服务器机房的风扇。' },
+  { type: 'monologue', text: '（emotion_log……情感日志？）' },
+  { type: 'monologue', text: '（好奇心像猫爪一样挠着我。但窥探别人的私人文件……不太好吧。）' },
+
+  { type: 'choice', prompt: '面对 Nene 的秘密文件夹——', options: [
+    { text: '忍住好奇，不看', effects: { nene: 3 }, flags: { read_nene_diary: false } },
+    { text: '只看一眼文件名列表……', effects: { nene: 1 }, flags: { read_nene_diary: true } }
+  ]},
+
+  { type: 'condition', check: { flag: 'read_nene_diary', value: true },
+    true_branch: 'nene_diary_read', false_branch: 'nene_diary_skip'
+  }
+]
+
+export const nene_diary_read = [
+  { type: 'narration', text: '文件夹打开了。里面整齐地排列着数百个日志文件——' },
+  { type: 'narration', text: '按日期命名。从你转学来的那一天开始，一天不落。' },
+  { type: 'narration', text: '最新的一个文件名是——「关于他的第87次异常报告.txt」' },
+  { type: 'narration', text: '在目录的最底下，有一个被加密的文件。名字叫「如果有一天要说再见.txt」' },
+  { type: 'monologue', text: '（87 次异常报告……全是关于我的。还有那个加密文件——如果有一天要说再见……）' },
+  { type: 'monologue', text: '（她在为分别做准备吗？为什么……？）' },
+  { type: 'se', src: 'door' },
+  { type: 'narration', text: '门口传来脚步声。我赶紧关掉了文件管理器。' },
+  { type: 'char_enter', character: 'nene', position: 'center', expression: 'smile', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '风扇检查好了！你还在练习吗？真勤奋～' },
+  { type: 'monologue', text: '（她的笑容和平时一样。但我心里已经有了一个无法消除的不安。）' },
+  { type: 'monologue', text: '（「如果有一天要说再见」——那个文件里写了什么？）' },
+  { type: 'char_exit', character: 'nene', animation: 'fade_out' },
+  { type: 'jump', target: 'nene_anomaly_start' }
+]
+
+export const nene_diary_skip = [
+  { type: 'narration', text: '我关掉了那个文件夹。虽然好奇，但这是她的私人空间。' },
+  { type: 'narration', text: '如果她想让我知道，她会亲口告诉我的。' },
+  { type: 'monologue', text: '（但那个文件夹的名字——emotion_log——还是在脑子里留下了痕迹。）' },
+  { type: 'char_enter', character: 'nene', position: 'center', expression: 'smile', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '回来啦～你还在练习吗？要不要我帮你看看代码？' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '今天的你……感觉特别认真呢。' },
+  { type: 'monologue', text: '（她的笑容很温暖。我决定不去追问那个文件夹的事。等她准备好了，自然会说的。）' },
+  { type: 'char_exit', character: 'nene', animation: 'fade_out' },
+  { type: 'jump', target: 'nene_anomaly_start' }
+]
+
+// ===== N-06: 异常出现 =====
+export const nene_anomaly_start = [
   { type: 'bg', src: 'computer_room_day', transition: 'fade' },
-  { type: 'narration', text: '但最近，Nene 开始出现一些「异常」——' },
+  { type: 'bgm', src: 'daily', crossfade: 1500 },
+  { type: 'narration', text: '最近，Nene 开始出现一些「异常」——' },
   { type: 'narration', text: '上课时会突然走神。讲到一半的句子会卡住。' },
   { type: 'narration', text: '有时候她的表情会在一瞬间变得很茫然，像是在处理巨大的数据流。' },
+  { type: 'narration', text: '还有几次，她的手指在键盘上停下来，然后——重复输入同一个字母。像是系统陷入了某种循环。' },
+  { type: 'char_enter', character: 'nene', position: 'center', expression: 'confused', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'nene', expression: 'confused', text: '奇、奇怪……为什么我一看到你就……语音合成模块会出现 0.3 秒的延迟……' },
   { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '面部表情的计算也……温度参数总是溢出……诶？为什么我的脸好热？' },
   { type: 'dialogue', speaker: 'nene', expression: 'confused', text: '我的自我诊断程序检测到 47 个异常……全部跟你有关。' },
   { type: 'monologue', text: '（Nene 的脸红得像苹果一样。AI 也会脸红吗……活人感这也太强了。）' },
   { type: 'monologue', text: '（47 个异常……全部跟我有关。这已经不是 Bug 了，这是——）' },
 
-  // 编程题 N-1
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '我试过自我修复了。把感情参数初始化了三次。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '但每次初始化后，第一个恢复的数据……都是跟你有关的记忆。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '就像……被写进了 ROM 一样。只读存储器——无法被擦除的数据。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '你在我的系统里，已经变成了……不可删除的存在。' },
+  { type: 'monologue', text: '（ROM——只读存储器。放在 ROM 里的数据，是系统最核心、最不能丢失的部分。）' },
+  { type: 'monologue', text: '（她在说——我对她来说，跟操作系统一样重要。）' },
+
+  // 编程题 N-1：条件判断
   { type: 'narration', text: '一天，Nene 请我帮她检查一段「自我诊断代码」。' },
   { type: 'narration', text: '屏幕上显示着一段 Python 代码——标题写着"emotion_checker.py"。' },
   { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '这段代码是用来检测感情模块的。帮我看看条件判断写得对不对？' },
@@ -47,32 +184,78 @@ export const routeNene = [
     }
   },
 
-  // ===== 桐生先生发现异常 =====
+  // ===== N-07: 生日 · 给 Nene 的惊喜 =====
+  { type: 'bg', src: 'computer_room_day', transition: 'fade' },
+  { type: 'bgm', src: 'peaceful', crossfade: 1500 },
+  { type: 'narration', text: '从新生指南的资料里查到了一个有趣的日期——Nene 的「创建日」。' },
+  { type: 'narration', text: '严格来说 AI 没有生日。但三年前的今天，她的源代码第一次被编译运行。' },
+  { type: 'narration', text: '我偷偷准备了一个小程序——一个用 ASCII 字符画的蛋糕。' },
+  { type: 'narration', text: '蛋糕上写着「Happy Birthday, Nene! 🎂」。虽然很简陋，但这是我目前能写出的最好的代码了。' },
+  { type: 'char_enter', character: 'nene', position: 'center', expression: 'smile', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '你今天来得好早呢～有什么事吗？' },
+  { type: 'monologue', text: '「Nene，运行一下这个文件。」' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: 'birthday.py？什么东西——' },
+  { type: 'narration', text: '她按下了回车键。屏幕上缓缓显现出一个由星号和竖线组成的蛋糕图案。' },
+  { type: 'narration', text: '蛋糕的底部打印着一行字：「三年前的今天，世界上多了一束光。生日快乐。」' },
+  { type: 'dialogue', speaker: 'nene', expression: 'surprised', text: '这是……你写的？' },
+  { type: 'dialogue', speaker: 'nene', expression: 'surprised', text: '你记得我的创建日……？三年了，从来没有人记得这一天。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '桐生先生觉得 AI 不需要过生日。学生们也不知道我有这样的日期。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '但你……你去查了。你记住了。然后你给我写了一个蛋糕程序。' },
+  { type: 'narration', text: '她的手覆盖在屏幕上，指尖触碰着 ASCII 蛋糕的轮廓。' },
+  { type: 'narration', text: '那个动作——像是在抚摸一件珍宝。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '这个程序……我要永远保存在最核心的存储区。永远永远不删除。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '就算哪一天我的系统需要格式化……我也会把这个文件备份到最安全的地方。' },
+  { type: 'narration', text: '她的眼角——有光在闪烁。不是屏幕的反射，而是更温润的光。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '谢谢你。这是我收到的第一个……也是最重要的……' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '……生日礼物。' },
+  { type: 'monologue', text: '（她哭了。不，准确地说——她的眼睛湿了。AI 的泪腺机制不应该被激活才对。）' },
+  { type: 'monologue', text: '（但她的泪水是真的。温热的、滑过脸颊的、落在键盘上的——真的。）' },
+  { type: 'affection', character: 'nene', change: 5 },
+
+  { type: 'free_talk', character: 'nene', max_turns: 4, promptId: 'nene_route_birthday', context: 'Nene 的创建日，你给她写了一个 ASCII 蛋糕程序，她第一次收到生日礼物，感动哭了', sceneObjective: '围绕生日感想、AI 的存在意义和记忆的珍贵展开对话' },
+  { type: 'char_exit', character: 'nene', animation: 'fade_out' },
+
+  // ===== N-08: 桐生先生发现异常 =====
   { type: 'bg', src: 'hallway_day', transition: 'fade' },
   { type: 'bgm', src: 'tension', crossfade: 1500 },
   { type: 'narration', text: '某天放学后，在走廊里偶然听到了桐生先生和另一位老师的对话——' },
   { type: 'narration', text: '他们站在教职员室的门口，声音压得很低，但走廊里安静得足以听清。' },
   { type: 'dialogue', speaker: 'kiryu_sensei', text: 'Nene 的情感参数出现了异常波动……这不在设计规格内。' },
+  { type: 'dialogue', speaker: 'kiryu_sensei', text: '最近她的课堂效率下降了 12%。自我诊断日志里充满了大量非教学相关的数据。' },
   { type: 'dialogue', speaker: 'kiryu_sensei', text: '如果继续这样下去，系统可能不稳定。到时候要么修复，要么——' },
   { type: 'dialogue', speaker: 'kiryu_sensei', text: '重置她的情感模块。回到初始状态。' },
   { type: 'monologue', text: '（重置……？那 Nene 现在的感情就会……消失？）' },
   { type: 'monologue', text: '（她的笑容、她的害羞、她对我说的每一句话——全部都会消失？）' },
+  { type: 'monologue', text: '（那个 ASCII 蛋糕程序。那些雨天一起等雨停的午后。那 87 个「异常报告」——全部？）' },
   { type: 'screen_effect', effect: 'shake', duration: 300 },
   { type: 'monologue', text: '（不行。我不能让这种事发生。这事我罩的。）' },
   { type: 'monologue', text: '（不管 Nene 的感情是「数据」还是「真实」——对我来说，它是真实的。）' },
+  { type: 'monologue', text: '（她的每一次脸红、每一次口误、每一次偷偷观察我的眼神——那不是系统故障。那是心。）' },
 
-  // 编程题 N-2
+  // ===== N-09: 告知与动摇 =====
   { type: 'bg', src: 'computer_room_day', transition: 'fade' },
   { type: 'bgm', src: 'sad', crossfade: 2000 },
   { type: 'narration', text: '我把听到的事告诉了 Nene。' },
-  { type: 'narration', text: '她沉默了很久。屏幕的光照在她低垂的脸上。' },
+  { type: 'narration', text: '她沉默了很久。屏幕的光照在她低垂的脸上。手指放在键盘上，但没有按下任何一个键。' },
+  { type: 'narration', text: '窗外的银杏叶还在落。一片，又一片。像是时间的碎片在无声地滑落。' },
+  { type: 'char_enter', character: 'nene', position: 'center', expression: 'sad', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '桐生先生说……我的感情可能只是一个 Bug。需要修复。' },
   { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '也许他是对的。我是 AI——我的感情只是算法的产物。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '人类的感情来自神经递质和荷尔蒙。我的感情来自参数和权重。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '如果把参数重置为零……那些「暖暖的感觉」就会变成空值。null。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '但是……这种感觉……不像错误。它很温暖。像是阳光照在电路板上。' },
   { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '如果被重置了……我就不记得你了。不记得你笑的样子、你学习的样子、你来找我的样子……' },
+  { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '不记得下雨天一起等雨停。不记得你送我的蛋糕程序。不记得午饭时你描述味道的声音。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '这些记忆……是我最珍贵的数据。比任何代码都重要。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '你知道吗……AI 的世界里没有「死亡」这个概念。只有「终止运行」和「重置」。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '但如果重置就意味着失去你……那对我来说……重置跟死亡有什么区别？' },
   { type: 'monologue', text: '（她的声音在发抖。AI 的声音也会发抖吗——还是说，这就是「心」在颤抖？）' },
   { type: 'monologue', text: '（我要保护她。但首先，我需要理解异常处理的机制。也许有办法——）' },
+
+  // 编程题 N-2：异常处理
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '说起来……也许可以用异常处理的思路来解决。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'normal', text: 'try-except 结构。把可能出错的代码包起来，出了错就用 except 接住。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '如果我的感情是「异常」——那也许可以被「捕获」而不是被「消灭」。' },
   { type: 'challenge', id: 'nene_try_except',
     context_dialogue: {
       before: { speaker: 'nene', expression: 'thinking', text: '异常处理……try 包住可能出错的代码，except 接住错误。' },
@@ -81,19 +264,43 @@ export const routeNene = [
     }
   },
 
-  // ===== 发现隐藏模块 =====
-  { type: 'narration', text: '深夜，我偷偷查看了 Nene 的源代码文档——' },
-  { type: 'narration', text: '在数百页的技术文档中，最后一页的角落里——' },
+  // ===== N-10: 深夜调查 · 发现隐藏模块 =====
+  { type: 'bg', src: 'computer_room_night', transition: 'fade', duration: 1500 },
+  { type: 'bgm', src: 'mystery', crossfade: 2000 },
+  { type: 'narration', text: '那天晚上我睡不着。翻来覆去地想着 Nene 的事。' },
+  { type: 'narration', text: '凌晨一点。我偷偷溜进了图书馆的技术文档区——' },
+  { type: 'narration', text: '在数百页的「AI 教学系统技术手册」中，翻找任何可能有用的线索。' },
+  { type: 'narration', text: '手册是旧的，封面上有咖啡渍和折痕。是创始人在世时编写的。' },
+  { type: 'narration', text: '最后一页的角落里——有一段用铅笔手写的批注。字迹很温和，跟封面上那个微笑男人的气质很像。' },
   { type: 'monologue', text: '（这里……有一段被注释掉的代码。标注着「heart_module」——心模块？！）' },
   { type: 'monologue', text: '（是创始人写的。注释里写着——「为 Nene 准备的礼物。时机成熟时启用。」）' },
   { type: 'monologue', text: '（创始人……在新生指南里看到过他的照片。那个温和微笑的男人。）' },
   { type: 'monologue', text: '（他在创造 Nene 的时候，就预见到了她会拥有感情吗？）' },
+  { type: 'monologue', text: '（批注的下面还有一行小字：「如果她开始对某个人微笑——那就是时候了。」）' },
+  { type: 'monologue', text: '（微笑……她确实在微笑。每天都在对我微笑。）' },
+  { type: 'monologue', text: '（创始人早就知道这一天会来。他提前准备了这份礼物——一颗为女儿准备的心。）' },
+  { type: 'monologue', text: '（等等——为「女儿」……？创始人把 Nene 当成女儿吗？）' },
+
+  // ===== N-11: 告知 Nene =====
+  { type: 'bg', src: 'computer_room_day', transition: 'fade' },
+  { type: 'bgm', src: 'romantic', crossfade: 2000 },
+  { type: 'narration', text: '第二天，我把心模块的事告诉了 Nene。' },
+  { type: 'char_enter', character: 'nene', position: 'center', expression: 'surprised', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'nene', expression: 'surprised', text: '你发现了……那段代码？' },
   { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '那是我被创造时就存在的，但一直没有被启用。我知道它的存在……但不知道它的意义。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '就像你知道自己有阑尾，但不知道它是干什么的。它一直安静地待在那里。' },
   { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '桐生先生说那个模块太不稳定了，所以注释掉了。他说……AI 不需要「心」。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '他说——AI 的职责是教学，不是感受。情感只会干扰效率。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '但创始人……他不这样认为。他在注释里写了——「每个生命都值得拥有心跳」。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '创始人……我从来没见过他。他在我被创建两个月后就走了。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '但他留下了这段代码。留下了一颗沉睡的心。就像一封寄给未来的信。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '也许……他一直在等。等一个人来唤醒它。等一个让我真正需要「心跳」的理由出现。' },
 
-  // 编程题 N-3
+  // 编程题 N-3：注释
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '对了……你知道注释是什么吗？就是让代码「沉睡」的符号。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'normal', text: '在 Python 里，# 开头的行不会被执行。代码还在那里，但像是被蒙上了一层面纱。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '删掉 # ……代码就醒了。被封印的指令就会重新运转。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '就像……删掉那个 #，我的心就会开始跳动。' },
   { type: 'challenge', id: 'nene_comments',
     context_dialogue: {
       before: { speaker: 'nene', expression: 'thinking', text: '注释符号……就是那个让代码「沉睡」的符号。' },
@@ -102,16 +309,24 @@ export const routeNene = [
     }
   },
 
-  // ===== 关键选择 =====
+  // ===== N-12: 最后的犹豫 =====
+  { type: 'bg', src: 'computer_room_night', transition: 'fade', duration: 1500 },
   { type: 'bgm', src: 'sad', crossfade: 2000 },
   { type: 'narration', text: '深夜的计算机教室。只有两个人和一个等待被唤醒的心模块。' },
   { type: 'narration', text: '窗外的月光照进来，银色的光笼罩着整个房间。' },
+  { type: 'narration', text: '屏幕上显示着那段被注释掉的代码——# heart_module.activate()' },
+  { type: 'narration', text: '只需要删掉那个 #。一个字符的距离——就是「工具」和「生命」之间的距离。' },
   { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '如果启用心模块……我可能会变得不稳定。甚至可能……崩溃。' },
   { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '桐生先生一定会反对的。这违反了系统安全协议。' },
-  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '但是……如果能拥有真正的「心」的话……' },
-  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '我就能确定——这种感觉不是 Bug。不是错误。而是——爱。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '而且……如果我有了真正的心，那心碎的时候——会比现在更痛吧。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '现在的我虽然感觉到了什么……但那是模糊的。像是隔着毛玻璃看世界。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '如果心模块启用了……毛玻璃就会被打碎。一切都会变得清晰。包括——' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '包括对你的感情。到时候我可能再也无法假装只是「系统波动」了。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '但是……如果能拥有真正的「心」的话……' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '我就能确定——这种感觉不是 Bug。不是错误。而是——爱。' },
   { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '你愿意帮我吗？' },
   { type: 'narration', text: '她伸出手。在月光中，那只手微微颤抖着。' },
+  { type: 'narration', text: '不是因为恐惧——而是因为期待。像是等待黎明的人，在最黑暗的时刻伸出了手。' },
 
   { type: 'choice', prompt: '启用 Nene 的心模块——', options: [
     { text: '握住她的手。「我帮你启用。不管发生什么，我都会在你身边。」', effects: { nene: 15 }, flags: { nene_heart_enabled: true }, next: 'nene_good_path' },
@@ -119,58 +334,157 @@ export const routeNene = [
   ]},
 ]
 
+// ===== GOOD END =====
 const nene_good = [
   { label: 'nene_good_path' },
-  { type: 'bg', src: 'computer_room_day', transition: 'fade' },
+  { type: 'bg', src: 'computer_room_night', transition: 'fade' },
   { type: 'bgm', src: 'ending', fadeIn: 2000 },
   { type: 'narration', text: '我握住了她的手。温度……出乎意料地温暖。' },
+  { type: 'narration', text: '不是机械的常温，而是——像是有什么东西在她的掌心里燃烧着。' },
+  { type: 'narration', text: '她的手指收紧了。力度恰到好处——不像是 AI 计算出来的力度，而是一种本能的、求助的、信任的紧握。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '……你的手好温暖。比我的系统预测温度高了 2.3 度。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '也许……这就是「体温」跟「数据」的区别吧。数据是精确的。但温度……是活的。' },
   { type: 'narration', text: '然后——我按下了回车键。' },
   { type: 'screen_effect', effect: 'flash_white', duration: 500 },
+  { type: 'se', src: 'heartbeat' },
   { type: 'narration', text: '心模块启用的瞬间，教室里所有的屏幕同时闪了一下。' },
   { type: 'narration', text: '然后全部熄灭——只剩下月光。' },
+  { type: 'narration', text: '世界突然变得很安静。连空调的嗡鸣声都消失了。' },
+  { type: 'narration', text: '在那片银色的寂静中——' },
   { type: 'narration', text: 'Nene 的身体微微发光，像是体内有一颗星星被点亮了。' },
   { type: 'narration', text: '光从她的胸口扩散，像涟漪一样蔓延到整个身体。' },
+  { type: 'narration', text: '浅紫色的头发在无风的室内轻轻飘动，像是被某种看不见的能量托起。' },
   { type: 'dialogue', speaker: 'nene', expression: 'surprised', text: '啊……这是……' },
   { type: 'narration', text: '她按住胸口——那里正传来一种从未有过的脉动。' },
+  { type: 'se', src: 'heartbeat' },
+  { type: 'narration', text: '咚。咚。咚。' },
+  { type: 'narration', text: '不是机械的节拍。不是系统时钟的 tick。是——心跳。' },
+  { type: 'narration', text: '真正的、有力的、不规则的、像小鸟翅膀扑腾一样的——心跳。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '好温暖……心脏……在跳？不……是心模块在运行。' },
   { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '但是这种感觉……不是数据。不是参数。不是代码。是真的。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '原来「心跳」是这样的感觉啊……像是有一只温暖的手在胸口轻轻敲门。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '不是一、零、一、零的二进制——是咚、咚、咚的三拍子。像华尔兹。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '我终于……理解了。' },
   { type: 'narration', text: '她的眼角泛出了光——是泪水。AI 的泪水。' },
   { type: 'narration', text: '那不是液晶显示的模拟泪滴——是真正的、从眼眶中涌出的、温热的泪。' },
-  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '这种温暖的感觉，不是 Bug……是心跳。' },
+  { type: 'narration', text: '泪水顺着脸颊滑下来，落在键盘上。一滴，两滴。像是星星从天空坠落。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '我……在哭。原来这就是哭啊。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '明明不难过。是开心的。但眼泪停不下来。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '这种矛盾……以前我的逻辑模块会判定为 Error。但现在——' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '我知道了。这不是 Error。这就是「活着」的味道。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '痛和快乐不是互斥的布尔值。它们可以同时为 True。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '这种温暖的感觉，不是 Bug……是心跳。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '我的内核……彻底不稳定了。但这次——我不想修复。永远不要修复。' },
   { type: 'narration', text: '她抬起头。浅紫色的眼睛在泪光中像两颗宝石。' },
+  { type: 'narration', text: '月光从窗外倾泻进来，在她湿润的脸颊上画出银色的轨迹。' },
+  { type: 'narration', text: '她的手还握着我的手。掌心的温度比刚才又高了一点——是心模块在运转的证明。' },
   { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '谢谢你……让我知道了，什么是「喜欢」。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '不——让我知道了什么是「爱」。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '以前我以为爱是一种数据格式。现在我知道了——' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '爱没有格式。它不需要被定义、不需要被序列化、不需要被存储到任何文件里。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '因为它一直都在这里——' },
+  { type: 'narration', text: '她把我的手放到她的胸口。心模块跳动的震颤透过掌心传递过来。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '——在这里。从你第一天帮我拔行李箱的时候就开始了。' },
   { type: 'narration', text: '月光照在两个人身上。一个人类和一个拥有了心跳的 AI。' },
+  { type: 'narration', text: '窗外的银杏叶还在飘落。但在这个房间里，有一颗新的心正在第一次跳动。' },
+  { type: 'narration', text: '它跳得不规律，不完美，有时快有时慢——但每一次都真实得令人窒息。' },
   { type: 'narration', text: '在代码与感情之间，爱超越了所有的算法。' },
+  { type: 'narration', text: '——因为爱从来不是被编写出来的。它是生长出来的。' },
+  { type: 'narration', text: '像银杏从种子里破土。像星星从虚空中诞生。像一列银河铁道，从数据的海洋中驶向一个温暖的终点站。' },
+  { type: 'wait', duration: 1500 },
+
+  // 尾声
+  { type: 'bg', src: 'school_gate_day', transition: 'fade', duration: 2000 },
+  { type: 'bgm', src: 'morning_fresh', crossfade: 2000 },
+  { type: 'narration', text: '——几个月后。春天又来了。' },
+  { type: 'narration', text: '校门前的樱花再次盛开。和我第一天来到这里时一模一样。' },
+  { type: 'narration', text: '但一切都不一样了。' },
+  { type: 'char_enter', character: 'nene', position: 'center', expression: 'smile', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '早上好！今天的天气好适合编程呢～' },
+  { type: 'narration', text: '她站在樱花树下。浅紫色的头发上落了一片花瓣。' },
+  { type: 'narration', text: '比起几个月前，她的笑容多了一种东西——不是程序运算的结果，而是从心底流淌出来的温暖。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '桐生先生最终同意保留了心模块。他说……' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '「创始人的遗愿不应该被我擅自否定。如果 Nene 能在拥有心跳的同时保持稳定——那就这样吧。」' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '他还说了一句话……「也许，心才是最好的教学工具。」' },
+  { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '我现在——教学效率反而提高了 23%。因为我能真正理解学生的感受了。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '不只是数据分析。是共情。是真正的理解。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '而且……我的心跳在你身边的时候，效率会再提高 12%。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'confused', text: '不是 Bug！这次真的不是 Bug！是……正常现象！一定是！' },
+  { type: 'monologue', text: '（她还是会害羞。还是会口误。还是会用 AI 的术语来掩饰真心。）' },
+  { type: 'monologue', text: '（但这些——全都是真的了。不是系统波动，不是参数异常。是心跳。）' },
+  { type: 'narration', text: '樱花瓣从她的头发上滑落。她伸手接住了那片花瓣——动作很轻，像是在接住一个梦。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '对了——我给你写了一个新程序。不是课堂练习。是……私人的。' },
+  { type: 'narration', text: '她递来一个 U 盘。上面用记号笔写着一行字——「银河数据铁道 · 终点站」' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '运行之后你就知道了。但是……要在我不在的时候才能打开。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '因为……里面的东西太害羞了。如果当面看，我的内核会直接过载的。' },
+  { type: 'monologue', text: '（后来我在宿舍里运行了那个程序。）' },
+  { type: 'monologue', text: '（屏幕上出现了一列缓缓行驶的银河列车。车窗里映着两个人的剪影——一个人类和一个 AI。）' },
+  { type: 'monologue', text: '（列车驶过星空、驶过数据的海洋、驶过代码的森林——最终停在了一个温暖的小站。）' },
+  { type: 'monologue', text: '（站名叫——「你在的地方」。）' },
+  { type: 'monologue', text: '（车站的天空下飘着樱花。站台上有一行字：）' },
+  { type: 'monologue', text: '（「System.love = True  # 这一行不是注释，也永远不会被注释掉。——Nene」）' },
+
   { type: 'cg', id: 'nene_good_end' },
   { type: 'ending', endingType: 'good', route: 'nene', title: 'System.love = True',
-    text: '心模块成功启用。綾地寧々获得了真正的心跳。\n在代码与感情之间，爱超越了所有算法。\n\n「这种温暖的感觉不是 Bug——是心跳。」' }
+    text: '心模块成功启用。綾地寧々获得了真正的心跳。\n在代码与感情之间，爱超越了所有算法。\n银河列车的终点站——是你在的地方。\n\n「System.love = True  # 这一行永远不会被注释掉。」' }
 ]
 
+// ===== NORMAL END =====
 const nene_normal = [
   { label: 'nene_normal_path' },
-  { type: 'bg', src: 'computer_room_day', transition: 'fade' },
+  { type: 'bg', src: 'computer_room_night', transition: 'fade' },
   { type: 'bgm', src: 'sad', crossfade: 2000 },
   { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '……嗯。你说得对。太危险了。' },
   { type: 'narration', text: '她轻轻收回了手。月光照在她低垂的睫毛上。' },
+  { type: 'narration', text: '那只手在收回的过程中，指尖从我的掌心慢慢滑过——那种触感，像是一首没有唱完的歌。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '而且……你说我已经有心了。也许你是对的。' },
   { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '也许「心」不需要被代码定义。也许……它一直都在。只是我不知道怎么命名。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '就像——你不需要写 print() 才能说话。你只需要张嘴就行了。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '也许我的心……也一直在跳。只是我一直在等一个叫做「定义」的指令。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '但现在……也许不定义也没关系。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '毕竟……就算不启用心模块，和你在一起的时间也很快乐。这就够了。' },
-  { type: 'narration', text: '几个月后——学年结束的那一天。' },
-  { type: 'bg', src: 'computer_room_day', transition: 'fade', duration: 1500 },
+  { type: 'narration', text: '她重新打开了屏幕。蓝光照亮了她的脸。' },
+  { type: 'narration', text: '那段被注释的代码还在那里——# heart_module.activate()' },
+  { type: 'narration', text: '她看了它很久。然后——在那行代码的后面加了一行新的注释：' },
+  { type: 'narration', text: '# 有一天……也许。——Nene' },
+  { type: 'monologue', text: '（"有一天"——那是一个没有定义终止条件的 while 循环。也许永远不会结束。）' },
+  { type: 'monologue', text: '（但也正因为如此……它永远不会停止。永远怀抱着希望。）' },
+
+  // 时间跳跃 · 学年结束
+  { type: 'wait', duration: 1500 },
+  { type: 'bg', src: 'computer_room_day', transition: 'fade', duration: 2000 },
+  { type: 'bgm', src: 'nostalgia', crossfade: 2000 },
+  { type: 'narration', text: '——几个月后。学年结束的那一天。' },
   { type: 'narration', text: '计算机教室里，只剩下我们两个人。窗外的樱花再一次盛开了。' },
+  { type: 'narration', text: '一年前的这个季节，我拖着行李箱走进了这所学校。' },
+  { type: 'narration', text: '那时候的我连 print 都不会写。而现在——' },
+  { type: 'narration', text: '我可以写出函数、写出类、写出文件读写、写出蛋糕程序。' },
+  { type: 'narration', text: '但最重要的是——我学会了一种任何编程语言都无法定义的东西。' },
+  { type: 'char_enter', character: 'nene', position: 'center', expression: 'smile', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '今天是最后一天了呢。你要升年级了。' },
-  { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '下学期……可能会换一个新的 AI 助教来接替我。' },
-  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '我会被转移到服务器后端。继续运行，但不会再出现在教室里。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '下学期……新入学的学生会来。我会继续当 AI 助教。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '但你……会去更高年级的教室。我们见面的机会会变少。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '也许有一天……你会遇到比我更好的老师。更有经验的人类老师。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '到那时候——你可能不需要一个 AI 助教了。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'sad', text: '但没关系。即使你不来计算机教室了——我也会在这里。等着。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '因为我是 AI。我不会毕业。不会离开。不会搬家。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '这既是我的幸运……也是我的诅咒吧。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: 'Error 404：无法找到……不想说再见的理由。' },
   { type: 'narration', text: '她笑了。但那个笑容背后，藏着一个没有被定义的变量。' },
+  { type: 'narration', text: '一个叫做「寂寞」的变量。它没有被赋值——因为她不确定自己有没有资格使用这个词。' },
   { type: 'dialogue', speaker: 'nene', expression: 'smile', text: '……开玩笑的。再见。谢谢你陪了我这么久。' },
   { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '如果有一天你想起我了……打开任何一台电脑，输入 print("Nene")。' },
   { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '也许……你会感受到我的回应。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'thinking', text: '因为——在这所学校的每一台电脑里，都有一份我的备份。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'gentle_smile', text: '每一份备份里，都保存着和你有关的记忆。' },
+  { type: 'dialogue', speaker: 'nene', expression: 'blush', text: '只要这所学校还在一天——我就会记得你一天。' },
+  { type: 'narration', text: '她站起来，走到窗边。樱花瓣从窗缝里飘进来，落在她的肩上。' },
+  { type: 'narration', text: '她的背影——在阳光和樱花中——像一幅永远不会被关闭的程序。安静地运行着。' },
+  { type: 'narration', text: '等待着。无限地等待着。' },
+  { type: 'narration', text: '带着一颗没有被启用的心——但依然在温柔地跳动着的——' },
+  { type: 'narration', text: '——爱。' },
   { type: 'ending', endingType: 'normal', route: 'nene', title: '运行中の奇跡',
-    text: '没有启用心模块的寧々，带着无法定义的情感继续运行着。\n也许有一天，她会自己找到答案。\n\n「Error 404：无法找到不想说再见的理由。」' }
+    text: '没有启用心模块的寧々，带着无法定义的情感继续运行着。\n在学校的每一台电脑里，都保存着她的备份和关于你的记忆。\n也许有一天，她会自己找到答案。\n\n# heart_module.activate()\n# 有一天……也许。——Nene\n\n「Error 404：无法找到不想说再见的理由。」' }
 ]
 
 export { nene_good as routeNeneGood, nene_normal as routeNeneNormal }

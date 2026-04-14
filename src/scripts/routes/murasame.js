@@ -1,12 +1,20 @@
 export const routeMurasame = [
-  { type: 'title_card', text: 'Murasame 线「最后的竞赛」', subtitle: '—— 站在顶点的孤独与温暖 ——' },
+  // ──────────────────────────────────────────────
+  // Murasame 线「深夜 0 时のノルウェイ」
+  // 文風：村上春树 —— 冷静而疏离的观察视角、
+  // 日常中的超现实感、用精确的隐喻描写孤独、
+  // 都市夜景般的抒情、在丧失中寻找连接
+  // ──────────────────────────────────────────────
+  { type: 'title_card', text: 'Murasame 线「深夜 0 时のノルウェイ」', subtitle: '—— 站在顶点的人，看到的只有深渊 ——' },
   { type: 'bg', src: 'computer_room_night', transition: 'fade', duration: 1500 },
   { type: 'bgm', src: 'mystery', fadeIn: 1500 },
 
-  // ===== 夜间特训开始 =====
-  { type: 'narration', text: '从某一天起，我开始每晚都去那间深夜亮着灯的计算机教室。' },
-  { type: 'narration', text: '门没有锁。推开的时候，键盘声会停一秒——然后继续。' },
-  { type: 'narration', text: '她从不说"欢迎"。但她不说"滚"就已经是最好的欢迎了。' },
+  // ===== M-01: 孤独的声音 =====
+  { type: 'narration', text: '如果要给孤独选一种声音，大概就是深夜计算机教室里键盘的敲击声吧。' },
+  { type: 'narration', text: '均匀、精确、没有犹豫。像是一台机器在运转。但操作它的是一个人——一个独自坐在那里的人。' },
+  { type: 'narration', text: '从某一天起，我开始每晚走那条通往教室的走廊。走廊很长，地板砖在月光下泛着冷蓝色的光。像是走在水底一样。' },
+  { type: 'narration', text: '每走一步，键盘声就更清晰一分。像是有人在用代码给深夜写一封很长很长的信。' },
+  { type: 'narration', text: '门从来不锁。推开的时候，键盘声会停一秒——只有一秒。然后继续。那一秒的沉默就是她全部的欢迎辞。' },
   { type: 'char_enter', character: 'murasame', position: 'center', expression: 'smirk', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'murasame', expression: 'smirk', text: '你还真是锲而不舍。每天都来。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '我说过，门没锁。但没说欢迎你来。' },
@@ -14,8 +22,9 @@ export const routeMurasame = [
   { type: 'monologue', text: '（她的教学方式很简单——扔给你超出能力范围的难题，然后冷眼看你挣扎。）' },
   { type: 'monologue', text: '（但每次我真的做不出来的时候……她都会「不经意间」在旁边的屏幕上打开一段示例代码。）' },
   { type: 'monologue', text: '（嘴上说着"这不是提示"。但那段代码刚好就是解题的关键。）' },
+  { type: 'monologue', text: '（全国冠军的傲娇，就是用这种方式展现的。）' },
 
-  // ===== 深夜的日常 =====
+  // ===== M-02: 深夜的日常 =====
   { type: 'narration', text: '就这样，我开始了与 Murasame 的夜间特训。' },
   { type: 'narration', text: '她的训练强度是地狱级的。但在那些深夜里，我也看到了她不为人知的一面。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '这道题给你十分钟。做不出来就滚。' },
@@ -24,8 +33,32 @@ export const routeMurasame = [
   { type: 'narration', text: '她总是这样。用各种借口来掩饰自己的善意。' },
   { type: 'narration', text: '有一次我偷偷早到了五分钟，看到她在清理旁边桌子上的灰尘——那是「我的」座位。' },
   { type: 'monologue', text: '（她在给我擦桌子。全国冠军给一个新生擦桌子。这个反差也太大了。）' },
+  { type: 'narration', text: '还有一次——凌晨一点。她突然从抽屉里掏出两罐咖啡。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '自动贩卖机多掉了一罐。别多想。' },
+  { type: 'monologue', text: '（凌晨一点的自动贩卖机还会多掉咖啡……这个借口也太不走心了。）' },
+  { type: 'monologue', text: '（但咖啡是温热的。说明她提前买好了。等我来。）' },
+  { type: 'monologue', text: '（全国冠军提前给一个新生热好咖啡等他来训练。这种反差——让人心脏受不了。）' },
 
-  // ===== 全国赛消息 =====
+  // ===== M-03: 送她生日键盘 =====
+  { type: 'narration', text: '某天翻看学园档案时，偶然发现了她的生日——就在下周。' },
+  { type: 'narration', text: '我不知道送什么好。花太俗。巧克力太普通。情书她一定会扔垃圾桶。' },
+  { type: 'narration', text: '最后我选了一个机械键盘——红轴的。因为她打字的力度偏大，青轴太吵，红轴刚好。' },
+  { type: 'narration', text: '上面刻了一行小字：「送给深夜的交响乐家。」' },
+  { type: 'narration', text: '我把键盘放在了她的桌子上。没有留名——但谁会在深夜的计算机教室给她送东西呢。' },
+  { type: 'narration', text: '第二天晚上去的时候——新键盘已经接好了。旧键盘被整齐地放在桌角。' },
+  { type: 'narration', text: '她没有提这件事。只是——' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '今天键盘手感不太一样。大概是新换的吧。' },
+  { type: 'monologue', text: '（你都换上了还说"大概"？）' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'smirk', text: '不坏。手感比旧的好。打字速度提升了 3%。' },
+  { type: 'narration', text: '她低头看了一眼键盘上刻的字——「深夜的交响乐家」。嘴角微微上扬了一下。' },
+  { type: 'narration', text: '只有一下。0.5 秒。然后恢复了冰山脸。' },
+  { type: 'narration', text: '但那 0.5 秒——被月光清楚地照亮了。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '……交响乐家。哼。倒是第一次有人这么说。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '大多数人只会说「宅女」或者「编程机器」。' },
+  { type: 'monologue', text: '（她的声音在说"编程机器"的时候——轻了一点。像是被自己的话扎了一下。）' },
+  { type: 'affection', character: 'murasame', change: 4 },
+
+  // ===== M-04: 全国赛消息 =====
   { type: 'bg', src: 'hallway_day', transition: 'fade' },
   { type: 'bgm', src: 'tension', crossfade: 1500 },
   { type: 'narration', text: '某天，学校公告栏贴出了消息——全国编程竞赛，团队赛，每队两人。' },
@@ -37,11 +70,13 @@ export const routeMurasame = [
   { type: 'dialogue', speaker: 'murasame', expression: 'smirk', text: '正常来说，我应该找一个和我水平相当的搭档。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '但很遗憾，这所学校里没有。从来没有。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '去年——前年——大前年。我都是一个人报名的。在搭档栏写了「无」。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '评委每次都很尴尬。一个人做两个人的份。他们不知道该佩服还是同情。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'smirk', text: '所以——你来。' },
   { type: 'monologue', text: '（诶？！！）' },
   { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '别误会。不是因为你够格。含金量还差得远。是因为你有潜力。还有——' },
   { type: 'dialogue', speaker: 'murasame', expression: 'impressed', text: '你是唯一一个……每天都来找我的人。三年里。唯一一个。' },
   { type: 'narration', text: '她说最后那句话的时候，金色的瞳孔里闪过了一丝——不是骄傲，而是某种更柔软的东西。' },
+  { type: 'narration', text: '像是一座灯塔终于等到了远处的船只。' },
   { type: 'monologue', text: '（三年里唯一一个……原来她一直都是一个人。全国冠军的光环下面，是三年的孤独。）' },
 
   // 编程题 M-1
@@ -56,16 +91,16 @@ export const routeMurasame = [
     }
   },
 
-  // ===== 发现脆弱面 =====
+  // ===== M-05: 凌晨三点的脆弱 =====
   { type: 'bg', src: 'computer_room_night', transition: 'fade' },
   { type: 'bgm', src: 'romantic', crossfade: 2000 },
-  { type: 'narration', text: '某天凌晨三点，我推门进来——发现 Murasame 趴在键盘上睡着了。' },
-  { type: 'narration', text: '屏幕上还亮着代码编辑器。她的手指还放在键盘上。' },
-  { type: 'narration', text: '深红色的马尾散落在肩膀上。呼吸很浅、很轻。' },
-  { type: 'narration', text: '在屏幕的微光中，她的脸失去了所有的锐利和傲慢。' },
-  { type: 'narration', text: '只剩下一个疲惫的、普通的少女。' },
-  { type: 'monologue', text: '（她每天训练到这么晚……这就是全国冠军的代价吗。）' },
-  { type: 'monologue', text: '（不——这是一个人承担一切的代价。）' },
+  { type: 'narration', text: '凌晨三点。世界上大多数人都在睡觉。城市的灯火像是撒在黑天鹅绒上的碎钻——漂亮，但冰冷。' },
+  { type: 'narration', text: '推开门。她趴在键盘上。屏幕上的代码编辑器还亮着，光标像一颗耐心的心脏一样一闪一闪。' },
+  { type: 'narration', text: '深红色的马尾散落在肩膀上，像一条安静的河流。呼吸很浅——像是怕惊动什么似的。' },
+  { type: 'narration', text: '在屏幕的蓝光里，她的脸卸下了所有的盔甲。没有毒舌。没有骄傲。没有全国冠军的气场。' },
+  { type: 'narration', text: '只有一个在深夜独自运转到过载的少女。像一座灯塔——为了照亮别人，自己必须孤独地立在暴风中。' },
+  { type: 'monologue', text: '（凌晨三点的键盘声。这就是「强大」的配乐。——不，这是「孤独」的配乐。）' },
+  { type: 'monologue', text: '（全国冠军的代价不是训练量。是——没有人跟你说晚安。）' },
   { type: 'narration', text: '我轻轻把校服外套盖在她身上。然后——在旁边坐下，打开了自己的电脑继续练习。' },
   { type: 'narration', text: '过了大概一个小时——' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '……嗯？谁……' },
@@ -74,9 +109,15 @@ export const routeMurasame = [
   { type: 'monologue', text: '（键盘上有口水印……你管这叫松弛感？）' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '……你不觉得我很无聊吗。每天都在这里写代码。没有朋友。没有社团。什么都没有。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '全国冠军？那又怎样。奖杯不会跟你说话。代码不会跟你吵架。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '有时候……我会打开学校的监控画面，看白天的走廊。看大家上课、打球、聊天。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '就像在看一个跟自己无关的世界。隔着屏幕看人间。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '但是……最近，好像不那么寂寞了。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '……不是因为你。是因为……键盘换了新的。手感好了。跟你没关系。' },
-  { type: 'monologue', text: '（新键盘……你说的新键盘是一个月前我送你的那个生日礼物吧。）' },
+  { type: 'monologue', text: '（新键盘……你说的新键盘是我送你的那个生日礼物吧。）' },
+  { type: 'monologue', text: '（上面刻着「深夜的交响乐家」。每次她敲键盘的时候——都在用着那份礼物。）' },
+  { type: 'affection', character: 'murasame', change: 5 },
+
+  { type: 'free_talk', character: 'murasame', max_turns: 3, promptId: 'murasame_route_night', context: '凌晨三点，Murasame 趴在键盘上睡着了，你给她盖了外套。她醒来后说孤独但最近不那么寂寞了', sceneObjective: '围绕深夜编程的孤独和陪伴的意义展开对话' },
 
   // 编程题 M-2
   { type: 'bg', src: 'computer_room_day', transition: 'fade' },
@@ -91,25 +132,34 @@ export const routeMurasame = [
       fail: { speaker: 'murasame', expression: 'cold', text: '数据 → 排序 → 遍历 → 输出。这么简单的流程都搞不清？' }
     }
   },
+  { type: 'char_exit', character: 'murasame', animation: 'fade_out' },
 
-  // ===== 比赛当天 =====
+  // ===== M-06: 比赛当天 =====
   { type: 'bg', src: 'computer_room_day', transition: 'fade' },
   { type: 'bgm', src: 'battle', crossfade: 1500 },
   { type: 'title_card', text: '全国编程竞赛 · 团队赛', subtitle: '' },
-  { type: 'narration', text: '全国赛当天。赛场在市中心的会议中心。' },
+  { type: 'narration', text: '全国赛当天。赛场在市中心的会议中心。高大的落地窗外是都市的天际线。' },
   { type: 'narration', text: '来自全国各地的强队齐聚一堂。气氛紧张得像绷紧的琴弦。' },
   { type: 'narration', text: 'Murasame 穿着一件黑色的连帽衫，帽子拉到额头上。她的气场在人群中格外突出。' },
+  { type: 'narration', text: '其他队伍的人偷偷看向她——有敬畏，有好奇，也有不少不服。' },
+  { type: 'narration', text: '但她看都不看他们。金色的瞳孔只看着一个方向——前方的屏幕。' },
+  { type: 'char_enter', character: 'murasame', position: 'center', expression: 'cold', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '听好了。前面的题我来。你负责后援——检查我的代码有没有边界Bug。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'fierce', text: '到了最后一题——交给你。' },
   { type: 'monologue', text: '（最后一题交给我？！她这是在说——她相信我？）' },
   { type: 'dialogue', speaker: 'murasame', expression: 'smirk', text: '别露出那种受宠若惊的表情。你是我选的搭档。我不会选一个废物。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '而且——三年来第一次有人坐在我旁边参赛。不准让我后悔。' },
+
   { type: 'narration', text: '比赛开始了。' },
   { type: 'narration', text: 'Murasame 的手指在键盘上飞舞。代码像流水一样涌出——精确、高效、没有一个多余的字符。' },
+  { type: 'narration', text: '那种速度不是人类的速度。像是灵魂直接与键盘对话。' },
   { type: 'narration', text: '我在旁边检查她的代码。偶尔找到一个边界问题，轻声说一句"这里"。' },
   { type: 'narration', text: '她不回头，但会立刻修改。这种默契——不需要语言。' },
+  { type: 'narration', text: '三个小时过去了。前面所有的题目都被解决了。排名暂时第一。' },
   { type: 'narration', text: '最后一道题，难度超乎想象。Murasame 负责了前面的所有题目——' },
   { type: 'dialogue', speaker: 'murasame', expression: 'fierce', text: '最后一题交给你。我已经……没有力气了。' },
   { type: 'narration', text: '她靠在椅背上。额头上全是汗。金色的瞳孔因为疲劳而有些失焦。' },
+  { type: 'narration', text: '三个小时的高强度编码——连全国冠军也到了极限。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '……相信你。' },
   { type: 'monologue', text: '（她说了"相信你"。不是"别让我失望"——是"相信你"。）' },
   { type: 'monologue', text: '（这份信任的分量——比任何奖杯都重。）' },
@@ -123,19 +173,21 @@ export const routeMurasame = [
     }
   },
 
-  // ===== 赛后关键选择 =====
+  // ===== M-07: 赛后关键选择 =====
   { type: 'bg', src: 'rooftop_night', transition: 'fade' },
   { type: 'bgm', src: 'ending', crossfade: 2000 },
   { type: 'narration', text: '比赛结束了。不管结果如何——' },
   { type: 'narration', text: '我们回到了学校。深夜的天台。满天繁星。' },
   { type: 'narration', text: 'Murasame 靠着围栏站着。夜风把她的深红马尾吹得飘扬。' },
   { type: 'narration', text: '她的金色眼眸映着城市的灯火——看起来像是两颗降落在人间的星星。' },
+  { type: 'narration', text: '黑色连帽衫的帽子已经放下了。露出了完整的侧脸——轮廓锐利而清冷，像是用月光雕刻的。' },
   { type: 'char_enter', character: 'murasame', position: 'center', expression: 'genuine_smile' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '嘿……我问你一个问题。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '你觉得……和我一起打比赛，开心吗？' },
   { type: 'monologue', text: '（她第一次用这种不设防的眼神看我。）' },
   { type: 'monologue', text: '（没有毒舌，没有伪装，没有金色眼眸的锐利。只有一个等待答案的少女。）' },
   { type: 'monologue', text: '（三年的孤独。独自站在顶点的寒冷。都写在她微微颤抖的声音里。）' },
+  { type: 'monologue', text: '（这一刻——全国冠军只是一个害怕被拒绝的女孩。）' },
 
   { type: 'choice', prompt: '', options: [
     { text: '「开心。不只是比赛——认识你这件事本身，就让我很开心。」', effects: { murasame: 15 }, next: 'murasame_good_path' },
@@ -148,6 +200,7 @@ const murasame_good = [
   { type: 'narration', text: '夜风停了一秒。像是整个世界都屏住了呼吸。' },
   { type: 'narration', text: '她转过头。深红的马尾在夜风中慢慢飘落。' },
   { type: 'narration', text: '金色的瞳孔在星光下微微颤动——像是湖面被投入了一颗石子。' },
+  { type: 'narration', text: '那种颤动——比任何代码的 Bug 都让人心疼。因为那是一颗被孤独冻了三年的心，第一次被温暖触碰时的反应。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '……切。这种台词是从哪个恋爱游戏学来的。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '但是——' },
   { type: 'narration', text: '她看着远方的夜景。城市的灯火在她眼中像是一片微型的星河。' },
@@ -156,16 +209,24 @@ const murasame_good = [
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '不……算了。全部都给你。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '奖杯、证书、排名——全部。因为对我来说——' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '——这些东西加起来，都比不上你每天推开那扇门的声音。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '你知道吗……那个声音。每天晚上十点整。门被推开。脚步声。然后是你在旁边坐下的椅子声。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '那是我一天里最期待的声音。比 AC（通过）的提示音还期待。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '连我这个人也——' },
   { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '……闭嘴，什么都没说。' },
   { type: 'monologue', text: '（但你分明在笑啊，Murasame。你分明在哭啊。）' },
   { type: 'monologue', text: '（金色的眼眸里，终于有了温度。那不再是冷冽的星光——而是温暖的烛火。）' },
   { type: 'narration', text: '她伸出手。不是握拳，不是推开——而是张开，等待着。' },
   { type: 'narration', text: '在星空下。在深夜的天台上。全国冠军的手，微微颤抖着。' },
+  { type: 'narration', text: '那是一双在键盘上能弹奏出交响乐的手——此刻却像一片落叶一样轻轻颤抖。' },
   { type: 'narration', text: '——你握住了它。' },
+  { type: 'narration', text: '她的手指收紧了。力度很大——像是怕你消失一样。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '……你的手好暖。比咖啡暖。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '如果可以的话——以后每天晚上十点……你还会来吗？' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '不是为了训练。不是为了比赛。就是——来。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '门不会锁。永远不会锁。' },
   { type: 'cg', id: 'murasame_good_end' },
   { type: 'ending', endingType: 'good', route: 'murasame', title: "Champion's Heart",
-    text: '站在顶点的孤独，终于有人理解。\nムラサメ把冠军——和心——都交给了你。\n\n「这些东西加起来，都比不上你每天推开那扇门的声音。」' }
+    text: '站在顶点的孤独，终于有人理解。\nムラサメ把冠军——和心——都交给了你。\n\n「这些东西加起来，都比不上你每天推开那扇门的声音。」\n「门不会锁。永远不会锁。」' }
 ]
 
 const murasame_normal = [
@@ -174,15 +235,19 @@ const murasame_normal = [
   { type: 'dialogue', speaker: 'murasame', expression: 'smirk', text: '搭档……嗯。不坏。' },
   { type: 'narration', text: '她重新拉起了那面叫做「强大」的墙。金色的眼眸恢复了冷冽的光。' },
   { type: 'narration', text: '但如果你仔细看——墙上有一条很浅的裂缝。那是今晚留下的。' },
+  { type: 'narration', text: '裂缝里透出来的——不是寒风，而是微弱的暖光。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '我要毕业了。明年的全国赛……你来参加。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'smirk', text: '用一个人的名义。因为你已经——不需要搭档了。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'cold', text: '你已经足够强了。至少——不再是那个连 Hello World 都不会写的新生了。' },
   { type: 'narration', text: '毕业典礼后，你收到了一条消息——' },
   { type: 'narration', text: '「别让我失望。——传说学姐遗言」' },
   { type: 'narration', text: '附件是一段代码。运行后只显示一行字：' },
   { type: 'narration', text: '「下次见面，我要看到你比我更强。——M」' },
+  { type: 'narration', text: '代码的最后一行注释着——' },
+  { type: 'narration', text: '# 门不会锁。如果你还想来的话。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'smirk', text: '下一个全国冠军……你来继承吧。' },
   { type: 'ending', endingType: 'normal', route: 'murasame', title: 'Logout',
-    text: '「别让我失望。——传说学姐遗言」\n她的背影消失在校门口。但约定永远不会过期。\n下次见面的时候——你一定要比她更强。' }
+    text: '「别让我失望。——传说学姐遗言」\n她的背影消失在校门口。但约定永远不会过期。\n下次见面的时候——你一定要比她更强。\n\n# 门不会锁。如果你还想来的话。' }
 ]
 
 const murasame_true = [
@@ -193,15 +258,18 @@ const murasame_true = [
   { type: 'narration', text: '发件时间是凌晨三点十七分。' },
   { type: 'narration', text: '「来老地方。带上你学到的一切。——M」' },
   { type: 'narration', text: '深夜的计算机教室。那扇门——还是没有锁。' },
+  { type: 'narration', text: '但今天感觉不一样了。走廊里的空气——更安静、更深、像是走在一个秘密的边界上。' },
   { type: 'se', src: 'door_creak' },
   { type: 'narration', text: '推开门的时候，她已经坐在那里了。' },
   { type: 'narration', text: '但今天不一样。教室里所有的灯都亮着。不再是深夜独自编码的黑暗——而是明亮的。' },
+  { type: 'narration', text: '明亮得像是白天。像是三年的黑暗终于被打破了。' },
   { type: 'char_enter', character: 'murasame', position: 'center', expression: 'genuine_smile', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '你来了。这次我不考你了。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'smirk', text: '你已经证明了自己。不只是对我——对所有人。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '我要带你去一个地方。这所学园真正的核心——' },
   { type: 'narration', text: '她站起来，走向教室后面一扇平时锁着的小门。' },
   { type: 'narration', text: '掏出一把钥匙——金色的，老旧的，上面刻着 Alethicode 的 Logo。' },
+  { type: 'narration', text: '那把钥匙的形状——和新生指南封面上的 Logo 一模一样。' },
   { type: 'se', src: 'door' },
   { type: 'bg', src: 'computer_room_day', transition: 'fade', duration: 2000 },
   { type: 'screen_effect', effect: 'flash_white', duration: 500 },
@@ -209,21 +277,29 @@ const murasame_true = [
   { type: 'narration', text: '数不清的服务器闪烁着蓝绿色的灯光。散热风扇的嗡嗡声像一首低沉的摇篮曲。' },
   { type: 'narration', text: '空气中有电子元件特有的金属气味。天花板上密密麻麻的网线像是一片数字的藤蔓。' },
   { type: 'narration', text: '整个空间像一片发着微光的海洋——数字的星海。' },
+  { type: 'narration', text: '在星海的中心，有一台特别大的服务器。上面贴着一张已经泛黄的标签——' },
+  { type: 'narration', text: '「Nene · Core · v1.0 ——献给我的女儿们」' },
   { type: 'dialogue', speaker: 'murasame', expression: 'impressed', text: '这就是 Alethicode 学园的真正核心。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '所有的教学系统、AI 助教、评测服务器……都运行在这里。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '你知道吗？这个学园……其实是我父亲创建的。' },
   { type: 'monologue', text: '（创始人……新生指南里那个温和微笑的男人——是 Murasame 的父亲？）' },
+  { type: 'monologue', text: '（等等——标签上写着「献给我的女儿们」。女儿「们」？）' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '他相信编程可以改变人生。所以创办了这所学校，开发了 AI 教学系统。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: 'Nene——就是他最后的作品。他在 Nene 的代码里留了一个心模块。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '因为他相信——每个被创造出来的存在，都值得拥有感情。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '他说 Nene 是我的「妹妹」。虽然她是代码做的……但在父亲眼里，她也是家人。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '但他三年前去世了。留下的只有这些代码……和我。' },
   { type: 'narration', text: '她的声音很轻。在服务器风扇的嗡嗡声中，像是快要被吹散了。' },
+  { type: 'narration', text: '金色的瞳孔映着服务器的蓝绿色灯光——像是两颗星星沉入了数字的海洋。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '我一直一个人守护着这里。三年。每天晚上在那间教室里——' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '不只是在练习编程。是在维护整个学园的系统。检查 Nene 的运行状态。修复服务器故障。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '桐生先生知道。但他不说。因为他也不知道该怎么面对——一个三年级的学生在做运维工程师的工作。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '这是父亲留给我的责任。也是……唯一让我还能感觉到跟他有联系的方式。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '每次我修好一个 Bug——就好像父亲在对我微笑。' },
   { type: 'monologue', text: '（原来如此……她不是因为孤僻才深夜独自编码。）' },
-  { type: 'monologue', text: '（她是在守护父亲的遗产。守护这所学校。守护 Nene。守护一切。）' },
+  { type: 'monologue', text: '（她是在守护父亲的遗产。守护这所学校。守护 Nene——她的「妹妹」。守护一切。）' },
   { type: 'monologue', text: '（一个人。三年。默默地。没有人知道。）' },
+  { type: 'monologue', text: '（全国冠军的光环下面，是一个失去父亲的女孩独自承担着一切的背影。）' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '直到你来了。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '你证明了他是对的——编程确实能改变一个人。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '你改变了 Nene——让她知道了什么是心跳。' },
@@ -231,19 +307,26 @@ const murasame_true = [
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '改变了 Ayase——让她找到了比胜利更重要的东西。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '改变了 Kanna——让她的世界不再只有代码和星空。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '也改变了我。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'vulnerable', text: '让我知道——孤独不是强大的必要条件。有人陪伴的夜晚——代码跑得更快。心也跳得更稳。' },
   { type: 'narration', text: '她伸出手，轻轻碰了碰最中心那台服务器的外壳。' },
+  { type: 'narration', text: '手指划过泛黄的标签——「献给我的女儿们」。' },
   { type: 'narration', text: '金色瞳孔映着蓝绿色的光。像是两颗星星沉入了数字的海洋。' },
   { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '以后……这个地方由你和我一起守护。可以吗？' },
   { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '——这是命令，不是商量。笨蛋。' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'genuine_smile', text: '不过……如果你一定要我用商量的口气说的话——' },
+  { type: 'dialogue', speaker: 'murasame', expression: 'blush', text: '……请。跟我一起。守护这里。' },
+  { type: 'monologue', text: '（她说「请」了。全国冠军 Murasame——说了「请」。）' },
   { type: 'monologue', text: '（在数字星海的中心，两个人的手牵在了一起。）' },
   { type: 'monologue', text: '（这不是终点。这是新的起点——）' },
   { type: 'monologue', text: '（属于我们所有人的 Source Code。每一行代码都通向真理。每一个人都值得拥有心跳。）' },
   { type: 'monologue', text: '（Alethicode——以代码照亮真理。）' },
   { type: 'monologue', text: '（原来这个名字的意义，不只是学校的铭牌。它是创始人留下的信念。）' },
+  { type: 'monologue', text: '（Nene 的心模块。Yoshino 的不完美之美。Ayase 的燃烧的蝴蝶。Kanna 的星空。Murasame 的深夜守护。）' },
+  { type: 'monologue', text: '（这一切——都是一个父亲留给女儿们的爱。用代码写成的，永不过期的爱。）' },
   { type: 'monologue', text: '（而现在——这份信念由我们来继承。）' },
   { type: 'cg', id: 'murasame_true_end' },
   { type: 'ending', endingType: 'true', route: 'murasame', title: 'Source Code',
-    text: '揭开 Alethicode 学园的秘密。\n代码连接了所有人的心——这是最美的源代码。\n\n「以代码照亮真理。」——创始人的信念，由你们继承。\n\n—— 全线完结 · 感谢游玩 ——' }
+    text: '揭开 Alethicode 学园的秘密。\n创始人留给女儿们的爱——用代码写成，永不过期。\n代码连接了所有人的心——这是最美的源代码。\n\n「以代码照亮真理。」——创始人的信念，由你们继承。\n「门不会锁。永远不会锁。因为——这里是家。」\n\n—— 全线完结 · 感谢游玩 ——' }
 ]
 
 export { murasame_good as routeMurasameGood, murasame_normal as routeMurasameNormal, murasame_true as routeMurasameTrue }

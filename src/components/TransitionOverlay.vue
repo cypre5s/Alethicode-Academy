@@ -70,12 +70,23 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, watch } from 'vue'
 import { getCgEntry } from '../data/cgCatalog.js'
+import { TRANSITIONS } from '../engine/TransitionManager.js'
 
 defineEmits(['title'])
 
 const engine = inject('engine')
+const live2d = inject('live2d', null)
+
+watch(() => engine.isTransitioning.value, (transitioning) => {
+  if (!live2d) return
+  if (transitioning) {
+    live2d.prepareTransition()
+  } else {
+    live2d.onTransitionComplete()
+  }
+})
 const effect = computed(() => engine.screenEffect.value)
 const currentCg = computed(() => {
   const raw = engine.currentCG.value
@@ -99,11 +110,15 @@ const cgDisplayClass = computed(() => ({
 
 const transitionClass = computed(() => {
   const type = engine.transitionType.value
+  const spec = TRANSITIONS[type]
+  if (spec?.cssClass) return { [spec.cssClass]: true }
   return {
-    'transition-fade': type === 'fade',
-    'transition-slide': type === 'slide' || type === 'slide_left',
-    'transition-dissolve': type === 'dissolve',
-    'transition-none': type === 'none',
+    'tr-fade': type === 'fade',
+    'tr-slide-left': type === 'slide' || type === 'slide_left',
+    'tr-slide-right': type === 'slide_right',
+    'tr-dissolve': type === 'dissolve',
+    'tr-flash': type === 'flash',
+    'tr-shake': type === 'shake',
   }
 })
 
@@ -139,6 +154,7 @@ const endingBackdropStyle = computed(() => (
   inset: 0;
   z-index: 50;
   pointer-events: none;
+  contain: layout style;
 }
 
 .overlay-bg,
@@ -154,24 +170,34 @@ const endingBackdropStyle = computed(() => (
   pointer-events: all;
 }
 
-.transition-fade {
+.tr-fade {
   background: rgba(60, 39, 23, 0.52);
   animation: transition-fade-pulse ease;
 }
 
-.transition-slide {
+.tr-slide-left {
   background: linear-gradient(90deg, rgba(91, 61, 38, 0.44), rgba(212, 164, 109, 0.34));
   animation: transition-slide ease;
 }
 
-.transition-dissolve {
+.tr-slide-right {
+  background: linear-gradient(270deg, rgba(91, 61, 38, 0.44), rgba(212, 164, 109, 0.34));
+  animation: transition-slide-right ease;
+}
+
+.tr-dissolve {
   background: rgba(255, 245, 236, 0.54);
   backdrop-filter: blur(14px);
   animation: transition-fade-pulse ease;
 }
 
-.transition-none {
-  display: none;
+.tr-flash {
+  background: rgba(255, 255, 255, 0.95);
+  animation: transition-fade-pulse ease;
+}
+
+.tr-shake {
+  animation: screen-shake forwards;
 }
 
 @keyframes transition-fade-pulse {
@@ -186,6 +212,13 @@ const endingBackdropStyle = computed(() => (
   42% { transform: translateX(0); }
   60% { transform: translateX(0); }
   100% { transform: translateX(100%); }
+}
+
+@keyframes transition-slide-right {
+  0% { transform: translateX(100%); }
+  42% { transform: translateX(0); }
+  60% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
 }
 
 .screen-effect {

@@ -2,6 +2,7 @@
   <div class="game-screen" @click="handleScreenClick" tabindex="0">
     <BackgroundLayer />
     <CharacterLayer />
+    <CanvasOverlay />
     <TransitionOverlay @title="handleTitle" />
     <StatusToast />
 
@@ -25,6 +26,9 @@
       <button class="yuzu-btn genesis-btn" @click.stop="showCognitiveMap = !showCognitiveMap" title="认知图谱">🧠</button>
       <button class="yuzu-btn genesis-btn" @click.stop="showCodeArchaeology = !showCodeArchaeology" title="代码考古">🏛️</button>
       <button class="yuzu-btn genesis-btn" @click.stop="showDashboard = !showDashboard" title="学习报告">📊</button>
+      <button class="yuzu-btn genesis-btn" @click.stop="showPairProgramming = !showPairProgramming" title="Pair Programming">👩‍💻</button>
+      <button class="yuzu-btn genesis-btn" @click.stop="showCodeWall = !showCodeWall" title="代码墙">📋</button>
+      <button class="yuzu-btn genesis-btn" @click.stop="showAchievement = !showAchievement" title="成就卡片">🏆</button>
     </div>
 
     <ChoiceMenu />
@@ -55,6 +59,18 @@
     <LearningDashboard
       :is-open="showDashboard"
       @close="showDashboard = false"
+    />
+    <PairProgramming
+      :is-open="showPairProgramming"
+      @close="showPairProgramming = false"
+    />
+    <CodeWall
+      :is-open="showCodeWall"
+      @close="showCodeWall = false"
+    />
+    <AchievementCard
+      :is-open="showAchievement"
+      @close="showAchievement = false"
     />
 
     <transition-group name="notif-slide" tag="div" class="autonomy-notifications">
@@ -125,6 +141,7 @@ import BacklogPanel from './BacklogPanel.vue'
 import SettingsPanel from './SettingsPanel.vue'
 import TransitionOverlay from './TransitionOverlay.vue'
 import StatusToast from './StatusToast.vue'
+import CanvasOverlay from './CanvasOverlay.vue'
 import SkipSummary from './SkipSummary.vue'
 import { defineAsyncComponent } from 'vue'
 const DebugConsole = defineAsyncComponent(() => import('./DebugConsole.vue'))
@@ -132,8 +149,12 @@ const WorldConsole = defineAsyncComponent(() => import('./WorldConsole.vue'))
 const CognitiveMap = defineAsyncComponent(() => import('./CognitiveMap.vue'))
 const CodeArchaeology = defineAsyncComponent(() => import('./CodeArchaeology.vue'))
 const LearningDashboard = defineAsyncComponent(() => import('./LearningDashboard.vue'))
+const PairProgramming = defineAsyncComponent(() => import('./PairProgramming.vue'))
+const CodeWall = defineAsyncComponent(() => import('./CodeWall.vue'))
+const AchievementCard = defineAsyncComponent(() => import('./AchievementCard.vue'))
 import { useLLMManager } from '../engine/LLMManager.js'
 import { useLive2DManager } from '../engine/Live2DManager.js'
+import html2canvas from 'html2canvas'
 
 const emit = defineEmits(['title'])
 const engine = inject('engine')
@@ -181,6 +202,9 @@ const showWorldConsole = ref(false)
 const showCognitiveMap = ref(false)
 const showCodeArchaeology = ref(false)
 const showDashboard = ref(false)
+const showPairProgramming = ref(false)
+const showCodeWall = ref(false)
+const showAchievement = ref(false)
 
 import('../engine/PythonRunner.js').then(async ({ usePythonRunner }) => {
   const pythonRunner = usePythonRunner()
@@ -390,8 +414,8 @@ async function captureScreenshot() {
   try {
     const gameEl = document.querySelector('.game-screen')
     if (!gameEl) return
-    const { default: html2canvas } = await import('html2canvas')
-    const canvas = await html2canvas(gameEl, { backgroundColor: '#0a0814', scale: 2, useCORS: true })
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+    const canvas = await html2canvas(gameEl, { backgroundColor: '#0a0814', scale: isMobile ? 1 : 2, useCORS: true })
     const link = document.createElement('a')
     link.download = `alethicode-${Date.now()}.png`
     link.href = canvas.toDataURL('image/png')

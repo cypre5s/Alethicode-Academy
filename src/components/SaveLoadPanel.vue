@@ -44,6 +44,14 @@
             </div>
           </div>
         </div>
+
+        <div class="panel-footer">
+          <button class="footer-btn" @click="handleExport">导出全部存档</button>
+          <label class="footer-btn import-label">
+            导入存档
+            <input type="file" accept=".json" class="import-input" @change="handleImport" />
+          </label>
+        </div>
       </div>
     </div>
   </transition>
@@ -106,6 +114,21 @@ function slotPreviewStyle(save) {
 function chapterLabel(save) {
   return save.chapterTitle || save.currentChapter || '剧情中'
 }
+
+function handleExport() {
+  saveManager.exportAllSaves()
+  audio.playSfx('save')
+}
+
+async function handleImport(e) {
+  const file = e.target?.files?.[0]
+  if (!file) return
+  const result = await saveManager.importSaves(file)
+  if (result.ok) {
+    audio.playSfx('save')
+  }
+  e.target.value = ''
+}
 </script>
 
 <style scoped>
@@ -115,6 +138,7 @@ function chapterLabel(save) {
   z-index: 30;
   display: flex;
   align-items: center;
+  contain: layout style paint;
   justify-content: center;
   padding: 24px;
   background: rgba(33, 22, 15, 0.42);
@@ -294,6 +318,39 @@ function chapterLabel(save) {
   background: rgba(214, 112, 112, 0.1);
   border: 1px solid rgba(214, 112, 112, 0.24);
   color: #b45d5d;
+}
+
+.panel-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 24px 22px;
+  border-top: 1px solid rgba(222, 190, 139, 0.18);
+}
+
+.footer-btn {
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(216, 177, 110, 0.26);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--vn-text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer-btn:hover {
+  border-color: var(--vn-primary);
+  color: var(--vn-text);
+}
+
+.import-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.import-input {
+  display: none;
 }
 
 .fade-enter-active,

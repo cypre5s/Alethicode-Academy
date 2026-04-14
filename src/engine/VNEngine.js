@@ -22,8 +22,10 @@ import { useSymbioticCodeDNA } from './SymbioticCodeDNA.js'
 import { useRealityBridge } from './RealityBridge.js'
 import { usePedagogyKernel } from './PedagogyKernel.js'
 import { useNarrativeCodeBridge } from './NarrativeCodeBridge.js'
+import { useAwakenessEngine } from './AwakenessEngine.js'
 import { evaluateMetaUnlocks } from '../data/metaNarrativeManifest.js'
 import { triggerHaptic, setMoodTheme, mapCommandToHaptic } from './ExperienceEnhancer.js'
+import { useImmersiveBridge } from './ImmersiveBridge.js'
 
 export function useVNEngine() {
   const _pendingTimers = new Set()
@@ -52,6 +54,8 @@ export function useVNEngine() {
   const realityBridge = useRealityBridge()
   const pedagogyKernel = usePedagogyKernel()
   const narrativeCodeBridge = useNarrativeCodeBridge()
+  const awakenessEngine = useAwakenessEngine()
+  const immersiveBridge = useImmersiveBridge()
 
   persistentMemory.initialize()
   cognitiveGraph.initialize()
@@ -2000,5 +2004,7 @@ export function useVNEngine() {
     realityBridge,
     pedagogyKernel,
     narrativeCodeBridge,
+    awakenessEngine,
+    immersiveBridge,
   }
 }

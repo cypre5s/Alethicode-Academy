@@ -1,17 +1,24 @@
 export const routeAyase = [
-  { type: 'title_card', text: 'Ayase 线「Bug 与 Butterfly」', subtitle: '—— 有些东西比赢更重要 ——' },
+  // ──────────────────────────────────────────────
+  // Ayase 线「Bug & Butterfly」
+  // 文風：热血体育文学 —— 短促有力的句子、
+  // 速度感与节奏感、感叹号密集如心跳、
+  // 汗水与青春的味道、胜败之间的成长
+  // ──────────────────────────────────────────────
+  { type: 'title_card', text: 'Ayase 线「Bug & Butterfly」', subtitle: '—— 全力以赴！有些东西比赢更重要！ ——' },
   { type: 'bg', src: 'rooftop_day', transition: 'fade', duration: 1500 },
   { type: 'bgm', src: 'daily', fadeIn: 1500 },
-  { type: 'narration', text: '文化祭结束后的第二天。空气中还残留着昨晚烟火的硝烟味。' },
-  { type: 'narration', text: '天台上风很大。银杏叶开始泛黄，秋天正式到来了。' },
+  { type: 'narration', text: '文化祭结束后的第二天！空气中残留着硝烟味！心脏还在砰砰跳！' },
+  { type: 'narration', text: '天台。风。银杏叶被吹得乱飞。秋天来了——但青春才刚刚起跑！' },
 
   { type: 'char_enter', character: 'ayase', position: 'center', expression: 'grin', animation: 'slide_from_right' },
-  { type: 'narration', text: 'Ayase 已经在那里等着了。今天的她穿了一件新卫衣——印着一只可爱的小蝴蝶图案。' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '嘿！从今天开始，我要超级加倍努力训练！下次比赛一定要赢你！' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'competitive', text: '所以——你要当我的陪练！不许拒绝！这事没得商量！' },
-  { type: 'monologue', text: '（她的竞争心还是这么旺盛啊……）' },
-  { type: 'monologue', text: '（不过最近她看我的眼神好像有点不一样了。怎么说呢……少了一些挑衅，多了一些……柔和？）' },
-  { type: 'monologue', text: '（而且那件卫衣上的蝴蝶——跟她平时的风格完全不一样。以前她只穿运动装。）' },
+  { type: 'narration', text: '她已经在那里了。风把她的橙色双马尾吹成了旗帜。卫衣上印着一只展翅的蝴蝶——这不像她。以前她只穿运动装。' },
+  { type: 'narration', text: '但蝴蝶在飞。就像她一样——从毛毛虫进化成了别的什么东西。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '嘿！！从今天开始！超级加倍训练！下次比赛！绝对赢你！' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'competitive', text: '你给我当陪练！不许拒绝！不许讨价还价！这事已经决定了！！' },
+  { type: 'monologue', text: '（声音大得连银杏树都在抖。竞争心爆表。但是——）' },
+  { type: 'monologue', text: '（她看我的眼神变了。不是对手的那种眼神。是什么呢。更柔、更暖。像日落前最后一缕阳光。）' },
+  { type: 'monologue', text: '（那只蝴蝶。她以前绝对不会穿这种东西。这是——给谁看的？）' },
 
   { type: 'dialogue', speaker: 'ayase', expression: 'fired_up', text: '别发呆了！来来来，从今天开始，每天放学后特训！' },
   { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '我列了一个训练计划！Bug 调试、算法对战、限时赛——全套！' },
@@ -20,7 +27,7 @@ export const routeAyase = [
   { type: 'narration', text: '——第一天的计划旁边画了两个小人并排坐在电脑前。一个有马尾。' },
   { type: 'monologue', text: '（这个画……是她和我吗？）' },
 
-  // === 训练日常 ===
+  // ===== A-02: 训练日常 =====
   { type: 'bg', src: 'computer_room_day', transition: 'fade' },
   { type: 'bgm', src: 'daily', crossfade: 1000 },
   { type: 'narration', text: '从那天起，我们开始每天一起训练编程。' },
@@ -40,12 +47,24 @@ export const routeAyase = [
   { type: 'monologue', text: '（不知道从什么时候开始，和她一起训练变成了每天最期待的事。）' },
   { type: 'monologue', text: '（不是因为编程——是因为她。那种不服输的光芒，每天都在变得更耀眼。）' },
 
-  // === 训练中的温柔时刻 ===
+  // ===== A-03: 训练中的温柔时刻 =====
   { type: 'narration', text: '有一天训练结束后，她递给我一瓶运动饮料。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'pout', text: '别误会！是自动贩卖机多掉了一瓶！才不是专门买的！' },
   { type: 'monologue', text: '（这瓶是草莓味的。她怎么知道我喜欢草莓味？我好像从来没说过。）' },
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '……上次在食堂你拿了草莓牛奶。我就——算了不说了。喝不喝随便你。' },
   { type: 'monologue', text: '（她观察得比我想象的仔细啊。嘴上说着"随便"，但细节出卖了她。）' },
+
+  { type: 'narration', text: '还有一次。训练到很晚。窗外已经黑了。' },
+  { type: 'narration', text: '她靠在椅背上，伸了个懒腰。马尾散了一半，搭在肩膀上。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '嘿……你有没有觉得，编程其实挺像运动的？' },
+  { type: 'monologue', text: '「运动？」' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'normal', text: '就是……要一直练。一直练。输了就再来。不放弃。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '而且——需要对手。一个能让你变得更强的对手。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '不是说你啦！我说的是一般意义上的对手！通用对手！Universal Rival！' },
+  { type: 'monologue', text: '（Universal Rival……你这个词用得倒挺高级的。但为什么要这么拼命否认啊。）' },
+  { type: 'affection', character: 'ayase', change: 3 },
+
+  { type: 'free_talk', character: 'ayase', max_turns: 3, promptId: 'ayase_route_training', context: '训练到很晚，Ayase 说编程像运动需要对手，把你叫成 Universal Rival 还死不承认', sceneObjective: '围绕竞争中的友情和彼此激励展开对话' },
 
   // 编程题 A-1
   { type: 'dialogue', speaker: 'ayase', expression: 'fired_up', text: '今天的训练主题——找 Bug！' },
@@ -58,8 +77,37 @@ export const routeAyase = [
       fail: { speaker: 'ayase', expression: 'grin', text: '嘿嘿，这次我看出来了！第4行应该用 += 不是 =！我赢了！' }
     }
   },
+  { type: 'char_exit', character: 'ayase', animation: 'fade_out' },
 
-  // === 校际赛来临 ===
+  // ===== A-04: 周末 · 一起去买装备 =====
+  { type: 'bg', src: 'school_gate_day', transition: 'fade' },
+  { type: 'bgm', src: 'playful', crossfade: 1500 },
+  { type: 'narration', text: '某个周末。手机上弹出一条消息——' },
+  { type: 'narration', text: '「嘿！今天陪我去买键盘！新键盘=新战力！含金量直接起飞！——Ayase」' },
+  { type: 'narration', text: '后面跟了十个感叹号和三个火焰 emoji。' },
+  { type: 'narration', text: '校门口。她穿着便装——碎花裙和白色运动鞋。头发放下来了，没有扎马尾。' },
+  { type: 'char_enter', character: 'ayase', position: 'center', expression: 'grin', animation: 'slide_from_right' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '哟！你来了！走走走！电子城在三站地铁！直接冲！' },
+  { type: 'monologue', text: '（她没有扎马尾……散着头发的 Ayase 看起来完全不一样。少了元气炸裂的感觉，多了一种……柔软。）' },
+  { type: 'monologue', text: '（而且碎花裙……从来没见她穿过。她为了今天特意换了衣服？）' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '……看什么看！裙子怎么了！我也有不穿运动装的时候好吧！' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'pout', text: '才不是因为今天特别什么的！只是洗衣机把运动裤洗坏了！对！就是这样！' },
+  { type: 'monologue', text: '（洗衣机把所有运动裤都洗坏了？你有几条运动裤啊……）' },
+
+  { type: 'narration', text: '电子城里。她对键盘的热情比对编程还高。' },
+  { type: 'narration', text: '每一款都要试按几下，然后大声评价——' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'fired_up', text: '这个！敲起来像机关枪！太酷了！超级加倍手感！' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '这个！灯光好炫！RGB 全开！编程效率直接翻倍！' },
+  { type: 'monologue', text: '（RGB 跟编程效率有什么关系……不过看她开心的样子，也不忍心吐槽。）' },
+  { type: 'narration', text: '最后她选了一款粉色的机械键盘。上面有蝴蝶图案的键帽。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '……嘿。帮我选一个键帽吧。当做纪念。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '不是什么特别的意思！就是……两个人一起选的键盘嘛，要有你的印记才完整！' },
+  { type: 'monologue', text: '（我选了一个蓝色的星星键帽，替换了她 Enter 键旁边的位置。）' },
+  { type: 'monologue', text: '（她看着那个蓝色星星，笑了。那个笑容——比电子城里所有的 RGB 都耀眼。）' },
+  { type: 'affection', character: 'ayase', change: 4 },
+  { type: 'char_exit', character: 'ayase', animation: 'fade_out' },
+
+  // ===== A-05: 校际赛来临 =====
   { type: 'bg', src: 'classroom_day', transition: 'fade' },
   { type: 'bgm', src: 'tension', crossfade: 1500 },
   { type: 'narration', text: '训练持续了两周。新的编程比赛来了——这次是校际赛，规模更大。' },
@@ -70,46 +118,22 @@ export const routeAyase = [
   { type: 'dialogue', speaker: 'ayase', expression: 'competitive', text: '练了这么久，如果还输就太丢人了！' },
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '……而且，我想让你看到——我的努力没有白费。' },
   { type: 'monologue', text: '（最后那句话，声音小得差点听不见。但我听到了。）' },
+  { type: 'monologue', text: '（她说的不是"我想赢"。而是"我想让你看到"。）' },
+  { type: 'monologue', text: '（这两句话之间的距离——就是竞争心和另一种心之间的距离。）' },
   { type: 'char_exit', character: 'ayase' },
 
-  // === 比赛中的异常 ===
-  { type: 'narration', text: '但在比赛中，我注意到了奇怪的事——' },
+  // ===== A-06: 比赛中的异常 =====
+  { type: 'narration', text: '比赛在市中心的大学计算机实验室举行。八所学校的参赛者坐满了整间教室。' },
+  { type: 'narration', text: '每台电脑前都坐着一个绷着脸的学生。空气中弥漫着紧张和键盘声。' },
+  { type: 'narration', text: '比赛开始了。前几道题我们都答得很快。' },
+  { type: 'narration', text: '但在比赛中途，我注意到了奇怪的事——' },
   { type: 'monologue', text: '（等等……Ayase 的答题速度好像变慢了。）' },
   { type: 'monologue', text: '（不对，不是变慢了。她明明看了一眼答案就移开了视线。）' },
   { type: 'monologue', text: '（那道题我们训练的时候做过——她当时一秒就选出了正确答案。）' },
   { type: 'monologue', text: '（可是刚才……她故意选了错误选项。）' },
   { type: 'monologue', text: '（Ayase……为什么要故意输？）' },
   { type: 'monologue', text: '（从第一天认识她开始，她就是那个「绝对不服输」的人。怎么会故意输？）' },
-
-  // === 天台对质 ===
-  { type: 'bg', src: 'rooftop_evening', transition: 'fade', duration: 1500 },
-  { type: 'bgm', src: 'romantic', crossfade: 2000 },
-  { type: 'narration', text: '比赛结束后，我在天台找到了她。' },
-  { type: 'narration', text: '夕阳把她的橙色双马尾染成了更深的金红色。她背对着我，看着远方的城市天际线。' },
-  { type: 'narration', text: '风很大。她的马尾在晚风中像两面火焰般的旗帜。' },
-  { type: 'char_enter', character: 'ayase', position: 'center', expression: 'normal' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'normal', text: '……嘿。你来了。' },
-  { type: 'monologue', text: '（她的声音……好安静。完全不像平时那个元气炸裂的 Ayase。）' },
-  { type: 'monologue', text: '（她甚至没有回头看我。第一次见她不面对我说话。）' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '你是不是发现了。在比赛里。' },
-  { type: 'monologue', text: '「……你故意输了。」' },
-  { type: 'narration', text: '她终于转过头来。翠绿色的眼睛在夕阳下湿润了。' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '……嗯。对。我故意输了。' },
-  { type: 'monologue', text: '「为什么？你不是最讨厌输的吗？」' },
-  { type: 'narration', text: '她低下头。马尾垂落在肩膀上。声音变得很轻——' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '因为……如果我赢了，就没有理由继续当你的「对手」了。' },
-  { type: 'monologue', text: '（……什么？）' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '「追上你」是我唯一能想到的……接近你的理由。' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'pout', text: '如果我追上了……甚至超过了……那我就没有继续留在你身边的借口了啊。' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '那份训练日程表……你翻到最后一页看过吗？' },
-  { type: 'monologue', text: '（最后一页？我只看了第一页就按照计划开始了。）' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '最后一页画着两个小人。跟第一页一样。但……' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '没有电脑。没有代码。只有两个人站在夕阳下。就像现在这样。' },
-  { type: 'monologue', text: '（原来……她的竞争心背后藏着这样的感情。）' },
-  { type: 'monologue', text: '（她不是想赢我。她是害怕——害怕赢了之后就失去了靠近我的理由。）' },
-  { type: 'monologue', text: '（那些挑衅、那些不服输、那些每天放学后的训练——全都是爱的伪装。）' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '……笨蛋。别用那种眼神看我。' },
-  { type: 'dialogue', speaker: 'ayase', expression: 'pout', text: '我们来做题！用编程解决一切！这种氛围我受不了！' },
+  { type: 'monologue', text: '（除非——她输的理由，比赢的理由更重要。）' },
 
   // 编程题 A-2
   { type: 'challenge', id: 'ayase_game_logic',
@@ -120,24 +144,64 @@ export const routeAyase = [
     }
   },
 
-  // === 约定最后一战 ===
+  // ===== A-07: 天台对质 =====
+  { type: 'bg', src: 'rooftop_evening', transition: 'fade', duration: 1500 },
+  { type: 'bgm', src: 'romantic', crossfade: 2000 },
+  { type: 'narration', text: '比赛结束后，我在天台找到了她。' },
+  { type: 'narration', text: '夕阳把她的橙色双马尾染成了更深的金红色。她背对着我，看着远方的城市天际线。' },
+  { type: 'narration', text: '风很大。她的马尾在晚风中像两面火焰般的旗帜。' },
+  { type: 'narration', text: '那件蝴蝶卫衣的背面——映着落日的剪影——蝴蝶的翅膀像是在燃烧。' },
+  { type: 'char_enter', character: 'ayase', position: 'center', expression: 'normal' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'normal', text: '……嘿。你来了。' },
+  { type: 'monologue', text: '（她的声音……好安静。完全不像平时那个元气炸裂的 Ayase。）' },
+  { type: 'monologue', text: '（她甚至没有回头看我。第一次见她不面对我说话。）' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '你是不是发现了。在比赛里。' },
+  { type: 'monologue', text: '「……你故意输了。」' },
+  { type: 'narration', text: '她终于转过头来。翠绿色的眼睛在夕阳下湿润了。' },
+  { type: 'narration', text: '那双总是闪着自信光芒的眼睛——此刻像是被雨淋过的翡翠。温润，但脆弱。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '……嗯。对。我故意输了。' },
+  { type: 'monologue', text: '「为什么？你不是最讨厌输的吗？」' },
+  { type: 'narration', text: '她低下头。马尾垂落在肩膀上。声音变得很轻——像是一只蝴蝶扇翅膀的声音。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '因为……如果我赢了，就没有理由继续当你的「对手」了。' },
+  { type: 'monologue', text: '（……什么？）' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '「追上你」是我唯一能想到的……接近你的理由。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'pout', text: '如果我追上了……甚至超过了……那我就没有继续留在你身边的借口了啊。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'normal', text: '你知道吗。每天放学后的训练——那是我一天里最开心的时间。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '不是因为编程。是因为你在。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '如果有一天我不需要再追你了……那一天就是我们不再在一起训练的日子。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '我害怕那一天。比害怕输还害怕。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '那份训练日程表……你翻到最后一页看过吗？' },
+  { type: 'monologue', text: '（最后一页？我只看了第一页就按照计划开始了。）' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '最后一页画着两个小人。跟第一页一样。但……' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '没有电脑。没有代码。只有两个人站在夕阳下。就像现在这样。' },
+  { type: 'monologue', text: '（原来……她的竞争心背后藏着这样的感情。）' },
+  { type: 'monologue', text: '（她不是想赢我。她是害怕——害怕赢了之后就失去了靠近我的理由。）' },
+  { type: 'monologue', text: '（那些挑衅、那些不服输、那些每天放学后的训练——全都是爱的伪装。）' },
+  { type: 'monologue', text: '（蝴蝶不是从毛毛虫变来的——它一直都在。只是被茧包裹着。等待破茧的那一刻。）' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '……笨蛋。别用那种眼神看我。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'pout', text: '我们来做题！用编程解决一切！这种氛围我受不了！' },
+
+  // ===== A-08: 约定最后一战 =====
   { type: 'bg', src: 'rooftop_day', transition: 'fade' },
-  { type: 'bgm', src: 'daily', crossfade: 1500 },
+  { type: 'bgm', src: 'determination', crossfade: 1500 },
   { type: 'narration', text: '第二天，Ayase 找到了我。她的表情变了——不再是逃避，而是决心。' },
-  { type: 'char_enter', character: 'ayase', position: 'center', expression: 'fired_up' },
+  { type: 'narration', text: '双马尾扎得比平时更紧。眼神比任何时候都锐利。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'fired_up', text: '我想好了！我不要再逃了！' },
   { type: 'dialogue', speaker: 'ayase', expression: 'competitive', text: '我们来最后一场公平的编程对决！' },
   { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '谁都不许放水！不许让着对方！全力以赴！' },
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '不管结果怎样……这一次，我要堂堂正正地面对你。面对我自己的心。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'fired_up', text: '赢了——我就有资格说出口。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '输了——我也要说。因为我不想再把喜欢伪装成竞争了。' },
   { type: 'monologue', text: '（她的眼神变了。不再是单纯的争强好胜。）' },
   { type: 'monologue', text: '（那是决心——面对自己感情的决心。像蝴蝶破茧的那一刻。）' },
 
-  // === 最终对决 ===
+  // ===== A-09: 最终对决 =====
   { type: 'bg', src: 'computer_room_day', transition: 'fade' },
   { type: 'bgm', src: 'battle', crossfade: 1500 },
   { type: 'narration', text: '计算机教室。放学后。只有我们两个人。' },
   { type: 'narration', text: '两台电脑并排摆着。窗外的夕阳从侧面照进来，把我们的影子投在墙上。' },
   { type: 'narration', text: '两个影子并排。就像训练日程表第一页上画的那幅画。' },
+  { type: 'narration', text: '她的粉色键盘上，蓝色星星键帽在夕阳下微微发光。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'competitive', text: '准备好了吗？' },
   { type: 'monologue', text: '「当然。」' },
   { type: 'dialogue', speaker: 'ayase', expression: 'fired_up', text: '那——最终对决，开始！！' },
@@ -151,7 +215,7 @@ export const routeAyase = [
     }
   },
 
-  // === 对决结束 ===
+  // ===== A-10: 对决结束 =====
   { type: 'bgm_stop', fadeOut: 1000 },
   { type: 'narration', text: '对决结束了。' },
   { type: 'narration', text: '教室里安静得只能听到电脑风扇的嗡嗡声和彼此的呼吸。' },
@@ -164,16 +228,19 @@ export const routeAyase = [
   { type: 'narration', text: '不知道是谁先提议的，我们来到了天台。' },
   { type: 'narration', text: '和第一天一样的天台。和第一天一样的风。' },
   { type: 'narration', text: '但现在——一切都不一样了。' },
+  { type: 'narration', text: '那只蝴蝶卫衣在晚风中猎猎作响。蝴蝶的翅膀像是真的在振动。' },
   { type: 'char_enter', character: 'ayase', position: 'center', expression: 'soft_smile' },
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '结束了呢……最后的对决。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'normal', text: '不管谁赢谁输——' },
   { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '我想说的其实不是「我要赢你」……' },
   { type: 'narration', text: '她深吸了一口气。马尾在风中飘动。翠绿色的眼睛直直地看着我——' },
+  { type: 'narration', text: '那双眼睛里没有了竞争的火焰。取而代之的是——一种更安静、更深沉的光。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '一直以来，那些挑衅、那些比赛、那些每天放学后的训练——' },
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '全都是……想跟你在一起的借口而已。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '每次说「我要赢你」——其实是在说「我不想失去你」。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '所以——今天，这一次，不用借口了。' },
   { type: 'narration', text: '她的声音在颤抖。但眼神比任何时候都坚定。' },
+  { type: 'narration', text: '风停了一秒。银杏叶在空中悬浮了一瞬——然后继续飘落。' },
 
   { type: 'choice', prompt: '', options: [
     { text: '「不管谁赢谁输，我都想一直和你比下去——一直在一起。」', effects: { ayase: 15 }, next: 'ayase_good_path' },
@@ -186,11 +253,14 @@ const ayase_good = [
   { type: 'bgm', src: 'ending', fadeIn: 2000 },
   { type: 'dialogue', speaker: 'ayase', expression: 'surprised', text: '……！' },
   { type: 'narration', text: '她愣了一秒。翠绿色的眼睛在夕阳下变得像融化的宝石。' },
+  { type: 'narration', text: '嘴唇张了张——像是有一千句话想说，但最后一句都没说出来。' },
   { type: 'narration', text: '然后——' },
   { type: 'narration', text: 'Ayase 冲了上来，抱住了你。双马尾在晚风中飘扬——像两条燃烧的火舌。' },
-  { type: 'narration', text: '她的肩膀在颤抖。但抱得很紧。' },
+  { type: 'narration', text: '她的肩膀在颤抖。但抱得很紧。紧得像是怕你消失一样。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '笨蛋！我想要的奖品从来就不是奖杯！' },
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '是你啊。从第一天坐在我旁边的时候开始……就一直是你。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '那天你走进教室的时候，我就知道——这个人会改变我的人生。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '但我不知道怎么接近你。除了「当你的对手」之外——我想不到别的办法。' },
   { type: 'monologue', text: '（她的声音在颤抖。那个总是大大咧咧的显眼包 Ayase——）' },
   { type: 'monologue', text: '（此刻就像一只终于停下来的蝴蝶。不再飞，不再闹，安静地停在我的肩上。）' },
   { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '……你知道 Bug 和 Butterfly 有什么共同点吗？' },
@@ -198,11 +268,33 @@ const ayase_good = [
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '都是在代码里诞生的惊喜啊。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '就像——喜欢上你这件事。明明不在我的「计划」里。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '但它就这样发生了。然后我发现——这是我写过的最美的 Bug。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '永远不要修复。永远不要 patch。让它一直运行下去。' },
   { type: 'narration', text: '夕阳在两个人的身后慢慢沉下去。' },
   { type: 'narration', text: '天台上只剩下风声、心跳声、和两个人轻轻的笑声。' },
+
+  // 尾声
+  { type: 'wait', duration: 1500 },
+  { type: 'bg', src: 'rooftop_day', transition: 'fade', duration: 2000 },
+  { type: 'bgm', src: 'spring_breeze', crossfade: 2000 },
+  { type: 'narration', text: '——几个月后。春天又来了。' },
+  { type: 'narration', text: '天台上。风。樱花在飞。' },
+  { type: 'narration', text: '她还是每天都会来这里。但不再是一个人。' },
+  { type: 'char_enter', character: 'ayase', position: 'center', expression: 'grin', animation: 'slide_from_right' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '嘿！今天也要训练吗？我已经准备好了！' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'competitive', text: '虽然我们已经……那个了。但编程上我可不会让着你！' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'fired_up', text: '下一次比赛我一定要赢！这次是认真的！超级加倍认真！' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '……而且这次赢了的话——' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'blush', text: '嘿嘿。这次我想要的奖品不是奖杯。是另一个东西。但现在不告诉你。' },
+  { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '等我赢了再说！走了走了！训练去！' },
+  { type: 'narration', text: '她拉着我的手跑下了楼梯。' },
+  { type: 'narration', text: '马尾在樱花中飞舞。翠绿色的眼睛比春天还要明亮。' },
+  { type: 'narration', text: '她的粉色键盘上，那个蓝色星星键帽——已经被磨得有点掉色了。' },
+  { type: 'narration', text: '因为她每天都在用。每天都在按。每一次按键——都像是在跟那个蓝色星星说一声：' },
+  { type: 'narration', text: '「今天也在一起呢。」' },
+
   { type: 'cg', id: 'ayase_good_end' },
   { type: 'ending', endingType: 'good', route: 'ayase', title: 'Winner Takes All',
-    text: '不管谁赢谁输，最珍贵的奖品一直都在身边。\n三司あやせ终于找到了比胜利更重要的东西。\n\n「喜欢上你——是我写过的最美的 Bug。」' }
+    text: '不管谁赢谁输，最珍贵的奖品一直都在身边。\n三司あやせ终于找到了比胜利更重要的东西。\n蝴蝶不再是 Bug——它是代码里最美的 Feature。\n\n「喜欢上你——是我写过的最美的 Bug。永远不要修复。」' }
 ]
 
 const ayase_normal = [
@@ -211,6 +303,7 @@ const ayase_normal = [
   { type: 'dialogue', speaker: 'ayase', expression: 'soft_smile', text: '对手……嗯。最好的对手。' },
   { type: 'monologue', text: '（她笑了。但那个笑容——像是一段代码明明运行成功了，但返回值却不是她想要的。）' },
   { type: 'narration', text: '风吹过天台。她的马尾在夕阳中飘扬。' },
+  { type: 'narration', text: '翠绿色的眼睛闪了一下——像是萤火虫的光。短暂但真实。' },
   { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '那我会变得更强！总有一天会强到——你不得不正视我！' },
   { type: 'dialogue', speaker: 'ayase', expression: 'competitive', text: '不只是作为对手——作为……算了！等着我！' },
   { type: 'narration', text: '她留下了一个编程挑战的链接。然后转身跑开了。' },
@@ -219,8 +312,9 @@ const ayase_normal = [
   { type: 'dialogue', speaker: 'ayase', expression: 'grin', text: '——下次见面的时候，我一定会让你说出不同的答案！等我！' },
   { type: 'monologue', text: '（那个链接上写着：「等你准备好再打开。——Ayase」）' },
   { type: 'monologue', text: '（她的背影消失在楼梯口。但她留下的挑战——永远不会过期。）' },
+  { type: 'monologue', text: '（因为三司あやせ——从来不放弃。不管是编程，还是——别的什么。）' },
   { type: 'ending', endingType: 'normal', route: 'ayase', title: 'Rematch',
-    text: '「下次见面的时候，我一定会让你说出不同的答案。」\n约定重赛的那一天，一定会来。\n到那时——三司あやせ会用全力赢一次。\n然后说出一直藏在心里的话。' }
+    text: '「下次见面的时候，我一定会让你说出不同的答案。」\n约定重赛的那一天，一定会来。\n到那时——三司あやせ会用全力赢一次。\n然后说出一直藏在心里的话。\n\n「等你准备好再打开。——Ayase」' }
 ]
 
 export { ayase_good as routeAyaseGood, ayase_normal as routeAyaseNormal }

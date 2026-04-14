@@ -36,7 +36,22 @@
         </div>
       </div>
 
-      <div class="freetalk-input-area">
+      <div v-if="wrapUpMode" class="freetalk-wrapup">
+        <div class="wrapup-farewell">
+          <p class="wrapup-line" :style="{ color: charColor }">{{ farewellLine }}</p>
+        </div>
+        <div v-if="sessionSummary.length" class="wrapup-summary">
+          <div v-for="(item, i) in sessionSummary" :key="i" class="wrapup-delta">
+            <span class="wrapup-label">{{ item.label }}</span>
+            <span class="wrapup-val" :class="item.val > 0 ? 'positive' : item.val < 0 ? 'negative' : ''">
+              {{ item.val > 0 ? '+' : '' }}{{ item.val }}
+            </span>
+          </div>
+        </div>
+        <button class="wrapup-btn" @click="confirmEndFreeTalk">结束对话</button>
+      </div>
+
+      <div v-else class="freetalk-input-area">
         <div v-if="showOptions && playerOptions.length" class="option-buttons">
           <button v-for="(opt, i) in playerOptions" :key="i"
                   class="option-btn" :class="'option-' + opt.type"
@@ -79,6 +94,7 @@ import { getRevisitDialogue, matchRevisitCondition } from '../data/revisitDialog
 
 const engine = inject('engine')
 const audio = inject('audio')
+const live2dRef = inject('live2d', null)
 const llm = useLLMManager()
 
 const messages = ref([])
@@ -88,6 +104,9 @@ const playerOptions = ref([])
 const currentTurn = ref(0)
 const messagesRef = ref(null)
 const lastNpcLine = ref('')
+const wrapUpMode = ref(false)
+const farewellLine = ref('')
+const sessionSummary = ref([])
 
 const charId = computed(() => engine.freeTalkData.value?.character)
 const charName = computed(() => characters[charId.value]?.name || '???')
@@ -95,21 +114,31 @@ const charColor = computed(() => characters[charId.value]?.color || '#999')
 const maxTurns = computed(() => engine.freeTalkData.value?.maxTurns || 5)
 const freeTalkMode = computed(() => engine.freeTalkData.value?.mode || 'free')
 
+let _initSessionId = 0
+let _isInitializing = false
+
 watch(() => engine.isFreeTalk.value, async (val) => {
-  if (val) {
+  if (!val || _isInitializing) return
+  _isInitializing = true
+  const sessionId = ++_initSessionId
+
+  try {
     messages.value = []
     currentTurn.value = 0
     inputText.value = ''
     lastNpcLine.value = ''
+    wrapUpMode.value = false
     llm.loadApiKey()
 
     const firstLine = await resolveFirstLine()
-    messages.value.push({
+    if (sessionId !== _initSessionId) return
+
+    messages.value = [{
       role: 'assistant',
       text: firstLine.text,
       expression: firstLine.expression,
       action: firstLine.action,
-    })
+    }]
     lastNpcLine.value = firstLine.text
 
     if (firstLine.expression && engine.visibleCharacters[charId.value]) {
@@ -126,6 +155,8 @@ watch(() => engine.isFreeTalk.value, async (val) => {
     }
 
     await loadOptions()
+  } finally {
+    _isInitializing = false
   }
 })
 
@@ -149,7 +180,7 @@ async function resolveFirstLine() {
 }
 
 function getGameState() {
-  return {
+  const state = {
     playerName: engine.playerName.value,
     affection: { ...engine.affection },
     relationship: JSON.parse(JSON.stringify(engine.relationship)),
@@ -158,10 +189,57 @@ function getGameState() {
     currentTimeSlot: engine.currentTimeSlot.value,
     currentBg: engine.currentBg.value,
     conversationHistory: engine.conversationHistory,
+    freeTalkSummaries: engine.freeTalkSummaries,
     memories: engine.memories,
     freeTalkData: engine.freeTalkData.value,
     _lastNpcLine: lastNpcLine.value,
   }
+
+  if (engine.persistentMemory) {
+    state._persistentMemoryCard = engine.persistentMemory.buildMemoryPromptCard()
+  }
+  if (engine.behaviorProfiler) {
+    state._playerInsightCard = engine.behaviorProfiler.buildPlayerInsightCard()
+  }
+  if (engine.characterAutonomy && charId.value) {
+    state._autonomyCard = engine.characterAutonomy.buildAutonomyPromptCard(charId.value, state)
+  }
+  if (engine.affectiveResonance) {
+    state._emotionCard = engine.affectiveResonance.buildEmotionPromptCard()
+  }
+
+  if (engine.spacedRepetition && charId.value) {
+    const dueItems = engine.spacedRepetition.getDueReviews(engine.currentChapter.value)
+    if (dueItems.length > 0) {
+      state._srsCard = engine.spacedRepetition.buildSRSPromptCard(charId.value, dueItems)
+    }
+  }
+
+  if (engine.worldVM) {
+    state._worldStateCard = engine.worldVM.buildWorldPromptCard()
+  }
+  if (engine.cognitiveGraph) {
+    state._cognitiveCard = engine.cognitiveGraph.buildCognitivePromptCard(charId.value)
+  }
+  if (engine.temporalCodeDB) {
+    state._temporalCodeCard = engine.temporalCodeDB.buildTemporalPromptCard(charId.value)
+  }
+  if (engine.symbioticCodeDNA) {
+    state._symbioticDNACard = engine.symbioticCodeDNA.buildSymbioticPromptCard(charId.value)
+  }
+  if (engine.realityBridge) {
+    state._realityBridgeCard = engine.realityBridge.buildRealityPromptCard()
+  }
+  if (engine.pedagogyKernel) {
+    state._pedagogyCard = engine.pedagogyKernel.buildPedagogyPromptCard({
+      chapter: engine.currentChapter.value,
+      location: engine.currentBg.value,
+      character: charId.value,
+      timeSlot: engine.currentTimeSlot.value,
+    })
+  }
+
+  return state
 }
 
 async function loadOptions() {
@@ -192,6 +270,17 @@ async function sendMessage(text) {
 
   engine.conversationHistory[charId.value].push({ role: 'user', content: playerMsg })
 
+  if (engine.behaviorProfiler) {
+    engine.behaviorProfiler.onFreeTalkMessage(playerMsg)
+  }
+  if (engine.affectiveResonance) {
+    engine.affectiveResonance.onFreeTalkSentiment(playerMsg)
+    engine.affectiveResonance.onPlayerActivity('typing_active')
+  }
+  if (engine.characterAutonomy) {
+    engine.characterAutonomy.onInteraction(charId.value)
+  }
+
   await nextTick()
   scrollToBottom()
 
@@ -208,6 +297,7 @@ async function sendMessage(text) {
     trustDelta: response.trustDelta || 0,
     comfortDelta: response.comfortDelta || 0,
     relationshipSummary: relSummary,
+    topicTags: response.topic_tags || [],
   })
   lastNpcLine.value = response.text
 
@@ -215,6 +305,13 @@ async function sendMessage(text) {
 
   if (response.expression && engine.visibleCharacters[charId.value]) {
     engine.visibleCharacters[charId.value].expression = response.expression
+  }
+
+  if (live2dRef && response.live2d_hints) {
+    live2dRef.applyLLMHints(charId.value, response.live2d_hints)
+  } else if (live2dRef && response.expression) {
+    live2dRef.setExpression(charId.value, response.expression)
+    live2dRef.startSpeaking(charId.value, response.text || '')
   }
 
   const deltas = {
@@ -228,6 +325,19 @@ async function sendMessage(text) {
     const netChange = Math.round((deltas.affection + deltas.trust + deltas.comfort) / 3)
     if (netChange !== 0) {
       engine.showAffectionToast(charId.value, netChange, true)
+    }
+  }
+
+  if (engine.persistentMemory && response.memoryCandidate && response.memoryCandidate.trim()) {
+    const rel = engine.relationship[charId.value]
+    const avg = rel ? Math.round((rel.affection + rel.trust + rel.comfort) / 3) : 0
+    if (avg >= 30 || response.memoryEmotion === 'romantic') {
+      engine.persistentMemory.recordPeakMoment(charId.value, {
+        text: response.memoryCandidate,
+        emotion: response.memoryEmotion || 'warm',
+        affection: avg,
+        chapter: engine.currentChapter?.value || '',
+      })
     }
   }
 
@@ -256,14 +366,25 @@ async function sendMessage(text) {
   scrollToBottom()
 
   if (currentTurn.value >= maxTurns.value) {
-    setTimeout(() => endFreeTalk(), 2000)
+    beginWrapUp()
     return
   }
 
   await loadOptions()
 }
 
-function endFreeTalk() {
+const FAREWELL_LINES = {
+  nene: '「今天和你聊天很开心，期待下次再见哦。」',
+  yoshino: '「……行了，该去做正事了。」',
+  ayase: '「下次再来切磋吧，我会更强的！」',
+  kanna: '「……嗯，下次见。」',
+  murasame: '「有趣的对话，期待你的进步。」',
+}
+
+function beginWrapUp() {
+  const cid = charId.value
+  farewellLine.value = FAREWELL_LINES[cid] || '「那就先这样吧。」'
+
   const totals = { affection: 0, trust: 0, comfort: 0 }
   messages.value
     .filter(m => m.role === 'assistant')
@@ -272,7 +393,60 @@ function endFreeTalk() {
       totals.trust += (m.trustDelta || 0)
       totals.comfort += (m.comfortDelta || 0)
     })
-  engine.resolveFreeTalk(totals)
+
+  const summary = []
+  if (totals.affection !== 0) summary.push({ label: '好感', val: totals.affection })
+  if (totals.trust !== 0) summary.push({ label: '信任', val: totals.trust })
+  if (totals.comfort !== 0) summary.push({ label: '安心', val: totals.comfort })
+  sessionSummary.value = summary
+
+  wrapUpMode.value = true
+}
+
+function endFreeTalk() {
+  beginWrapUp()
+}
+
+function confirmEndFreeTalk() {
+  saveSessionSummary()
+  wrapUpMode.value = false
+  engine.resolveFreeTalk(null)
+}
+
+function saveSessionSummary() {
+  const cid = charId.value
+  if (!cid || messages.value.length < 2) return
+
+  const playerMsgs = messages.value.filter(m => m.role === 'user').map(m => m.text)
+  const npcMsgs = messages.value.filter(m => m.role === 'assistant').map(m => m.text)
+
+  const topics = []
+  const topicTags = messages.value
+    .filter(m => m.role === 'assistant' && m.topicTags)
+    .flatMap(m => m.topicTags)
+  if (topicTags.length > 0) {
+    topics.push(...[...new Set(topicTags)].slice(0, 4))
+  }
+
+  const playerSample = playerMsgs.slice(0, 3).map(t => t.slice(0, 30)).join('；')
+  const npcSample = npcMsgs.slice(0, 2).map(t => t.slice(0, 40)).join('；')
+
+  const summary = {
+    chapter: engine.currentChapter.value,
+    timeSlot: engine.currentTimeSlot.value,
+    promptId: engine.freeTalkData.value?.promptId || null,
+    topics,
+    playerSaid: playerSample,
+    npcSaid: npcSample,
+    turns: currentTurn.value,
+    timestamp: Date.now(),
+  }
+
+  if (!engine.freeTalkSummaries[cid]) engine.freeTalkSummaries[cid] = []
+  engine.freeTalkSummaries[cid].push(summary)
+  if (engine.freeTalkSummaries[cid].length > 8) {
+    engine.freeTalkSummaries[cid] = engine.freeTalkSummaries[cid].slice(-8)
+  }
 }
 
 function scrollToBottom() {
@@ -550,6 +724,64 @@ function scrollToBottom() {
 }
 
 .mode-btn.active { color: var(--vn-primary); }
+
+.freetalk-wrapup {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  border-top: 1px solid rgba(216, 177, 110, 0.2);
+}
+
+.wrapup-farewell {
+  text-align: center;
+}
+
+.wrapup-line {
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.wrapup-summary {
+  display: flex;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.wrapup-delta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.wrapup-label {
+  font-size: 11px;
+  color: var(--vn-text-dim);
+}
+
+.wrapup-val {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.wrapup-val.positive { color: #5a8a5a; }
+.wrapup-val.negative { color: #a05555; }
+
+.wrapup-btn {
+  padding: 10px 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(224, 145, 171, 0.92), rgba(198, 154, 78, 0.92));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wrapup-btn:hover {
+  filter: brightness(1.08);
+}
 
 .panel-slide-enter-active { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .panel-slide-leave-active { transition: all 0.3s ease; }

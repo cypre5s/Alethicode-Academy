@@ -9,13 +9,17 @@ export const knowledgeDomains = {
   advanced:    { label: '进阶综合',   primaryChar: 'murasame', primaryDim: 'affection' },
 }
 
-export const outcomeTypes = ['solo_pass', 'assisted_pass', 'thoughtful_fail', 'careless_fail']
+export const outcomeTypes = ['solo_pass', 'assisted_pass', 'thoughtful_fail', 'careless_fail', 'excellent_teach', 'accurate_teach', 'warm_but_wrong', 'poor_teach']
 
 export const outcomeDeltas = {
   solo_pass:       { affection: 1, trust: 2, comfort: 1 },
   assisted_pass:   { affection: 0, trust: 1, comfort: 2 },
   thoughtful_fail: { affection: 0, trust: 1, comfort: 0 },
   careless_fail:   { affection: 0, trust: -1, comfort: -1 },
+  excellent_teach: { affection: 2, trust: 2, comfort: 2 },
+  accurate_teach:  { affection: 0, trust: 2, comfort: 0 },
+  warm_but_wrong:  { affection: 1, trust: -1, comfort: 2 },
+  poor_teach:      { affection: 0, trust: 0, comfort: -1 },
 }
 
 export const characterDeltaModifiers = {

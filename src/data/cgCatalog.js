@@ -25,6 +25,13 @@ export const cgCatalog = {
   murasame_championship: { id: 'murasame_championship', title: '全国赛的搭档', route: 'Murasame 线', effectPreset: 'lab_night_glow', image: cgPath('murasame_championship'), thumbnail: cgPath('murasame_championship') },
   murasame_good_end: { id: 'murasame_good_end', title: 'Champion\'s Heart', route: 'Murasame Good End', effectPreset: 'fireworks_bloom', image: cgPath('murasame_good_end'), thumbnail: cgPath('murasame_good_end') },
   murasame_true_end: { id: 'murasame_true_end', title: 'Source Code', route: 'Murasame True End', effectPreset: 'fireworks_bloom', image: cgPath('murasame_true_end'), thumbnail: cgPath('murasame_true_end') },
+
+  nene_defeat: { id: 'nene_defeat', title: '崩溃的心模块', route: 'Nene Bad End', category: 'defeat', effectPreset: 'lab_night_glow', image: cgPath('nene_defeat'), thumbnail: cgPath('nene_defeat') },
+  yoshino_defeat: { id: 'yoshino_defeat', title: '碎裂的完美主义', route: 'Yoshino Bad End', category: 'defeat', effectPreset: 'golden_hour', image: cgPath('yoshino_defeat'), thumbnail: cgPath('yoshino_defeat') },
+  ayase_defeat: { id: 'ayase_defeat', title: '没有对手的擂台', route: 'Ayase Bad End', category: 'defeat', effectPreset: 'spring_day', image: cgPath('ayase_defeat'), thumbnail: cgPath('ayase_defeat') },
+  kanna_defeat: { id: 'kanna_defeat', title: '熄灭的星空', route: 'Kanna Bad End', category: 'defeat', effectPreset: 'blue_night', image: cgPath('kanna_defeat'), thumbnail: cgPath('kanna_defeat') },
+  murasame_defeat: { id: 'murasame_defeat', title: '独行的剑士', route: 'Murasame Bad End', category: 'defeat', effectPreset: 'lab_night_glow', image: cgPath('murasame_defeat'), thumbnail: cgPath('murasame_defeat') },
+  generic_defeat: { id: 'generic_defeat', title: '未竟的代码', route: '共通 Bad End', category: 'defeat', effectPreset: 'golden_hour', image: cgPath('generic_defeat'), thumbnail: cgPath('generic_defeat') },
 }
 
 export const cgList = Object.values(cgCatalog)

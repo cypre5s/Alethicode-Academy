@@ -1,6 +1,12 @@
 <template>
   <div class="character-layer">
-    <transition-group name="char-anim">
+    <!-- Live2D Mode: PixiJS full-layer canvas -->
+    <canvas v-if="live2dEnabled"
+            ref="pixiCanvas"
+            class="live2d-canvas" />
+
+    <!-- Fallback Mode: preserved original img logic -->
+    <transition-group v-else name="char-anim">
       <div v-for="(char, id) in engine.visibleCharacters" :key="id"
            class="character-sprite"
            :class="[
@@ -13,7 +19,7 @@
            ]"
            :style="microActionStyle(char)">
         <img
-          v-if="!spriteErrors[id]"
+          v-if="spriteErrors[id] !== true"
           class="character-image"
           :src="getSpriteSrc(id, char.expression || 'normal')"
           :alt="getCharacterAlt(id, char.expression || 'normal')"
@@ -30,14 +36,115 @@
 </template>
 
 <script setup>
-import { inject, reactive, computed } from 'vue'
+import { inject, reactive, ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { characters } from '../data/characters.js'
 import { getCharacterSprite } from '../data/characterSprites.js'
 import { getPreset } from '../data/characterAnimPresets.js'
 
 const engine = inject('engine')
+const live2d = inject('live2d', null)
 const spriteErrors = reactive({})
+const pixiCanvas = ref(null)
 
+const live2dEnabled = ref(false)
+
+onMounted(async () => {
+  if (live2d && live2d.live2dEnabled?.value) {
+    live2dEnabled.value = true
+    await nextTick()
+    if (pixiCanvas.value) {
+      await live2d.initCanvas(pixiCanvas.value)
+    }
+    if (!live2d.live2dEnabled.value) {
+      live2dEnabled.value = false
+    } else {
+      _syncCharactersToLive2D()
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', _onResize)
+  }
+})
+
+watch(() => live2d?.live2dEnabled?.value, (val) => {
+  if (val === false && live2dEnabled.value) {
+    live2dEnabled.value = false
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', _onResize)
+  }
+})
+
+function _onResize() {
+  if (live2d && live2dEnabled.value) {
+    live2d.handleResize()
+  }
+}
+
+watch(() => engine.visibleCharacters, (chars) => {
+  if (!live2dEnabled.value || !live2d) return
+  _syncCharactersToLive2D()
+}, { deep: true })
+
+watch(() => engine.speaker.value, (sp) => {
+  if (!live2dEnabled.value || !live2d) return
+  for (const charId of Object.keys(engine.visibleCharacters)) {
+    if (sp?.id === charId) {
+      live2d.startSpeaking(charId, engine.dialogueText.value || '')
+    } else {
+      live2d.stopSpeaking(charId)
+    }
+  }
+})
+
+watch(() => engine.speakerExpression.value, (expr) => {
+  if (!live2dEnabled.value || !live2d) return
+  const sp = engine.speaker.value
+  if (sp?.id && engine.visibleCharacters[sp.id]) {
+    live2d.setExpression(sp.id, expr || 'normal')
+  }
+})
+
+let _prevCharIds = new Set()
+
+function _syncCharactersToLive2D() {
+  if (!live2d) return
+  const currentIds = new Set(Object.keys(engine.visibleCharacters))
+
+  for (const charId of currentIds) {
+    if (!_prevCharIds.has(charId)) {
+      const char = engine.visibleCharacters[charId]
+      live2d.showCharacter(charId, char.position || 'center', char.expression || 'normal')
+    }
+  }
+
+  for (const charId of _prevCharIds) {
+    if (!currentIds.has(charId)) {
+      live2d.hideCharacter(charId)
+    }
+  }
+
+  for (const charId of currentIds) {
+    if (_prevCharIds.has(charId)) {
+      const char = engine.visibleCharacters[charId]
+      const active = live2d.activeCharacters[charId]
+      if (active && active.position !== char.position) {
+        live2d.moveCharacter(charId, char.position)
+      }
+      if (active && active.expression !== char.expression) {
+        live2d.setExpression(charId, char.expression || 'normal')
+      }
+    }
+  }
+
+  _prevCharIds = currentIds
+}
+
+// ─── Fallback mode functions (identical to original) ──────────
 function isSpeaking(id) {
   return engine.speaker.value?.id === id
 }
@@ -89,7 +196,12 @@ function appendCenterOffset(char, transform) {
 }
 
 function getSpriteSrc(id, expression) {
-  return getCharacterSprite(id, expression) || getCharacterSprite(id, 'normal') || ''
+  const primary = getCharacterSprite(id, expression) || getCharacterSprite(id, 'normal')
+  if (!primary) return ''
+  if (spriteErrors[id] === 'webp') {
+    return primary.replace(/\.webp$/, '.svg')
+  }
+  return primary
 }
 
 function getCharacterAlt(id, expression) {
@@ -106,7 +218,11 @@ function getCharName(id) {
 }
 
 function handleSpriteError(id) {
-  spriteErrors[id] = true
+  if (spriteErrors[id] === 'webp') {
+    spriteErrors[id] = true
+  } else if (!spriteErrors[id]) {
+    spriteErrors[id] = 'webp'
+  }
 }
 </script>
 
@@ -115,6 +231,15 @@ function handleSpriteError(id) {
   position: absolute;
   inset: 0;
   z-index: 1;
+  pointer-events: none;
+  contain: layout style;
+}
+
+.live2d-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
@@ -126,6 +251,8 @@ function handleSpriteError(id) {
   align-items: center;
   transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4));
+  will-change: transform, opacity, filter;
+  contain: layout;
 }
 
 .character-image {
@@ -187,8 +314,6 @@ function handleSpriteError(id) {
   animation: char-flash 0.15s ease-out !important;
 }
 
-/* --- Breathe keyframes --- */
-
 @keyframes breathe {
   0%, 100% { transform: translateY(-2px) scaleY(1); }
   50% { transform: translateY(-2px) scaleY(1.004); }
@@ -208,8 +333,6 @@ function handleSpriteError(id) {
   0%, 100% { transform: translateX(-50%) translateY(0) scaleY(1); }
   50% { transform: translateX(-50%) translateY(0) scaleY(1.003); }
 }
-
-/* --- Micro-action keyframes --- */
 
 @keyframes char-shake {
   0%, 100% { transform: translateX(0); }
@@ -248,8 +371,6 @@ function handleSpriteError(id) {
   0% { filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4)) brightness(2); }
   100% { filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4)) brightness(1); }
 }
-
-/* --- Enter / exit --- */
 
 .sprite-fallback {
   width: clamp(200px, 24vw, 320px);

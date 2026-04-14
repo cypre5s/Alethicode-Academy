@@ -6,7 +6,7 @@ const QUICK_KEY = 'alethicode_save_quick'
 const SETTINGS_KEY = 'alethicode_settings'
 const GLOBAL_KEY = 'alethicode_global'
 const MAX_SLOTS = 6
-const CURRENT_VERSION = '3.1.0'
+const CURRENT_VERSION = '3.3.0'
 const CHECKSUM_SALT = 'alethicode_v3_salt'
 const MAX_SAVE_SIZE = 512 * 1024
 
@@ -130,6 +130,16 @@ export function useSaveManager() {
           data.version = CURRENT_VERSION
           data.memories = _migrateMemories(data.memories)
           data.visitLog = data.visitLog || {}
+          data.relationshipChangeLog = data.relationshipChangeLog || []
+          data.srsData = data.srsData || {}
+        } else if (data.version === '3.1.0') {
+          data.version = CURRENT_VERSION
+          data.relationshipChangeLog = data.relationshipChangeLog || []
+          data.srsData = data.srsData || {}
+          data.live2dState = data.live2dState || null
+        } else if (data.version === '3.2.0') {
+          data.version = CURRENT_VERSION
+          data.live2dState = data.live2dState || null
         } else {
           return { error: 'version_mismatch', data, savedVersion: data.version, currentVersion: CURRENT_VERSION }
         }
@@ -216,11 +226,97 @@ export function useSaveManager() {
     } catch { return null }
   }
 
+  function exportAllSaves() {
+    const bundle = {
+      _type: 'alethicode_save_bundle',
+      _version: CURRENT_VERSION,
+      _exportedAt: Date.now(),
+      slots: {},
+      auto: null,
+      quick: null,
+      settings: null,
+      global: null,
+    }
+    for (let i = 0; i < MAX_SLOTS; i++) {
+      try {
+        const raw = localStorage.getItem(SAVE_PREFIX + i)
+        if (raw) bundle.slots[i] = JSON.parse(raw)
+      } catch {}
+    }
+    try {
+      const auto = localStorage.getItem(AUTO_KEY)
+      if (auto) bundle.auto = JSON.parse(auto)
+    } catch {}
+    try {
+      const quick = localStorage.getItem(QUICK_KEY)
+      if (quick) bundle.quick = JSON.parse(quick)
+    } catch {}
+    try {
+      const settings = localStorage.getItem(SETTINGS_KEY)
+      if (settings) bundle.settings = JSON.parse(settings)
+    } catch {}
+    try {
+      const global = localStorage.getItem(GLOBAL_KEY)
+      if (global) bundle.global = JSON.parse(global)
+    } catch {}
+
+    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `alethicode_save_${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    return { ok: true }
+  }
+
+  function importSaves(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        try {
+          const bundle = JSON.parse(reader.result)
+          if (bundle._type !== 'alethicode_save_bundle') {
+            resolve({ error: 'invalid_format' })
+            return
+          }
+          if (bundle.slots) {
+            for (const [idx, data] of Object.entries(bundle.slots)) {
+              const i = Number(idx)
+              if (i >= 0 && i < MAX_SLOTS && data && typeof data === 'object') {
+                try { localStorage.setItem(SAVE_PREFIX + i, JSON.stringify(data)) } catch {}
+              }
+            }
+          }
+          if (bundle.auto) {
+            try { localStorage.setItem(AUTO_KEY, JSON.stringify(bundle.auto)) } catch {}
+          }
+          if (bundle.quick) {
+            try { localStorage.setItem(QUICK_KEY, JSON.stringify(bundle.quick)) } catch {}
+          }
+          if (bundle.settings) {
+            try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(bundle.settings)) } catch {}
+          }
+          if (bundle.global) {
+            try { localStorage.setItem(GLOBAL_KEY, JSON.stringify(bundle.global)) } catch {}
+          }
+          refresh()
+          resolve({ ok: true })
+        } catch {
+          resolve({ error: 'parse_error' })
+        }
+      }
+      reader.onerror = () => resolve({ error: 'read_error' })
+      reader.readAsText(file)
+    })
+  }
+
   return {
     saves, saveToSlot, loadFromSlot, deleteSlot, saveAuto, loadAuto,
     quickSave, quickLoad,
     saveSettings, loadSettings,
     saveGlobal, loadGlobal,
+    exportAllSaves, importSaves,
     refresh, isStorageHealthy,
     MAX_SLOTS
   }

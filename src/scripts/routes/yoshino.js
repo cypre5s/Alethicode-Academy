@@ -1,53 +1,92 @@
 export const routeYoshino = [
-  { type: 'title_card', text: 'Yoshino 线「完美代码的裂痕」', subtitle: '—— 不完美也是一种美 ——' },
+  // ──────────────────────────────────────────────
+  // Yoshino 线「金阁寺炎上」
+  // 文風：三島由紀夫 —— 极致美学的描写、形式与本质
+  // 的紧张对峙、对完美的执念与自我毁灭的冲动、
+  // 华丽而冷峻的散文体
+  // ──────────────────────────────────────────────
+  { type: 'title_card', text: 'Yoshino 线「金阁寺炎上」', subtitle: '—— 完美是一座囚禁灵魂的金阁 ——' },
   { type: 'bg', src: 'classroom_day', transition: 'fade', duration: 1500 },
   { type: 'bgm', src: 'peaceful', fadeIn: 1500 },
 
-  // ===== 日常铺垫 =====
-  { type: 'narration', text: '文化祭后，Yoshino 对我的态度发生了微妙的变化。' },
-  { type: 'narration', text: '以前她只在必要时才跟我说话。现在——她会主动问我问题。' },
-  { type: 'narration', text: '虽然每次都是以「代码审查」为借口。' },
+  // ===== Y-01: 美与暴力 =====
+  { type: 'narration', text: '美，首先是一种暴力。' },
+  { type: 'narration', text: '朝武芳乃的美就是这样——像一柄磨到极致的日本刀，端正、冷冽、毫无瑕疵。任何人靠近她，都会不自觉地感到一种压迫感。' },
+  { type: 'narration', text: '不是因为她凶——恰恰相反，她的面容宁静如水。但正是那份过于完美的宁静，让人觉得自己的一切不完美都被暴露了。' },
+  { type: 'narration', text: '文化祭后，她对我的态度发生了某种肉眼难以察觉的变化。如同金阁寺的金箔在月光下微微偏转了角度——只有长久注视的人才能发现。' },
   { type: 'char_enter', character: 'yoshino', position: 'center', expression: 'normal', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '今天的代码审查——你来协助我。' },
-  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '不是因为你有多优秀。只是……两个人效率更高。' },
-  { type: 'monologue', text: '（又是那种口是心非的语气……你细品，确实是傲娇。）' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '不是因为你有多优秀。只是……两个人的审查，比一个人更接近完美。仅此而已。' },
+  { type: 'monologue', text: '（她说「仅此而已」的时候，右手无名指微微弯曲了一下。那是她唯一的破绽。）' },
+  { type: 'monologue', text: '（但我已经学会了读她的「微表情」。那个弯曲——意味着她在掩饰什么。）' },
 
-  // ===== 代码审查日常 =====
-  { type: 'narration', text: '一起做代码审查的日子里，我渐渐发现了 Yoshino 不为人知的一面。' },
-  { type: 'narration', text: '她的桌面永远一尘不染。文件按字母排列，笔按颜色归位。' },
-  { type: 'narration', text: '连喝水的杯子都放在桌面上固定的位置——从不偏移一毫米。' },
+  // ===== Y-02: 代码审查日常 =====
+  { type: 'narration', text: '与她一起做代码审查的日子里，我见识到了一种近乎宗教的秩序感。' },
+  { type: 'narration', text: '她的桌面是一座微缩的金阁寺。文件按字母排列如佛经。笔按颜色归位如法器。' },
+  { type: 'narration', text: '连喝水的杯子都放在桌面上精确的位置——偏差不超过一毫米。那种精确不是习惯，而是信仰。' },
+  { type: 'narration', text: '审查代码的时候，她会把别人的代码投影到大屏幕上，然后一行一行地审阅。像是在鉴赏一幅画——或者审判一个罪人。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '这段代码的缩进不统一。重写。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '变量命名不规范。改掉。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '注释写得太少——不，太多了。只保留必要的。' },
   { type: 'monologue', text: '（她对代码的要求近乎苛刻。内核稳定得可怕。）' },
   { type: 'monologue', text: '（但有时候……她对自己的要求更苛刻。我开始注意到一些细节——）' },
 
-  // ===== 发现异常 =====
+  // ===== Y-03: 放学后 · 整理笔记 =====
+  { type: 'bg', src: 'classroom_evening', transition: 'fade', duration: 1000 },
+  { type: 'bgm', src: 'romantic', crossfade: 1500 },
+  { type: 'narration', text: '放学后。教室里只剩下两个人——她在窗边整理笔记，我在旁边复习。' },
+  { type: 'narration', text: '夕阳从窗户斜照进来，把她的黑发染成了深红色。像是金阁寺在黄昏中的倒影。' },
+  { type: 'narration', text: '她的笔记本是我见过最工整的——每一页都像是印刷品。标题用红笔，重点用蓝笔，补充用绿笔。' },
+  { type: 'narration', text: '而且每一页的间距都是完全相同的。我用尺子量过——偏差不超过 0.5 毫米。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '……你一直在看我写笔记。有什么问题？' },
+  { type: 'monologue', text: '「你的字好漂亮。像打印的一样。」' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '那是因为写了几百遍。最初的版本远没有这么整齐。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '每一页我都重写过至少三遍。直到找不到任何瑕疵为止。' },
+  { type: 'monologue', text: '（三遍……每一页都重写三遍？那这本笔记花了她多少时间？）' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '你的笔记呢。给我看。' },
+  { type: 'narration', text: '我把笔记本递给她。她翻开第一页——' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '……字迹潦草。排版混乱。标题没有用红笔标注。这怎么看得懂？' },
+  { type: 'narration', text: '但她没有合上。她继续翻着。翻到了我在课堂上记的某个知识点旁边——' },
+  { type: 'narration', text: '那里有一行小字：「芳乃说的，记住。」' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'surprised', text: '……' },
+  { type: 'narration', text: '她看到了那行字。手指停了一秒。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '……你连这种话都记下来了？而且用的是……我的名字？' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '……不规范。笔记里应该写知识点，不是写人名。回去重写。' },
+  { type: 'narration', text: '她把笔记本还给我。但在转身的瞬间——' },
+  { type: 'narration', text: '我看到她的耳朵尖红了。' },
+  { type: 'monologue', text: '（她嘴上说着不规范，但耳朵出卖了她。这大概是朝武芳乃最大的系统漏洞。）' },
+  { type: 'affection', character: 'yoshino', change: 3 },
+
+  { type: 'free_talk', character: 'yoshino', max_turns: 3, promptId: 'yoshino_route_notes', context: '放学后教室，Yoshino 看到了你笔记里写的"芳乃说的，记住"，嘴上说不规范但耳朵红了', sceneObjective: '围绕笔记整理方法和学习态度展开对话' },
+  { type: 'char_exit', character: 'yoshino', animation: 'fade_out' },
+
+  // ===== Y-04: 发现异常 · 创可贴 =====
+  { type: 'bg', src: 'classroom_day', transition: 'fade' },
+  { type: 'bgm', src: 'daily', crossfade: 1000 },
   { type: 'narration', text: '某天，我注意到她的手指上贴着创可贴。不是一个——是三个。' },
+  { type: 'narration', text: '食指、中指、无名指。精确地贴在指腹上——写字时会接触到笔杆的位置。' },
   { type: 'monologue', text: '（她在改作业的时候，手指在发抖。但她用力握住笔来掩饰。）' },
+  { type: 'monologue', text: '（三个手指都磨破了……她到底写了多少字？重写了多少遍？）' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '……看什么。赶紧审查代码。' },
   { type: 'monologue', text: '（她的声音比平时更冷。像是在筑墙。）' },
+  { type: 'monologue', text: '（有些人筑墙是为了不让别人进来。但 Yoshino 筑墙——是为了不让自己的痛苦流出去。）' },
 
-  // ===== 发现 Yoshino 的秘密 =====
-  { type: 'bg', src: 'classroom_evening', transition: 'fade' },
-  { type: 'bgm', src: 'sad', crossfade: 2000 },
-  { type: 'narration', text: '某天傍晚，我路过教室时看到了令人意外的一幕——' },
-  { type: 'narration', text: 'Yoshino 一个人坐在夕阳中，反复修改着一段已经完美的代码。' },
-  { type: 'narration', text: '她的手指在键盘上飞快地敲击——删除、重写、再删除、再重写。' },
-  { type: 'narration', text: '那种表情……不是追求卓越的专注，而是一种接近强迫症的执念。' },
-  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '还不够好……这里可以再优化……效率还能提升 0.01%……' },
-  { type: 'monologue', text: '（她在改已经完美的代码？0.01% 的效率提升？）' },
-  { type: 'monologue', text: '（而且……她看起来很疲惫。眼下有明显的黑眼圈，嘴唇也有点干裂。）' },
-  { type: 'se', src: 'door' },
-  { type: 'dialogue', speaker: 'yoshino', expression: 'surprised', text: '！你……什么时候在那里的。' },
-  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '不要偷看别人的代码。这是基本礼仪。' },
-  { type: 'narration', text: '她迅速关闭了屏幕。但在关闭之前，我看到了编辑器底部的状态栏——' },
-  { type: 'narration', text: '这个文件已经被修改了 147 次。' },
-  { type: 'monologue', text: '（147 次……一段已经完美的代码，被修改了 147 次。这不是追求完美——这是被完美束缚了。）' },
+  // ===== Y-05: 午后 · 效率比赛 =====
+  { type: 'narration', text: '日子一天天过去。我们之间的「代码审查时间」变成了一种默契。' },
+  { type: 'narration', text: '从下午放学到天黑——她审查代码，我在旁边学习。偶尔交流几句，大多数时间是沉默。' },
+  { type: 'narration', text: '但那种沉默不是尴尬的。而是两台电脑并排运行的那种——各自处理各自的任务，但共享着同一个网络。' },
+  { type: 'char_enter', character: 'yoshino', position: 'center', expression: 'normal', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '代码审查效率比赛。一小时内看谁审查的文件多。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '不是我在挑战你。是在训练你的审查速度。这是基本技能。' },
+  { type: 'monologue', text: '（又来了。她总是用「训练」来包装「想一起做点什么」的心情。）' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '审查代码不只是找 Bug。更重要的是看——代码有没有表达作者的意图。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '好的代码自己会说话。不需要注释就能让人理解。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'slight_smile', text: '就像……好的人不需要解释就能让人信任。' },
+  { type: 'narration', text: '她说最后那句话的时候，看了我一眼。那个眼神——只有 0.3 秒。但足够了。' },
+  { type: 'monologue', text: '（她是在说我吗。是在说她信任我吗。还是——只是随口举例？）' },
+  { type: 'monologue', text: '（但朝武芳乃从来不「随口」说任何东西。她的每一句话都是经过精确计算的。）' },
+  { type: 'affection', character: 'yoshino', change: 2 },
 
-  // 编程题 Y-1
-  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '……既然你在。帮我把这段重复代码重构一下。' },
-  { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '消除重复是代码质量的基本要求。我做到了——但你来检验一下。' },
   { type: 'challenge', id: 'yoshino_refactor',
     context_dialogue: {
       before: { speaker: 'yoshino', expression: 'glasses_adjust', text: '重复代码是坏代码。用函数消除重复。' },
@@ -56,39 +95,123 @@ export const routeYoshino = [
     }
   },
 
-  // ===== 深入了解：Yoshino 的过去 =====
+  { type: 'char_exit', character: 'yoshino', animation: 'fade_out' },
+
+  // ===== Y-06: 发现 Yoshino 的秘密 =====
+  { type: 'bg', src: 'classroom_evening', transition: 'fade' },
+  { type: 'bgm', src: 'sad', crossfade: 2000 },
+  { type: 'narration', text: '某天傍晚，我路过教室时看到了令人意外的一幕——' },
+  { type: 'narration', text: 'Yoshino 一个人坐在夕阳中，反复修改着一段已经完美的代码。' },
+  { type: 'narration', text: '她的手指在键盘上飞快地敲击——删除、重写、再删除、再重写。' },
+  { type: 'narration', text: '那种表情……不是追求卓越的专注，而是一种接近强迫症的执念。' },
+  { type: 'narration', text: '像是一个人在反复擦拭一面已经一尘不染的镜子——不是因为镜子脏了，而是因为她相信镜子「应该更干净」。' },
+  { type: 'char_enter', character: 'yoshino', position: 'center', expression: 'normal', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '还不够好……这里可以再优化……效率还能提升 0.01%……' },
+  { type: 'monologue', text: '（她在改已经完美的代码？0.01% 的效率提升？）' },
+  { type: 'monologue', text: '（而且……她看起来很疲惫。眼下有明显的黑眼圈，嘴唇也有点干裂。）' },
+  { type: 'monologue', text: '（她从什么时候开始这样的？是从编程比赛之后？还是——一直以来？）' },
+  { type: 'se', src: 'door' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'surprised', text: '！你……什么时候在那里的。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '不要偷看别人的代码。这是基本礼仪。' },
+  { type: 'narration', text: '她迅速关闭了屏幕。但在关闭之前，我看到了编辑器底部的状态栏——' },
+  { type: 'narration', text: '这个文件已经被修改了 147 次。' },
+  { type: 'monologue', text: '（147 次……一段已经完美的代码，被修改了 147 次。这不是追求完美——这是被完美束缚了。）' },
+  { type: 'monologue', text: '（她不是在写代码。她是在用代码折磨自己。）' },
+
+  { type: 'choice', prompt: '面对这样的 Yoshino——', options: [
+    { text: '「已经很好了。不需要再改了。」', effects: { yoshino: 2 } },
+    { text: '「你还好吗？看起来很累。」', effects: { yoshino: 3 } },
+    { text: '安静地在旁边坐下来', effects: { yoshino: 4 } }
+  ]},
+
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '……我很好。我只是在优化代码。这是正常的工作流程。' },
+  { type: 'narration', text: '但她的手在发抖。握着鼠标的手指——指节发白。' },
+  { type: 'monologue', text: '（她在撒谎。但我不打算戳穿。不是现在。）' },
+  { type: 'monologue', text: '（有些真相需要时间来敲开。就像 Debug——急不来的。）' },
+  { type: 'char_exit', character: 'yoshino', animation: 'fade_out' },
+
+  // ===== Y-07: 天台 · Yoshino 的过去 =====
   { type: 'bg', src: 'rooftop_evening', transition: 'fade' },
   { type: 'bgm', src: 'sad', crossfade: 2000 },
   { type: 'narration', text: '某天放学后，我在天台找到了 Yoshino。她靠着围栏站着，看着远方。' },
   { type: 'narration', text: '夕阳把她的影子拉得很长。风吹起她的黑发，露出了通常被遮住的右耳。' },
   { type: 'narration', text: '她的右耳上有一个小小的耳洞——但没有戴耳环。' },
+  { type: 'narration', text: '那个耳洞像是一个被注释掉的代码——曾经存在过，但现在被隐藏了。' },
   { type: 'monologue', text: '（Yoshino 有耳洞？她看起来不像是会打耳洞的类型……以前的她，是什么样的？）' },
+  { type: 'char_enter', character: 'yoshino', position: 'center', expression: 'normal', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '……你怎么知道我在这里。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '别说是碰巧。你这个人从来都不「碰巧」出现。' },
   { type: 'monologue', text: '（被看穿了。但这不正说明她也在观察我吗。）' },
   { type: 'narration', text: '沉默了很久。风把远处社团活动的声音送了过来。' },
+  { type: 'narration', text: '夕阳在城市的天际线上越坠越低。像一颗正在燃尽的恒星。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '……你想知道为什么我对代码这么执着吗。' },
+  { type: 'narration', text: '她没有回头。声音被风吹得有些模糊。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '小时候参加编程比赛。全市第二名。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '正常人会觉得这很好对吧。但我父亲不这么认为。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '他说——「第二名就是第一个输家」。' },
   { type: 'monologue', text: '（第二名就是第一个输家……？）' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '他是大学教授。计算机科学系的。在他的世界里只有两种状态——完美和失败。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '没有中间值。没有"还行"。没有"下次努力"。只有完美。不完美就是失败。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '从那以后我就决定——代码必须完美。思维必须完美。成绩必须完美。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '不能有任何瑕疵。因为瑕疵就意味着——不被认可。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '我的笔记重写三遍。代码修改一百多次。考试必须满分。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '因为在我的家里——97 分和 0 分没有区别。' },
   { type: 'narration', text: '她的声音很平静。但握着围栏的手指，指节发白。' },
+  { type: 'narration', text: '风吹过天台。她的刘海被吹开了——露出一双比平时更脆弱的眼睛。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '耳洞是初中时打的。那时候我还会做一些「不完美」的事。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '但被父亲看到之后……他说这是「不务正业」。然后——' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '我把耳环摘了。把所有跟编程无关的东西都扔了。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '连喜欢的音乐、喜欢的小说、喜欢的甜食——全部放弃了。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '因为那些东西会让我变得「不纯粹」。而不纯粹——在父亲眼里就是不完美。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'tsundere_pout', text: '……为什么跟你说这些。不讲了不讲了。忘掉。这是命令。' },
   { type: 'monologue', text: '（她在害怕。害怕被看到不完美的自己。所以用命令来筑墙。）' },
   { type: 'monologue', text: '（但她选择告诉我……这意味着——她信任我。即使她自己还不愿意承认。）' },
+  { type: 'monologue', text: '（那个耳洞……是旧时代的遗迹。是被注释掉的代码。是她曾经自由过的证据。）' },
 
   { type: 'choice', prompt: '', options: [
     { text: '「第二名也很棒。你已经很努力了。」', effects: { yoshino: 4 } },
     { text: '「你不需要完美。你只需要做你自己。」', effects: { yoshino: 5 } },
-    { text: '安静地站在她旁边，什么都不说', effects: { yoshino: 3 } }
+    { text: '安静地站在她旁边，什么都不说', effects: { yoshino: 3 } },
+    { text: '「你喜欢什么音乐？」', effects: { yoshino: 6 } }
   ]},
 
-  // 编程题 Y-2
+  { type: 'narration', text: '不管我说了什么，她都沉默了很久。' },
+  { type: 'narration', text: '夕阳终于沉下了地平线。天台上只剩下橘色的余晖和渐渐亮起的路灯。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'slight_smile', text: '……你不害怕我吗。' },
+  { type: 'monologue', text: '「为什么要害怕？」' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '因为大多数人都害怕我。觉得我太严格。太冷。太不近人情。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'slight_smile', text: '但你一直在——午休来教室、放学后留下来、甚至现在追到天台上来。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '……你是第一个看到创可贴之后没有走开的人。' },
+  { type: 'monologue', text: '（那句话让我的心里涌起一种无法命名的感觉。像是在冰冷的金阁寺里，第一次触碰到了温暖的木头。）' },
+  { type: 'affection', character: 'yoshino', change: 5 },
+  { type: 'char_exit', character: 'yoshino', animation: 'fade_out' },
+
+  // ===== Y-08: 给她买甜食 =====
+  { type: 'bg', src: 'classroom_day', transition: 'fade' },
+  { type: 'bgm', src: 'daily', crossfade: 1500 },
+  { type: 'narration', text: '第二天，我在自动贩卖机前犹豫了很久。最后买了一块草莓奶油蛋糕。' },
+  { type: 'narration', text: '放在了她桌子上笔筒旁边。没有留名——但全班只有我知道她曾经喜欢甜食。' },
+  { type: 'char_enter', character: 'yoshino', position: 'center', expression: 'surprised', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'surprised', text: '……这是谁放的。' },
+  { type: 'narration', text: '她拿起蛋糕，看了看。然后——目光移向了我。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '上课不准吃东西。这是校规。' },
+  { type: 'narration', text: '她把蛋糕放进了抽屉里。' },
+  { type: 'narration', text: '但在下课后——我看到抽屉被打开了一条缝。蛋糕被吃完了。包装纸叠得整整齐齐。' },
+  { type: 'narration', text: '上面用铅笔写了两个字：「谢谢。」' },
+  { type: 'monologue', text: '（她吃了。而且说了谢谢。朝武芳乃……也会用铅笔写「谢谢」啊。）' },
+  { type: 'monologue', text: '（那两个字的字迹，比她笔记本上的字更潦草。更自然。更——像人。）' },
+  { type: 'affection', character: 'yoshino', change: 3 },
+  { type: 'char_exit', character: 'yoshino', animation: 'fade_out' },
+
+  // 编程题 Y-2：边界测试
   { type: 'bg', src: 'classroom_day', transition: 'fade' },
   { type: 'bgm', src: 'daily', crossfade: 1500 },
   { type: 'narration', text: '第二天的课上，Yoshino 出了一道关于边界测试的题。' },
+  { type: 'narration', text: '她说的时候看了我一眼——那种眼神好像在说：「我在教你的不只是编程。」' },
+  { type: 'char_enter', character: 'yoshino', position: 'center', expression: 'normal', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '边界测试。即使代码在正常情况下运行完美——在极端值面前也可能崩溃。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '完美的外表不代表没有漏洞。最可怕的 Bug 往往藏在边界上。' },
+  { type: 'monologue', text: '（她在说代码。但也像是在说自己。）' },
   { type: 'challenge', id: 'yoshino_boundary',
     context_dialogue: {
       before: { speaker: 'yoshino', expression: 'glasses_adjust', text: '边界测试。完美的代码也需要在边界上经受考验。' },
@@ -96,16 +219,22 @@ export const routeYoshino = [
       fail: { speaker: 'yoshino', expression: 'normal', text: '边界值是最容易出 Bug 的地方。18 正好在 >= 18 的边界上。' }
     }
   },
+  { type: 'char_exit', character: 'yoshino', animation: 'fade_out' },
 
-  // ===== 写爱心代码 =====
+  // ===== Y-09: 写爱心代码 =====
   { type: 'bg', src: 'computer_room_day', transition: 'fade' },
   { type: 'bgm', src: 'romantic', crossfade: 1500 },
   { type: 'narration', text: '我决定做一件事——写一个「不完美但有趣」的程序给 Yoshino。' },
   { type: 'narration', text: '一个用 ASCII 字符画的爱心图案。' },
   { type: 'narration', text: '代码故意不那么「规范」——变量名用了日语拼音，缩进故意多了一格，注释写着私密的话。' },
   { type: 'narration', text: '因为完美的代码她见过太多了。我想让她看到——不完美也可以有温度。' },
+  { type: 'narration', text: '爱心的形状是用嵌套循环生成的。每一行的星号数量用一个数学公式计算。' },
+  { type: 'narration', text: '我在代码里加了一些「故意的不完美」——' },
+  { type: 'narration', text: '一个变量叫 kokoro（心）。一个函数叫 egao（笑颜）。注释里写着日语拼音的告白。' },
+  { type: 'narration', text: '这些不符合 PEP8 规范。不符合 Yoshino 的标准。' },
+  { type: 'narration', text: '但它们符合我想对她说的话。' },
 
-  // 编程题 Y-3
+  // 编程题 Y-3：协作编程
   { type: 'challenge', id: 'yoshino_pair',
     context_dialogue: {
       before: { speaker: 'yoshino', expression: 'normal', text: '协作编程？好吧……这次你写，我审查。' },
@@ -114,24 +243,35 @@ export const routeYoshino = [
     }
   },
 
-  // ===== 关键场景：展示爱心代码 =====
+  // ===== Y-10: 关键场景：展示爱心代码 =====
   { type: 'bg', src: 'classroom_evening', transition: 'fade' },
   { type: 'bgm', src: 'romantic', crossfade: 2000 },
   { type: 'narration', text: '夕阳下的教室。只有我们两个人。' },
+  { type: 'narration', text: '窗外的银杏叶在风中飘落。金色的光从窗户涌进来，把教室变成了一座微型的金阁寺。' },
   { type: 'narration', text: '我打开笔记本电脑，运行了那段代码。' },
   { type: 'narration', text: '屏幕上，一个由星号组成的爱心图案缓缓显现——' },
   { type: 'narration', text: '爱心的中间写着一行注释：# 给芳乃。' },
+  { type: 'narration', text: '下面一行：# 不完美的代码。但完整的心意。' },
+  { type: 'char_enter', character: 'yoshino', position: 'center', expression: 'surprised', animation: 'fade_in' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'surprised', text: '你写了……一个画爱心的程序？' },
   { type: 'narration', text: '她盯着屏幕。表情从惊讶变成了茫然，再变成了某种我看不透的复杂情绪。' },
-  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '变量名用的是 heart 而不是 h……还算可以。' },
+  { type: 'narration', text: '那种表情——像是金阁寺第一次出现了裂缝。不是毁灭的裂缝，而是——光照进来的裂缝。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '变量名用的是 kokoro 而不是 heart……这不符合英文命名规范。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '但缩进多了一个空格……注释太私人了……' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'tsundere_pout', text: '这代码完全不规范！变量命名不统一！PEP8 违规至少五处！' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'tsundere_pout', text: '函数名用拼音？egao？谁能看得懂？！' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'cold', text: '注释里不应该写个人情感！这是代码审查的大忌！' },
   { type: 'narration', text: '但她的手在发抖。不是愤怒——而是感动。' },
   { type: 'narration', text: '因为有人第一次不是为了「正确」而写代码——而是为了「她」而写代码。' },
+  { type: 'narration', text: '有人故意在代码里留下了瑕疵——因为那些瑕疵本身就是心意。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '……为什么。为什么要写这种东西给我。' },
-  { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '我不需要……不完美的代码。我只接受……' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '你知道我最讨厌不规范的代码。你明明知道。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '但你还是写了。而且——每一个「不规范」都是故意的。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '你是在告诉我——不完美也可以被接受吗。' },
   { type: 'narration', text: '她的声音越来越小。最后几乎只是唇形在动——' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '……可是。这是我收到过的……最温暖的代码。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '比任何完美的程序都温暖。因为——' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '它不完美。但它是真的。' },
 
   { type: 'choice', prompt: 'Yoshino 的防线崩溃了——', options: [
     { text: '上前拥抱她', effects: { yoshino: 15 }, flags: { yoshino_hug: true }, next: 'yoshino_good_path' },
@@ -139,49 +279,109 @@ export const routeYoshino = [
   ]},
 ]
 
+// ===== GOOD END =====
 const yoshino_good = [
   { label: 'yoshino_good_path' },
   { type: 'bgm', src: 'ending', fadeIn: 2000 },
   { type: 'narration', text: '我上前一步，轻轻抱住了她。' },
-  { type: 'narration', text: '她的身体僵硬了一秒——然后慢慢地、慢慢地放松了。' },
+  { type: 'narration', text: '她的身体僵硬了一秒——像是一段代码遇到了未知的输入，不知道该执行哪个分支。' },
+  { type: 'narration', text: '然后慢慢地、慢慢地放松了。' },
+  { type: 'narration', text: '像是 try-except 终于 catch 到了那个一直在等待的 exception。然后选择了——不抛出。而是拥抱。' },
   { type: 'narration', text: '她把脸埋在我的肩膀上。黑发铺散开来，有洗发水淡淡的清香。' },
+  { type: 'narration', text: '那种香味——不是她平时那种一丝不苟的气质。而是更私人的、更柔软的、更真实的她。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '……你这个笨蛋。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '代码不规范……注释有错字……完全不是好代码。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '变量名不统一。缩进多了。PEP8 违规。哪个审查员会通过这种代码？' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '但是……' },
   { type: 'narration', text: '她轻轻推开我。走到电脑前。' },
+  { type: 'narration', text: '手指放在键盘上——那双曾经被创可贴覆盖的手指，此刻温柔得像是在弹奏一首小夜曲。' },
   { type: 'narration', text: '她打开编辑器，在那段爱心代码的最后加了一行注释——' },
   { type: 'narration', text: '// I lkie you' },
   { type: 'monologue', text: '（lkie……不是 like？）' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '故意拼错的。因为……完美的告白太不像我了。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '不——等等。完美的告白才像我。但——' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '我不想做完美的自己了。至少——在你面前。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '预制告白什么的，太下头了。所以——' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '这个 typo 是我留的。是专属于我的……不完美。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '是我第一次故意犯的错误。第一次觉得——犯错也可以这么开心。' },
   { type: 'narration', text: '她转过头。夕阳照在她难得温柔的脸上。' },
+  { type: 'narration', text: '那张总是严肃得像金阁寺正面的脸——此刻像是被阳光融化了一角。' },
+  { type: 'narration', text: '露出了里面的木头。温暖的、有纹理的、带着年轮的——真实的木头。' },
   { type: 'narration', text: '那个总是追求完美的少女，第一次接受了——世界上有比完美更重要的东西。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '这段代码……不完美。但是——我不想修改了。永远不改。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '因为这是唯一一段……让我想保留 Bug 的代码。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '……不。这不是 Bug。这是——Feature。' },
+  { type: 'narration', text: '她的嘴角——终于上扬了。那是一个真正的微笑。' },
+  { type: 'narration', text: '不是班长的微笑。不是审查员的微笑。不是完美主义者的微笑。' },
+  { type: 'narration', text: '而是——朝武芳乃的微笑。一个被允许不完美的女孩的微笑。' },
+
+  // 尾声
+  { type: 'wait', duration: 1500 },
+  { type: 'bg', src: 'classroom_day', transition: 'fade', duration: 2000 },
+  { type: 'bgm', src: 'spring_breeze', crossfade: 2000 },
+  { type: 'narration', text: '——几个月后。' },
+  { type: 'narration', text: '教室里。阳光很好。黑板上写着新学期的课程表。' },
+  { type: 'narration', text: 'Yoshino 的桌面……发生了一点变化。' },
+  { type: 'narration', text: '文件还是按字母排列。笔还是按颜色归位。杯子还是放在精确的位置。' },
+  { type: 'narration', text: '但——笔筒旁边多了一块草莓蛋糕的包装纸折成的小星星。歪歪扭扭的。' },
+  { type: 'narration', text: '那是她折的。第一次折。不完美——但她没有重折。' },
+  { type: 'narration', text: '还有——她的右耳上，又戴上了耳环。很小的银色耳钉。' },
+  { type: 'narration', text: '阳光照在上面，闪着微弱的光。像是一行被取消注释的代码——重新运行了。' },
+  { type: 'char_enter', character: 'yoshino', position: 'center', expression: 'slight_smile', animation: 'fade_in' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'slight_smile', text: '……看什么。赶紧坐下。马上上课了。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '对了——你昨天的代码我审查了。有两处不规范。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '但——我通过了。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '因为……有些代码，不需要完美就已经足够好了。' },
   { type: 'cg', id: 'yoshino_good_end' },
   { type: 'ending', endingType: 'good', route: 'yoshino', title: '不完全なコード、完全な気持ち',
-    text: '不完美的代码，完整的心意。\n朝武芳乃第一次接受了——世界上有比完美更重要的东西。\n\n// I lkie you\n// 这个 typo 是故意的。是我唯一想保留的 Bug。' }
+    text: '不完美的代码，完整的心意。\n朝武芳乃第一次接受了——世界上有比完美更重要的东西。\n她重新戴上了耳环。那行被注释掉的代码——重新运行了。\n\n// I lkie you\n// 这个 typo 是故意的。是我唯一想保留的 Bug。\n// 不——这不是 Bug。这是 Feature。' }
 ]
 
+// ===== NORMAL END =====
 const yoshino_normal = [
   { label: 'yoshino_normal_path' },
   { type: 'bgm', src: 'sad', crossfade: 2000 },
   { type: 'narration', text: '我站在原地，安静地陪着她。' },
   { type: 'narration', text: '夕阳慢慢西沉。教室里的光从金色变成了橘红色，最后变成了深紫色。' },
+  { type: 'narration', text: '两个人的影子在墙上慢慢拉长。然后融入了黑暗。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '……谢谢你。给我空间。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '大多数人遇到这种场面会尴尬地找话题。或者逃走。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'slight_smile', text: '但你——你只是安静地在。不多也不少。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'slight_smile', text: '你的代码……我会好好保存的。作为参考。仅此而已。' },
   { type: 'narration', text: '她把那段代码保存在了一个私人文件夹里。文件名是「不要打开.py」。' },
   { type: 'monologue', text: '（不要打开.py……如果真的不要打开，又为什么要保存呢。）' },
-  { type: 'narration', text: '毕业前的最后一次代码审查——' },
+  { type: 'monologue', text: '（如果真的只是「参考」，又为什么要放进私人文件夹呢。）' },
+  { type: 'monologue', text: '（朝武芳乃——你的文件命名，是我见过最不规范的。但也是最诚实的。）' },
+
+  // 时间跳跃
+  { type: 'wait', duration: 1500 },
   { type: 'bg', src: 'classroom_evening', transition: 'fade', duration: 1500 },
+  { type: 'bgm', src: 'nostalgia', crossfade: 2000 },
+  { type: 'narration', text: '——毕业前的最后一次代码审查。' },
+  { type: 'narration', text: '教室里只剩下我们两个人。一如既往。' },
+  { type: 'narration', text: '窗外的樱花正在盛开。和一年前的春天一样。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'slight_smile', text: '你的代码审查结果：合格。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'normal', text: '变量命名规范、逻辑清晰、注释恰当。没有任何问题。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'glasses_adjust', text: '从一个连缩进都搞不清的新生……到现在这样。进步很大。' },
   { type: 'narration', text: '她把审查报告递给我。在报告的最后——手写的备注栏——' },
+  { type: 'narration', text: '用铅笔写着一行字。字迹比她平时潦草——更像是那天蛋糕包装纸上的「谢谢」。' },
   { type: 'narration', text: '// 合格。……谢谢你教会我：代码不需要完美，写代码的人也不需要。' },
+  { type: 'narration', text: '下面还有一行更小的字——' },
+  { type: 'narration', text: '// P.S. 不要打开.py 我打开过了。37 次。' },
   { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '……再见。' },
-  { type: 'ending', endingType: 'normal', route: 'yoshino', title: 'Code Review',
-    text: '最后的代码审查报告，备注栏手写着一行字：\n// 合格。……谢谢你教会我：代码不需要完美。' }
+  { type: 'narration', text: '她收拾好文件。站起来。走向教室门口。' },
+  { type: 'narration', text: '在门口停了一秒——背对着我。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '……那个文件名。本来想改成别的名字。' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'rare_gentle', text: '但最后还是没改。因为——' },
+  { type: 'dialogue', speaker: 'yoshino', expression: 'blush', text: '每次看到「不要打开」三个字，就会想起你。然后——还是会打开。' },
+  { type: 'narration', text: '她走了。门关上了。' },
+  { type: 'narration', text: '教室里只剩下夕阳和一份审查报告。' },
+  { type: 'narration', text: '报告上的铅笔字迹——在阳光下微微发光。' },
+  { type: 'narration', text: '「不要打开.py  我打开过了。37 次。」' },
+  { type: 'narration', text: '——朝武芳乃，把不完美的数字也写进了最终的审查报告里。' },
+  { type: 'narration', text: '也许。这就是她的答案。' },
+  { type: 'ending', endingType: 'normal', route: 'yoshino', title: 'Code Review: PASSED',
+    text: '最后的代码审查报告，备注栏手写着一行字：\n// 合格。……谢谢你教会我：代码不需要完美。\n// P.S. 不要打开.py 我打开过了。37 次。\n\n那个文件——她一直没有删除。也一直没有改名。' }
 ]
 
 export { yoshino_good as routeYoshinoGood, yoshino_normal as routeYoshinoNormal }

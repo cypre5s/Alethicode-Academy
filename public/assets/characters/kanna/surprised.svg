@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="700" viewBox="0 0 400 700">
+  <defs>
+    <linearGradient id="bg_kanna" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7BA7C9" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#5b9cc4" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="hair_kanna" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#93c5e8"/>
+      <stop offset="100%" stop-color="#5b9cc4"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="700" fill="url(#bg_kanna)" rx="20"/>
+  <ellipse cx="200" cy="250" rx="80" ry="95" fill="url(#hair_kanna)" opacity="0.9"/>
+  <ellipse cx="200" cy="260" rx="55" ry="65" fill="#fde8d0"/>
+  <text x="200" y="272" text-anchor="middle" font-size="32" fill="#5b9cc4">⊙▽⊙</text>
+  <rect x="130" y="380" width="140" height="240" rx="30" fill="#7BA7C9" opacity="0.7"/>
+  <rect x="145" y="395" width="110" height="60" rx="12" fill="#fff" opacity="0.4"/>
+  <text x="200" y="620" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="#5b9cc4">Kanna</text>
+  <text x="200" y="650" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#5b9cc4" opacity="0.7">surprised</text>
+</svg>

@@ -3,8 +3,8 @@
     <div v-if="engine.isChallenge.value && challenge" class="challenge-overlay" @click.stop>
       <div class="challenge-panel">
         <div class="challenge-header">
-          <span class="challenge-icon">{{ isCompetition ? '⚔' : '📝' }}</span>
-          <h3 class="challenge-title">{{ isCompetition ? competitionTitle : ('编程挑战 · ' + (activeChallenge?.title || challenge.title || challenge.id)) }}</h3>
+          <span class="challenge-icon">{{ isCompetition ? '⚔' : isWorldChallenge ? '⚡' : isDynamicChallenge ? '🎯' : '📝' }}</span>
+          <h3 class="challenge-title">{{ isCompetition ? competitionTitle : isWorldChallenge ? ('World Challenge · ' + (challenge.title || 'Unknown')) : ('编程挑战 · ' + (activeChallenge?.title || challenge.title || challenge.id)) }}</h3>
           <span v-if="(activeChallenge || challenge).difficulty" class="difficulty">
             {{ '★'.repeat((activeChallenge || challenge).difficulty || 1) }}{{ '☆'.repeat(Math.max(0, 4 - ((activeChallenge || challenge).difficulty || 1))) }}
           </span>
@@ -91,6 +91,92 @@
           </div>
         </div>
 
+        <!-- 教学反转 teach_back -->
+        <div v-if="challengeType === 'teach_back'" class="teach-back-area">
+          <div class="teach-prompt">
+            <span class="teach-char-name" :style="{ color: teachCharColor }">{{ teachCharName }}</span>
+            <span class="teach-ask">{{ challenge.prompt_text }}</span>
+          </div>
+          <textarea v-model="teachBackText"
+                    class="teach-textarea"
+                    :placeholder="`用你自己的话解释「${challenge.concept}」（至少 ${challenge.evaluation_rubric?.min_length || 20} 字）`"
+                    :disabled="answered"
+                    rows="5"></textarea>
+          <div class="teach-counter">{{ teachBackText.length }} 字</div>
+        </div>
+
+        <!-- 配对调试 pair_debug -->
+        <div v-if="challengeType === 'pair_debug'" class="pair-debug-area">
+          <div class="debug-setup">
+            <span class="teach-char-name" :style="{ color: teachCharColor }">{{ teachCharName }}</span>
+            <span class="debug-dialogue">{{ challenge.setup_dialogue }}</span>
+          </div>
+          <div class="code-block">
+            <pre><code v-html="highlightPython(challenge.buggy_code)"></code></pre>
+          </div>
+          <textarea v-model="pairDebugText"
+                    class="teach-textarea"
+                    placeholder="分析这段代码的问题，并说说怎么修复……"
+                    :disabled="answered"
+                    rows="4"></textarea>
+        </div>
+
+        <!-- 创意编程 creative_code -->
+        <div v-if="challengeType === 'creative_code'" class="creative-code-area">
+          <div class="creative-prompt">{{ challenge.prompt }}</div>
+          <div class="creative-split">
+            <div class="creative-editor">
+              <div class="creative-editor-header">代码编辑器</div>
+              <textarea v-model="creativeCode"
+                        class="creative-textarea"
+                        :disabled="answered"
+                        spellcheck="false"
+                        rows="10"></textarea>
+            </div>
+            <div class="creative-preview">
+              <div class="creative-preview-header">
+                运行结果
+                <button v-if="!answered" class="run-btn" @click="runCreativeCode" :disabled="creativeRunning">
+                  {{ creativeRunning ? '⏳ 运行中...' : '▶ 运行' }}
+                </button>
+              </div>
+              <pre class="creative-output">{{ creativeOutput || '（点击运行查看输出）' }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- LLM 评估中 -->
+        <div v-if="llmEvaluating" class="llm-evaluating">
+          <div class="eval-spinner"></div>
+          <span>{{ teachCharName }}正在思考……</span>
+        </div>
+
+        <!-- LLM 反馈（替代传统结果区） -->
+        <div v-if="answered && llmFeedback" class="llm-feedback-area">
+          <div class="llm-feedback-header" :class="isCorrect ? 'success' : 'needs-work'">
+            {{ isCorrect ? '✨ ' : '💭 ' }}{{ isCorrect ? '很好！' : '还可以更好' }}
+          </div>
+          <div class="llm-feedback-body">
+            <span class="teach-char-name" :style="{ color: teachCharColor }">{{ teachCharName }}</span>
+            <span class="llm-feedback-text">{{ llmFeedback.feedback_text }}</span>
+          </div>
+          <div v-if="llmFeedback.clarity !== undefined" class="llm-scores">
+            <span class="score-tag">清晰 {{ llmFeedback.clarity }}/5</span>
+            <span class="score-tag">准确 {{ llmFeedback.accuracy }}/5</span>
+            <span class="score-tag">共情 {{ llmFeedback.empathy }}/5</span>
+          </div>
+          <div v-if="llmFeedback.technical_score !== undefined" class="llm-scores">
+            <span class="score-tag">技术 {{ llmFeedback.technical_score }}/5</span>
+            <span class="score-tag">语气 {{ llmFeedback.tone_score }}/5</span>
+            <span v-if="llmFeedback.found_bug !== undefined" class="score-tag" :class="llmFeedback.found_bug ? 'tag-ok' : 'tag-miss'">{{ llmFeedback.found_bug ? '✓ 找到Bug' : '✗ 未找到' }}</span>
+          </div>
+          <div v-if="llmFeedback.elegance !== undefined" class="llm-scores">
+            <span class="score-tag">优雅 {{ llmFeedback.elegance }}/5</span>
+            <span class="score-tag">创意 {{ llmFeedback.creativity }}/5</span>
+            <span class="score-tag" :class="llmFeedback.runs ? 'tag-ok' : 'tag-miss'">{{ llmFeedback.runs ? '✓ 运行成功' : '✗ 运行失败' }}</span>
+          </div>
+        </div>
+
         <div v-if="showConfetti" class="confetti-container">
           <span v-for="i in 30" :key="'c'+i" class="confetti-piece" :style="confettiStyle(i)"></span>
         </div>
@@ -142,6 +228,9 @@ const audio = inject('audio')
 
 const challenge = computed(() => engine.challengeData.value)
 const isCompetition = computed(() => challenge.value?.isCompetition === true)
+const isWorldChallenge = computed(() => challenge.value?.isWorldChallenge === true)
+const isDynamicChallenge = computed(() => challenge.value?.isDynamic === true)
+const isCodeNarrative = computed(() => challenge.value?.isCodeNarrative === true)
 const currentCompRound = computed(() => challenge.value?.currentRound || 0)
 const totalCompRounds = computed(() => challenge.value?.rounds?.length || 0)
 const compScores = computed(() => challenge.value?.scores || { player: 0, opponent: 0 })
@@ -170,6 +259,9 @@ const challengeType = computed(() => {
   if (t === 'multiple_choice' || t === 'choice') return 'multiple_choice'
   if (t === 'fill_blank' || t === 'fill') return 'fill_blank'
   if (t === 'code_order' || t === 'sort') return 'code_order'
+  if (t === 'teach_back') return 'teach_back'
+  if (t === 'pair_debug') return 'pair_debug'
+  if (t === 'creative_code') return 'creative_code'
   return t
 })
 
@@ -177,6 +269,17 @@ const selectedOption = ref(-1)
 const fillAnswer = ref('')
 const sortedLines = ref([])
 const showConfetti = ref(false)
+
+const teachBackText = ref('')
+const pairDebugText = ref('')
+const creativeCode = ref('')
+const creativeOutput = ref('')
+const creativeRunning = ref(false)
+const llmEvaluating = ref(false)
+const llmFeedback = ref(null)
+const llmExpression = ref('normal')
+
+const llm = inject('llm', null)
 
 function confettiStyle(i) {
   const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A78BFA', '#F472B6', '#34D399', '#60A5FA', '#FBBF24']
@@ -210,11 +313,28 @@ watch(() => engine.isChallenge.value, (val) => {
     hintsUsed.value = 0
     currentHint.value = ''
     attempts.value = 0
+    teachBackText.value = ''
+    pairDebugText.value = ''
+    creativeCode.value = challenge.value?.starter_code || ''
+    creativeOutput.value = ''
+    creativeRunning.value = false
+    llmEvaluating.value = false
+    llmFeedback.value = null
+    llmExpression.value = 'normal'
     if (challengeType.value === 'code_order') {
       const lines = challenge.value.lines || []
       sortedLines.value = [...lines].sort(() => Math.random() - 0.5)
     }
   }
+})
+
+const teachCharColor = computed(() => {
+  const charId = challenge.value?.related_character
+  return characters[charId]?.color || '#aaa'
+})
+const teachCharName = computed(() => {
+  const charId = challenge.value?.related_character
+  return characters[charId]?.nameShort || characters[charId]?.name || charId || ''
 })
 
 const codeDisplay = computed(() => {
@@ -281,9 +401,13 @@ const resultExplanation = computed(() => {
 })
 
 const canSubmit = computed(() => {
+  if (llmEvaluating.value) return false
   if (challengeType.value === 'multiple_choice') return selectedOption.value >= 0
   if (challengeType.value === 'fill_blank') return fillAnswer.value.trim().length > 0
   if (challengeType.value === 'code_order') return true
+  if (challengeType.value === 'teach_back') return teachBackText.value.trim().length >= (challenge.value?.evaluation_rubric?.min_length || 10)
+  if (challengeType.value === 'pair_debug') return pairDebugText.value.trim().length >= 5
+  if (challengeType.value === 'creative_code') return creativeCode.value.trim().length > 0
   return false
 })
 
@@ -317,10 +441,23 @@ function useHint() {
   hintsUsed.value++
 }
 
-function submitAnswer() {
+async function submitAnswer() {
   if (!canSubmit.value) return
 
   attempts.value++
+
+  if (challengeType.value === 'teach_back') {
+    await submitTeachBack()
+    return
+  }
+  if (challengeType.value === 'pair_debug') {
+    await submitPairDebug()
+    return
+  }
+  if (challengeType.value === 'creative_code') {
+    await submitCreativeCode()
+    return
+  }
 
   if (challengeType.value === 'multiple_choice') {
     isCorrect.value = isCorrectOption(selectedOption.value)
@@ -333,6 +470,132 @@ function submitAnswer() {
   answered.value = true
   audio.playSfx(isCorrect.value ? 'correct' : 'wrong')
 
+  if (isCorrect.value) {
+    showConfetti.value = true
+    setTimeout(() => { showConfetti.value = false }, 2500)
+  }
+}
+
+function _getGameState() {
+  return {
+    playerName: engine.playerName?.value || '',
+    relationship: JSON.parse(JSON.stringify(engine.relationship)),
+    flags: { ...engine.flags },
+    currentChapter: engine.currentChapter?.value || '',
+    currentTimeSlot: engine.currentTimeSlot?.value || '',
+    currentBg: engine.currentBg?.value || '',
+    conversationHistory: engine.conversationHistory || {},
+    memories: engine.memories || {},
+  }
+}
+
+async function submitTeachBack() {
+  llmEvaluating.value = true
+  const ch = challenge.value
+  const charId = ch.related_character
+  const gs = _getGameState()
+  let result
+  if (llm?.evaluateTeachBack) {
+    result = await llm.evaluateTeachBack(charId, ch.concept, teachBackText.value, ch.evaluation_rubric, gs)
+  } else {
+    result = { clarity: 3, accuracy: 3, empathy: 3, feedback_text: '嗯，你说的有道理。', expression: 'normal', memory_candidate: '', outcome: 'accurate_teach', success: true }
+  }
+  llmEvaluating.value = false
+  llmFeedback.value = result
+  llmExpression.value = result.expression || 'normal'
+  isCorrect.value = result.success
+  answered.value = true
+  audio.playSfx(isCorrect.value ? 'correct' : 'wrong')
+  if (isCorrect.value) {
+    showConfetti.value = true
+    setTimeout(() => { showConfetti.value = false }, 2500)
+  }
+}
+
+async function submitPairDebug() {
+  llmEvaluating.value = true
+  const ch = challenge.value
+  const charId = ch.related_character
+  const gs = _getGameState()
+  let result
+  if (llm?.evaluatePairDebug) {
+    result = await llm.evaluatePairDebug(charId, ch.buggy_code, ch.bug_description, pairDebugText.value, ch.evaluation_rubric, gs)
+  } else {
+    result = { found_bug: true, technical_score: 3, tone_score: 3, feedback_text: '嗯，你找到了。', expression: 'normal', relationship_hint: '', outcome: 'solo_pass', success: true }
+  }
+  llmEvaluating.value = false
+  llmFeedback.value = result
+  llmExpression.value = result.expression || 'normal'
+  isCorrect.value = result.success
+  answered.value = true
+  audio.playSfx(isCorrect.value ? 'correct' : 'wrong')
+  if (isCorrect.value) {
+    showConfetti.value = true
+    setTimeout(() => { showConfetti.value = false }, 2500)
+  }
+}
+
+async function runCreativeCode() {
+  creativeRunning.value = true
+  creativeOutput.value = ''
+  let execResult = null
+  try {
+    if (isWorldChallenge.value && engine.worldVM?.isReady?.value) {
+      const result = await engine.worldVM.executeWorldCode(creativeCode.value, {
+        tier: challenge.value?.tier,
+        timeout: 8000,
+      })
+      creativeOutput.value = result.success
+        ? (result.stdout || '(世界状态已更新)')
+        : `错误：${result.stderr}`
+      execResult = result
+    } else {
+      if (!window._pyodide) {
+        const { usePythonRunner } = await import('../engine/PythonRunner.js')
+        window._pyodideRunner = usePythonRunner()
+        await window._pyodideRunner.initialize()
+      }
+      const runner = window._pyodideRunner
+      const result = await runner.runCode(creativeCode.value, 5000)
+      creativeOutput.value = result.success ? result.stdout : `错误：${result.stderr}`
+      execResult = result
+    }
+  } catch (e) {
+    creativeOutput.value = `运行失败：${e.message}`
+    execResult = { success: false, stdout: '', stderr: e.message }
+  }
+
+  if (engine.narrativeCodeBridge && execResult) {
+    engine.narrativeCodeBridge.evaluateCode(creativeCode.value, execResult, {
+      chapter: engine.currentChapter?.value,
+      character: challenge.value?.related_character,
+    })
+  }
+
+  creativeRunning.value = false
+}
+
+async function submitCreativeCode() {
+  if (!creativeOutput.value) {
+    await runCreativeCode()
+  }
+  llmEvaluating.value = true
+  const ch = challenge.value
+  const charId = ch.related_character
+  const gs = _getGameState()
+  let result
+  if (llm?.evaluateCreativeCode) {
+    result = await llm.evaluateCreativeCode(charId, creativeCode.value, creativeOutput.value, ch.evaluation, gs)
+  } else {
+    const ran = creativeOutput.value && !creativeOutput.value.startsWith('错误') && !creativeOutput.value.startsWith('运行失败')
+    result = { runs: ran, elegance: 3, creativity: 3, feedback_text: ran ? '跑起来了！' : '好像有问题……', expression: ran ? 'smile' : 'confused', memory_candidate: '', outcome: ran ? 'assisted_pass' : 'thoughtful_fail', success: ran }
+  }
+  llmEvaluating.value = false
+  llmFeedback.value = result
+  llmExpression.value = result.expression || 'normal'
+  isCorrect.value = result.success
+  answered.value = true
+  audio.playSfx(isCorrect.value ? 'correct' : 'wrong')
   if (isCorrect.value) {
     showConfetti.value = true
     setTimeout(() => { showConfetti.value = false }, 2500)
@@ -466,10 +729,52 @@ function continueGame() {
       engine.showAffectionToast(k, v)
     })
   }
-  engine.resolveChallenge(isCorrect.value, (activeChallenge.value || challenge.value)?.id, {
-    hintsUsed: hintsUsed.value,
-    totalHints: totalHints.value,
-  })
+  const cType = challengeType.value
+  const challengeId = (activeChallenge.value || challenge.value)?.id
+
+  const codeForRecording = cType === 'creative_code' ? creativeCode.value
+    : cType === 'teach_back' ? teachBackText.value
+    : cType === 'pair_debug' ? pairDebugText.value
+    : fillAnswer.value || ''
+
+  if (codeForRecording && engine.temporalCodeDB) {
+    engine.temporalCodeDB.recordCode(codeForRecording, {
+      chapter: engine.currentChapter.value,
+      challenge: challengeId,
+      character: (activeChallenge.value || challenge.value)?.related_character || '',
+      location: engine.currentBg.value,
+      challengeType: cType,
+    }, {
+      success: isCorrect.value,
+      output: cType === 'creative_code' ? creativeOutput.value : '',
+      attempts: attempts.value,
+    })
+  }
+
+  if (codeForRecording && engine.symbioticCodeDNA) {
+    engine.symbioticCodeDNA.analyzePlayerCode(codeForRecording)
+  }
+
+  if (isCodeNarrative.value && engine.resolveCodeNarrative) {
+    engine.resolveCodeNarrative(codeForRecording || '', {
+      success: isCorrect.value,
+      stdout: creativeOutput.value || '',
+      stderr: '',
+    })
+  } else if ((cType === 'teach_back' || cType === 'pair_debug' || cType === 'creative_code') && llmFeedback.value) {
+    const fb = llmFeedback.value
+    engine.resolveLLMChallenge(challengeId, {
+      success: isCorrect.value,
+      outcome: fb.outcome,
+      memoryText: fb.memory_candidate || fb.feedback_text || '',
+      relationshipDelta: null,
+    })
+  } else {
+    engine.resolveChallenge(isCorrect.value, challengeId, {
+      hintsUsed: hintsUsed.value,
+      totalHints: totalHints.value,
+    })
+  }
 }
 </script>
 
@@ -828,6 +1133,179 @@ function continueGame() {
   color: var(--vn-text);
   font-weight: 600;
 }
+
+/* teach_back */
+.teach-back-area, .pair-debug-area { margin-bottom: 20px; }
+
+.teach-prompt, .debug-setup {
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(216, 177, 110, 0.24);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  line-height: 1.7;
+}
+
+.teach-char-name { font-weight: 700; margin-right: 8px; }
+.teach-ask, .debug-dialogue { color: var(--vn-text); font-size: 15px; }
+
+.teach-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 14px;
+  background: rgba(14, 20, 36, 0.96);
+  border: 1px solid rgba(150, 177, 219, 0.28);
+  border-radius: 8px;
+  color: #e0d6cb;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 15px;
+  line-height: 1.8;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+}
+.teach-textarea:focus { border-color: var(--vn-primary); box-shadow: 0 0 0 2px rgba(232, 160, 191, 0.2); }
+.teach-textarea:disabled { opacity: 0.6; }
+
+.teach-counter { text-align: right; font-size: 12px; color: var(--vn-text-dim); margin-top: 4px; }
+
+/* creative_code */
+.creative-code-area { margin-bottom: 20px; }
+
+.creative-prompt {
+  font-size: 15px;
+  color: #2d2018;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(216, 177, 110, 0.2);
+  border-radius: 8px;
+}
+
+.creative-split { display: flex; gap: 12px; }
+@media (max-width: 600px) { .creative-split { flex-direction: column; } }
+
+.creative-editor, .creative-preview { flex: 1; min-width: 0; }
+
+.creative-editor-header, .creative-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(14, 20, 36, 0.8);
+  border: 1px solid rgba(150, 177, 219, 0.2);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  font-size: 12px;
+  color: #8899aa;
+  font-family: 'Fira Code', monospace;
+}
+
+.creative-textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 12px;
+  background: rgba(14, 20, 36, 0.98);
+  border: 1px solid rgba(150, 177, 219, 0.28);
+  border-radius: 0 0 8px 8px;
+  color: #a5d6ff;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  tab-size: 4;
+  box-sizing: border-box;
+}
+.creative-textarea:focus { border-color: rgba(150, 177, 219, 0.5); }
+
+.creative-output {
+  width: 100%;
+  min-height: 180px;
+  padding: 12px;
+  background: rgba(14, 20, 36, 0.98);
+  border: 1px solid rgba(150, 177, 219, 0.28);
+  border-radius: 0 0 8px 8px;
+  color: #34D399;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+
+.run-btn {
+  padding: 2px 10px;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #34D399;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'Fira Code', monospace;
+}
+.run-btn:hover:not(:disabled) { background: rgba(52, 211, 153, 0.3); }
+.run-btn:disabled { opacity: 0.5; }
+
+/* LLM evaluating */
+.llm-evaluating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  color: var(--vn-text-dim);
+  font-size: 14px;
+}
+
+.eval-spinner {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(216, 177, 110, 0.2);
+  border-top-color: var(--vn-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* LLM feedback */
+.llm-feedback-area {
+  padding: 16px;
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(216, 177, 110, 0.2);
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.llm-feedback-header {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.llm-feedback-header.success { color: var(--vn-green); }
+.llm-feedback-header.needs-work { color: var(--vn-gold); }
+
+.llm-feedback-body {
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+.llm-feedback-text { color: var(--vn-text); font-size: 15px; }
+
+.llm-scores { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+.score-tag {
+  padding: 3px 10px;
+  background: rgba(214, 182, 136, 0.12);
+  border: 1px solid rgba(214, 182, 136, 0.2);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--vn-text-dim);
+  font-family: 'Fira Code', monospace;
+}
+.score-tag.tag-ok { background: rgba(52, 211, 153, 0.12); border-color: rgba(52, 211, 153, 0.3); color: #34D399; }
+.score-tag.tag-miss { background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.3); color: #F87171; }
 
 .challenge-slide-enter-active { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .challenge-slide-leave-active { transition: all 0.3s ease; }

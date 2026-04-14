@@ -30,6 +30,9 @@
   "dependencies": {
     "@capacitor/android": "^6.2.1",
     "@capacitor/core": "^6.2.1",
+    "html2canvas": "^1.4.1",
+    "pixi-live2d-display": "^0.4.0",
+    "pixi.js": "^7.4.2",
     "vue": "^3.5.13"
   },
   "devDependencies": {
@@ -101,15 +104,21 @@
       "target": [
         {
           "target": "deb",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "tar.gz",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "artifactName": "AlethicodeAcademyGal-${version}-linux-${arch}.${ext}"

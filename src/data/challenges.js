@@ -83,8 +83,50 @@ export const challenges = {
     failText: '正确顺序：先定义字符串，再 split 分割，最后打印。别急，再捋一遍～'
   },
 
+  ch1_string_format: {
+    id: 'ch1_string_format', title: '字符串格式化', chapter: 'chapter1', difficulty: 2,
+    type: 'multiple_choice', related_character: 'nene', knowledge_domain: 'strings',
+    question: '已知 name = "Nene"，age = 17，以下哪个能正确输出 "Nene今年17岁"？',
+    options: [
+      'print(f"{name}今年{age}岁")',
+      'print(name + "今年" + age + "岁")',
+      'print("name今年age岁")',
+      'print(name, "今年", age, "岁")'
+    ],
+    correct: 0,
+    explanation: 'f-string（f"..."）可以直接在花括号里嵌入变量。第二个选项会报错因为 age 是 int 不能直接和 str 拼接。',
+    hints: ['f-string 是最推荐的格式化方式', '注意 int 和 str 不能直接用 + 拼接'],
+  },
+
+  ch1_type_convert: {
+    id: 'ch1_type_convert', title: '类型转换', chapter: 'chapter1', difficulty: 1,
+    type: 'fill_blank', related_character: 'yoshino', knowledge_domain: 'basics',
+    question: 'input() 返回的是字符串。要把用户输入的数字转成整数，应该用什么函数？',
+    code_template: 'age_str = input("你几岁？")\nage = _____(age_str)\nprint(age + 1)',
+    correct_answer: 'int',
+    accept_patterns: ['int'],
+    explanation: 'int() 函数可以把字符串转成整数。类似地，float() 转浮点数，str() 转字符串。',
+    hints: ['int 是 integer（整数）的缩写'],
+  },
+
+  ch1_variable_swap: {
+    id: 'ch1_variable_swap', title: '变量交换', chapter: 'chapter1', difficulty: 2,
+    type: 'multiple_choice', related_character: 'ayase', knowledge_domain: 'basics',
+    question: '以下哪种方式可以正确交换两个变量 a 和 b 的值？',
+    code_display: 'a = 10\nb = 20',
+    options: [
+      'a, b = b, a',
+      'a = b; b = a',
+      'swap(a, b)',
+      'a == b; b == a'
+    ],
+    correct: 0,
+    explanation: 'Python 支持元组解包交换：a, b = b, a。第二个选项会让 a 和 b 都变成 20。',
+    hints: ['Python 的元组解包是一个很优雅的特性'],
+  },
+
   // =====================================================================
-  // 第二章 (4 题) — 循环与分支
+  // 第二章 (4+3 题) — 循环与分支
   // 来源: PPT 第四章
   // =====================================================================
 
@@ -148,6 +190,38 @@ export const challenges = {
     success_affection: { yoshino: 5, murasame: 2 },
     successText: '完美理解。嵌套循环的关键在于内外层的依赖关系。',
     failText: 'range(1, i+1) 让第 i 行只打印 i 个算式，形成三角形。'
+  },
+
+  ch2_while_loop: {
+    id: 'ch2_while_loop', title: 'while 循环', chapter: 'chapter2', difficulty: 2,
+    type: 'multiple_choice', related_character: 'ayase', knowledge_domain: 'loops',
+    question: '以下 while 循环执行几次？\n\ncount = 0\nwhile count < 3:\n    print(count)\n    count += 1',
+    code_display: 'count = 0\nwhile count < 3:\n    print(count)\n    count += 1',
+    options: ['3 次', '4 次', '2 次', '无限次'],
+    correct: 0,
+    explanation: 'count 从 0 开始，每次 +1。当 count 为 0、1、2 时条件成立，共 3 次。count 变成 3 时循环结束。',
+  },
+
+  ch2_break_continue: {
+    id: 'ch2_break_continue', title: 'break 和 continue', chapter: 'chapter2', difficulty: 2,
+    type: 'multiple_choice', related_character: 'kanna', knowledge_domain: 'loops',
+    question: '以下代码输出什么？',
+    code_display: 'for i in range(5):\n    if i == 2:\n        continue\n    if i == 4:\n        break\n    print(i)',
+    options: ['0 1 3', '0 1 2 3', '0 1 3 4', '0 1 2 3 4'],
+    correct: 0,
+    explanation: 'continue 跳过当前循环（跳过 2），break 终止循环（到 4 停止）。输出 0、1、3。',
+    hints: ['continue 是跳过本次，break 是退出整个循环'],
+  },
+
+  ch2_elif: {
+    id: 'ch2_elif', title: 'elif 多分支', chapter: 'chapter2', difficulty: 2,
+    type: 'fill_blank', related_character: 'nene', knowledge_domain: 'conditionals',
+    question: '补全代码，让分数 80-89 输出 "良好"。',
+    code_template: 'score = 85\nif score >= 90:\n    print("优秀")\n_____ score >= 80:\n    print("良好")\nelse:\n    print("继续努力")',
+    correct_answer: 'elif',
+    accept_patterns: ['elif'],
+    explanation: 'elif 是 else if 的缩写，用于多条件分支。',
+    hints: ['Python 中 else if 写成 elif'],
   },
 
   // =====================================================================
@@ -450,6 +524,213 @@ export const challenges = {
   },
 
   // =====================================================================
+  // teach_back 教学反转挑战
+  // =====================================================================
+
+  ch1_teach_back_nene: {
+    id: 'ch1_teach_back_nene',
+    type: 'teach_back',
+    title: '教 Nene 理解循环',
+    chapter: 1,
+    difficulty: 1,
+    related_character: 'nene',
+    knowledge_domain: 'loops',
+    concept: 'for 循环',
+    concept_detail: 'for i in range(n) 的执行流程',
+    character_ask_style: 'curious',
+    prompt_text: '那个……for 循环到底是怎么一步步执行的呀？你能用我能理解的方式讲给我听吗？',
+    evaluation_rubric: {
+      accuracy_keywords: ['range', '重复', '每次', '变量', '递增'],
+      good_analogies: ['心跳', '数数', '排队'],
+      min_length: 20,
+    },
+    success_affection: { nene: 5 },
+  },
+
+  ch2_teach_back_yoshino: {
+    id: 'ch2_teach_back_yoshino',
+    type: 'teach_back',
+    title: '向 Yoshino 解释异常处理',
+    chapter: 2,
+    difficulty: 2,
+    related_character: 'yoshino',
+    knowledge_domain: 'basics',
+    concept: 'try-except 异常处理',
+    concept_detail: 'try 块中代码出错时跳转到 except 块执行，程序不会崩溃',
+    character_ask_style: 'demanding',
+    prompt_text: '解释一下 try-except 的执行流程。要准确。',
+    evaluation_rubric: {
+      accuracy_keywords: ['try', 'except', '异常', '捕获', '错误', '不会崩溃'],
+      good_analogies: ['安全网', '保险', '备用方案'],
+      min_length: 30,
+    },
+    success_affection: { yoshino: 5 },
+  },
+
+  ch3_teach_back_kanna: {
+    id: 'ch3_teach_back_kanna',
+    type: 'teach_back',
+    title: '给 Kanna 讲递归',
+    chapter: 3,
+    difficulty: 3,
+    related_character: 'kanna',
+    knowledge_domain: 'algorithms',
+    concept: '递归',
+    concept_detail: '函数调用自身来解决子问题，需要基准条件防止无限递归',
+    character_ask_style: 'silent',
+    prompt_text: '……递归。{pause:400}用你的话说。',
+    evaluation_rubric: {
+      accuracy_keywords: ['调用自身', '基准条件', '子问题', '终止', '返回'],
+      good_analogies: ['俄罗斯套娃', '镜子', '剥洋葱', '楼梯'],
+      min_length: 25,
+    },
+    success_affection: { kanna: 5 },
+  },
+
+  // =====================================================================
+  // pair_debug 配对调试挑战
+  // =====================================================================
+
+  ch2_pair_debug_ayase: {
+    id: 'ch2_pair_debug_ayase',
+    type: 'pair_debug',
+    title: '帮 Ayase 找 Bug',
+    chapter: 2,
+    difficulty: 2,
+    related_character: 'ayase',
+    knowledge_domain: 'loops',
+    setup_dialogue: '看看这段代码，明明逻辑没问题啊，为什么跑出来是 4950 不是 5050？',
+    buggy_code: 'total = 0\nfor i in range(100):\n    total += i\nprint(total)',
+    bug_description: 'range(100) 生成 0-99 而非 1-100，应改为 range(1, 101)',
+    bug_type: 'off_by_one',
+    character_personality_in_bug: 'Ayase 性急，直接写 range(100) 没仔细想上界',
+    evaluation_rubric: {
+      must_identify: ['range', '0', '99', '1', '101'],
+      bonus_if_kind: true,
+    },
+    success_affection: { ayase: 5 },
+  },
+
+  ch1_pair_debug_nene: {
+    id: 'ch1_pair_debug_nene',
+    type: 'pair_debug',
+    title: '帮 Nene 找变量名错误',
+    chapter: 1,
+    difficulty: 1,
+    related_character: 'nene',
+    knowledge_domain: 'basics',
+    setup_dialogue: '唔……我的代码跑出来的结果好奇怪，你能帮我看看吗？',
+    buggy_code: 'name = "Alice"\nprint("Hello, " + Name)',
+    bug_description: 'Python 区分大小写，name 和 Name 是不同变量，Name 未定义',
+    bug_type: 'name_error',
+    character_personality_in_bug: 'Nene 不小心把变量名的大小写搞混了',
+    evaluation_rubric: {
+      must_identify: ['大小写', 'Name', 'name', '区分'],
+      bonus_if_kind: true,
+    },
+    success_affection: { nene: 3 },
+  },
+
+  ch3_pair_debug_yoshino: {
+    id: 'ch3_pair_debug_yoshino',
+    type: 'pair_debug',
+    title: '帮 Yoshino 重构',
+    chapter: 3,
+    difficulty: 3,
+    related_character: 'yoshino',
+    knowledge_domain: 'conventions',
+    setup_dialogue: '这段代码功能正确，但我觉得可以写得更好。你觉得哪里可以优化？',
+    buggy_code: 'result = []\nfor i in range(10):\n    if i % 2 == 0:\n        result.append(i * i)\nprint(result)',
+    bug_description: '可以用列表推导式简化为一行：result = [i*i for i in range(10) if i%2==0]',
+    bug_type: 'refactor',
+    character_personality_in_bug: 'Yoshino 知道有更好的写法，但想看玩家是否也知道',
+    evaluation_rubric: {
+      must_identify: ['列表推导式', '简化', 'list comprehension'],
+      bonus_if_kind: false,
+    },
+    success_affection: { yoshino: 5 },
+  },
+
+  ch3_pair_debug_murasame: {
+    id: 'ch3_pair_debug_murasame',
+    type: 'pair_debug',
+    title: 'Murasame 的陷阱',
+    chapter: 3,
+    difficulty: 4,
+    related_character: 'murasame',
+    knowledge_domain: 'advanced',
+    setup_dialogue: '这段代码有 Bug。找到它。',
+    buggy_code: 'def is_palindrome(s):\n    return s == s[::-1]\n\nprint(is_palindrome("racecar"))',
+    bug_description: '这段代码其实是正确的。这是 Murasame 的测试——看玩家是否知道 s[::-1] 可以反转字符串',
+    bug_type: 'trick_question',
+    character_personality_in_bug: 'Murasame 故意给出正确代码来测试玩家是否真正理解',
+    evaluation_rubric: {
+      must_identify: ['正确', '没有Bug', '[::-1]', '反转'],
+      bonus_if_kind: false,
+    },
+    success_affection: { murasame: 8 },
+  },
+
+  // =====================================================================
+  // creative_code 创意编程挑战
+  // =====================================================================
+
+  ch3_creative_lantern: {
+    id: 'ch3_creative_lantern',
+    type: 'creative_code',
+    title: '祭典灯笼图案',
+    chapter: 3,
+    difficulty: 2,
+    related_character: 'ayase',
+    knowledge_domain: 'loops',
+    prompt: '写一个函数，用 * 和空格打印出一个灯笼形状的图案（至少5行）',
+    starter_code: 'def draw_lantern():\n    # 在这里写你的代码\n    pass\n\ndraw_lantern()',
+    evaluation: {
+      must_run: true,
+      min_output_lines: 5,
+      creativity_keywords: ['对称', '渐变', '花纹'],
+    },
+    scene_integration: 'festival_decoration',
+    success_affection: { ayase: 5 },
+  },
+
+  ch2_creative_heart: {
+    id: 'ch2_creative_heart',
+    type: 'creative_code',
+    title: '爱心图案',
+    chapter: 2,
+    difficulty: 2,
+    related_character: 'nene',
+    knowledge_domain: 'loops',
+    prompt: '用 print 和循环打印一个爱心形状的图案',
+    starter_code: '# 用 * 和空格画一个爱心\nfor i in range(6):\n    # 你的代码\n    pass',
+    evaluation: {
+      must_run: true,
+      min_output_lines: 4,
+      creativity_keywords: ['对称', '心形', '创意'],
+    },
+    success_affection: { nene: 5 },
+  },
+
+  ch3_creative_fractal: {
+    id: 'ch3_creative_fractal',
+    type: 'creative_code',
+    title: '分形树',
+    chapter: 3,
+    difficulty: 3,
+    related_character: 'kanna',
+    knowledge_domain: 'algorithms',
+    prompt: '用递归和字符画出一个简单的分形图案（如谢尔宾斯基三角形或分形树）',
+    starter_code: 'def fractal(n, prefix=""):\n    # 递归画分形\n    pass\n\nfractal(4)',
+    evaluation: {
+      must_run: true,
+      min_output_lines: 3,
+      creativity_keywords: ['递归', '自相似', '分形'],
+    },
+    success_affection: { kanna: 5 },
+  },
+
+  // =====================================================================
   // 兼容旧 ID — 重定向到新题
   // =====================================================================
   hello_world: {
@@ -466,5 +747,128 @@ export const challenges = {
     hints: ['在 Python 中，我们用 print() 函数来输出内容哦~'],
     successText: '太棒了！你已经迈出了编程的第一步！',
     failText: '这是其他语言的写法呢，Python 用的是 print() 哦~'
-  }
+  },
+
+  // =====================================================================
+  // 第四章 — 列表与字典
+  // =====================================================================
+
+  ch4_list_basics: {
+    id: 'ch4_list_basics', title: '列表的创建', chapter: 'chapter4', difficulty: 1,
+    type: 'multiple_choice', related_character: 'nene', knowledge_domain: 'lists',
+    question: '以下哪个是正确的 Python 列表创建方式？',
+    options: [
+      'fruits = ["苹果", "香蕉", "草莓"]',
+      'fruits = ("苹果", "香蕉", "草莓")',
+      'fruits = {"苹果", "香蕉", "草莓"}',
+      'fruits = <"苹果", "香蕉", "草莓">'
+    ],
+    correct: 0,
+    explanation: '列表用方括号 [] 创建。圆括号 () 是元组，花括号 {} 是集合或字典。',
+    hints: ['列表的标志是方括号 []'],
+  },
+
+  ch4_list_index: {
+    id: 'ch4_list_index', title: '列表索引', chapter: 'chapter4', difficulty: 1,
+    type: 'multiple_choice', related_character: 'yoshino', knowledge_domain: 'lists',
+    question: '已知 colors = ["红", "绿", "蓝", "黄"]，colors[2] 的值是什么？',
+    options: ['绿', '蓝', '红', '黄'],
+    correct: 1,
+    explanation: 'Python 索引从 0 开始。colors[0]="红", colors[1]="绿", colors[2]="蓝"。',
+    hints: ['索引从 0 开始数', 'colors[0] 是第一个元素'],
+  },
+
+  ch4_list_methods: {
+    id: 'ch4_list_methods', title: '列表方法', chapter: 'chapter4', difficulty: 2,
+    type: 'multiple_choice', related_character: 'nene', knowledge_domain: 'lists',
+    question: '以下代码执行后，nums 的值是什么？\n\nnums = [1, 2, 3]\nnums.append(4)\nnums.insert(1, 10)',
+    code_display: 'nums = [1, 2, 3]\nnums.append(4)\nnums.insert(1, 10)',
+    options: [
+      '[1, 10, 2, 3, 4]',
+      '[1, 2, 3, 4, 10]',
+      '[10, 1, 2, 3, 4]',
+      '[1, 2, 10, 3, 4]'
+    ],
+    correct: 0,
+    explanation: 'append(4) 在末尾加 4 → [1,2,3,4]。insert(1,10) 在索引 1 处插入 10 → [1,10,2,3,4]。',
+    hints: ['append 在末尾添加', 'insert(位置, 值) 在指定位置插入'],
+  },
+
+  ch4_dict_access: {
+    id: 'ch4_dict_access', title: '字典访问', chapter: 'chapter4', difficulty: 2,
+    type: 'fill_blank', related_character: 'yoshino', knowledge_domain: 'dicts',
+    question: '已知 student = {"name": "Leo", "age": 17, "score": 92}。\n要获取 score 的值，应该写什么？',
+    code_template: 'student = {"name": "Leo", "age": 17, "score": 92}\nresult = student[_____]\nprint(result)  # 输出 92',
+    correct_answer: '"score"',
+    accept_patterns: ['"score"', "'score'", 'score'],
+    explanation: '字典用 key 来获取 value。student["score"] 返回 92。',
+    hints: ['字典用 key 获取值', 'key 是字符串时需要加引号'],
+  },
+
+  ch4_list_slice: {
+    id: 'ch4_list_slice', title: '列表切片', chapter: 'chapter4', difficulty: 2,
+    type: 'multiple_choice', related_character: 'ayase', knowledge_domain: 'lists',
+    question: '已知 nums = [10, 20, 30, 40, 50]，nums[1:4] 的值是什么？',
+    code_display: 'nums = [10, 20, 30, 40, 50]\nprint(nums[1:4])',
+    options: [
+      '[20, 30, 40]',
+      '[10, 20, 30, 40]',
+      '[20, 30, 40, 50]',
+      '[10, 20, 30]'
+    ],
+    correct: 0,
+    explanation: '切片 [1:4] 取索引 1、2、3 的元素（不包含 4）。所以是 [20, 30, 40]。',
+    hints: ['切片不包含终止索引', 'nums[1] 是 20, nums[3] 是 40'],
+  },
+
+  // =====================================================================
+  // 第五章 — 类与对象
+  // =====================================================================
+
+  ch5_class_basics: {
+    id: 'ch5_class_basics', title: '类的定义', chapter: 'chapter5', difficulty: 2,
+    type: 'multiple_choice', related_character: 'nene', knowledge_domain: 'oop',
+    question: '以下哪个是正确的 Python 类定义语法？',
+    options: [
+      'class Cat:\n    pass',
+      'def Cat:\n    pass',
+      'create Cat:\n    pass',
+      'object Cat:\n    pass'
+    ],
+    correct: 0,
+    explanation: '用 class 关键字定义类，类名首字母大写。pass 是占位符。',
+    hints: ['定义类用 class 关键字'],
+  },
+
+  ch5_init_method: {
+    id: 'ch5_init_method', title: '构造函数', chapter: 'chapter5', difficulty: 2,
+    type: 'fill_blank', related_character: 'yoshino', knowledge_domain: 'oop',
+    question: '补全构造函数，让 Dog 类可以在创建时设置名字。',
+    code_template: 'class Dog:\n    def _____(self, name):\n        self.name = name\n\ndog = Dog("小白")\nprint(dog.name)',
+    correct_answer: '__init__',
+    accept_patterns: ['__init__'],
+    explanation: '__init__ 是 Python 的构造函数，创建对象时自动调用。',
+    hints: ['构造函数是双下划线开头和结尾的特殊方法'],
+  },
+
+  ch5_class_method: {
+    id: 'ch5_class_method', title: '类的方法', chapter: 'chapter5', difficulty: 2,
+    type: 'multiple_choice', related_character: 'nene', knowledge_domain: 'oop',
+    question: '以下代码输出什么？\n\nclass Cat:\n    def __init__(self, name):\n        self.name = name\n    def greet(self):\n        return f"喵～我是{self.name}"\n\ncat = Cat("小花")\nprint(cat.greet())',
+    code_display: 'class Cat:\n    def __init__(self, name):\n        self.name = name\n    def greet(self):\n        return f"喵～我是{self.name}"\n\ncat = Cat("小花")\nprint(cat.greet())',
+    options: ['喵～我是小花', '喵～我是Cat', '喵～我是self', '报错'],
+    correct: 0,
+    explanation: 'self.name 被设为 "小花"，greet 方法通过 self 访问 name 属性。',
+  },
+
+  ch5_inheritance: {
+    id: 'ch5_inheritance', title: '继承', chapter: 'chapter5', difficulty: 3,
+    type: 'multiple_choice', related_character: 'yoshino', knowledge_domain: 'oop',
+    question: '以下代码中 Dog 继承了 Animal，创建 Dog 对象后调用 speak() 输出什么？',
+    code_display: 'class Animal:\n    def speak(self):\n        return "..."\n\nclass Dog(Animal):\n    def speak(self):\n        return "汪！"\n\ndog = Dog()\nprint(dog.speak())',
+    options: ['汪！', '...', '报错', 'None'],
+    correct: 0,
+    explanation: '子类 Dog 重写了 speak 方法（多态），所以调用的是 Dog 的版本。',
+    hints: ['子类可以重写父类的方法', '这就是多态'],
+  },
 }

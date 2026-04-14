@@ -1,5 +1,5 @@
 """
-BGM Crawler — DOVA-SYNDROME / 魔王魂
+BGM Crawler — maou.audio / amachamusic / DOVA-SYNDROME
 Downloads free-to-use BGM MP3s matching Yuzusoft galgame style.
 All sources are CC0 or free for commercial use.
 
@@ -26,113 +26,106 @@ HEADERS = {
     'Accept-Language': 'ja,en;q=0.9',
 }
 
-BGM_SPECS = [
-    {
-        'filename': 'bgm_01_title.mp3',
-        'keywords': '学園 ピアノ 青春',
-        'description': 'Title screen — piano + strings, youthful school feeling',
+# ── Curated track list: maou.audio direct URLs ──
+# These are known free-to-use tracks from 魔王魂 (maou.audio)
+# License: Free for commercial use, credit appreciated but not required
+MAOU_TRACKS = {
+    'bgm_11_nostalgia.mp3': {
+        'page': 'https://maou.audio/bgm_piano37/',
+        'desc': 'Nostalgia — セピアの風 (Sepia Wind), reminiscent piano',
     },
-    {
-        'filename': 'bgm_02_daily.mp3',
-        'keywords': '日常 明るい ほのぼの',
-        'description': 'Daily life — cheerful guitar, warm atmosphere',
+    'bgm_12_gentle_rain.mp3': {
+        'page': 'https://maou.audio/bgm_piano40/',
+        'desc': 'Gentle rain — 安らぎの思い (Peaceful Thoughts), soft piano',
     },
-    {
-        'filename': 'bgm_03_peaceful.mp3',
-        'keywords': '穏やか ピアノ 優しい',
-        'description': 'Peaceful — gentle piano solo',
+    'bgm_13_determination.mp3': {
+        'page': 'https://maou.audio/bgm_piano36/',
+        'desc': 'Determination — 宿命のシナリオ (Fate Scenario), resolute piano',
     },
-    {
-        'filename': 'bgm_05_tension.mp3',
-        'keywords': '緊迫 バトル スピード',
-        'description': 'Tension / competition — fast electronic beat',
+    'bgm_14_playful.mp3': {
+        'page': 'https://maou.audio/category/bgm/bgm-healing/',
+        'search': 'healing01',
+        'desc': 'Playful — ヒーリング, light and bouncy',
     },
-    {
-        'filename': 'bgm_06_romantic.mp3',
-        'keywords': '恋愛 切ない ピアノ',
-        'description': 'Romantic — piano + strings quartet',
+    'bgm_15_study.mp3': {
+        'page': 'https://maou.audio/bgm_piano38/',
+        'desc': 'Study — うつろな一時 (Drifting Moment), quiet focus piano',
     },
-    {
-        'filename': 'bgm_07_sad.mp3',
-        'keywords': '悲しい 切ない ピアノソロ',
-        'description': 'Sad / farewell — slow piano solo',
+    'bgm_16_confession.mp3': {
+        'page': 'https://maou.audio/bgm_piano34/',
+        'desc': 'Confession — 静寂の世界へ (To the Silent World), emotional piano',
     },
-    {
-        'filename': 'bgm_08_mystery.mp3',
-        'keywords': 'ミステリー ダーク 不思議',
-        'description': 'Mystery / Murasame theme — dark electronic',
+    'bgm_17_comedy.mp3': {
+        'page': 'https://maou.audio/category/bgm/bgm-healing/',
+        'search': 'healing02',
+        'desc': 'Comedy — ヒーリング, light-hearted',
     },
-    {
-        'filename': 'bgm_09_festival.mp3',
-        'keywords': 'お祭り 楽しい にぎやか',
-        'description': 'Festival — lively orchestral',
+    'bgm_18_heartache.mp3': {
+        'page': 'https://maou.audio/bgm_piano41/',
+        'desc': 'Heartache — Last daily sound 2, bittersweet piano',
     },
-    {
-        'filename': 'bgm_10_ending.mp3',
-        'keywords': '感動 壮大 エンディング',
-        'description': 'Ending — grand orchestral + piano',
+    'bgm_19_victory.mp3': {
+        'page': 'https://maou.audio/bgm_piano32/',
+        'desc': 'Victory — 脈動 (Pulse), energetic piano',
     },
-    {
-        'filename': 'battle.mp3',
-        'keywords': 'テクノ 集中 プログラミング',
-        'description': 'Coding challenge — electronic + rhythmic',
+    'bgm_20_night_walk.mp3': {
+        'page': 'https://maou.audio/bgm_piano35/',
+        'desc': 'Night walk — 見渡す街へ (Overlooking the City), calm piano',
     },
-    {
-        'filename': 'morning_fresh.mp3',
-        'keywords': '朝 さわやか 目覚め',
-        'description': 'Morning scene — fresh and bright',
+    'bgm_21_spring_breeze.mp3': {
+        'page': 'https://maou.audio/bgm_piano33/',
+        'desc': 'Spring — 記憶を抱いて (Embracing Memories), gentle piano',
     },
-    {
-        'filename': 'evening_calm.mp3',
-        'keywords': '夕方 穏やか 帰り道',
-        'description': 'Evening scene — calm sunset walk',
+    'bgm_22_summer_sun.mp3': {
+        'page': 'https://maou.audio/bgm_piano39/',
+        'desc': 'Summer — 時の道を越えて (Beyond the Path of Time), bright piano',
     },
-]
+}
 
-
-def search_dova(keywords: str, max_results: int = 5) -> list[dict]:
-    """Search DOVA-SYNDROME for BGM matching keywords."""
-    url = f'https://dova-s.jp/_contents/search/?search_word={quote(keywords)}'
-    try:
-        resp = requests.get(url, headers=HEADERS, timeout=15)
-        resp.raise_for_status()
-    except requests.RequestException as e:
-        print(f'  [DOVA] Search failed: {e}')
-        return []
-
-    soup = BeautifulSoup(resp.text, 'html.parser')
-    results = []
-
-    for item in soup.select('.searchResult a[href*="/bgm/"]')[:max_results]:
-        href = item.get('href', '')
-        if not href:
-            continue
-        detail_url = urljoin('https://dova-s.jp/', href)
-        title = item.get_text(strip=True) or 'Unknown'
-        results.append({'title': title, 'url': detail_url})
-
-    return results
-
-
-def get_dova_download_url(detail_url: str) -> str | None:
-    """Get the MP3 download URL from a DOVA-SYNDROME detail page."""
-    try:
-        resp = requests.get(detail_url, headers=HEADERS, timeout=15)
-        resp.raise_for_status()
-    except requests.RequestException:
-        return None
-
-    soup = BeautifulSoup(resp.text, 'html.parser')
-    dl_link = soup.select_one('a[href*="mp3"]')
-    if dl_link:
-        return urljoin(detail_url, dl_link['href'])
-
-    for a in soup.find_all('a', href=True):
-        href = a['href']
-        if '.mp3' in href or 'download' in href.lower():
-            return urljoin(detail_url, href)
-
-    return None
+# ── amachamusic curated tracks ──
+AMACHA_BASE = 'https://amachamusic.chagasi.com'
+AMACHA_TRACKS = {
+    'bgm_23_autumn_leaves.mp3': {
+        'search_tag': 'しっとり',
+        'desc': 'Autumn leaves — melancholy acoustic',
+    },
+    'bgm_24_winter_cold.mp3': {
+        'search_tag': '冬',
+        'desc': 'Winter cold — sparse piano',
+    },
+    'bgm_25_club_activity.mp3': {
+        'search_tag': '元気',
+        'desc': 'Club activity — upbeat',
+    },
+    'bgm_26_warmth.mp3': {
+        'search_tag': 'ほのぼの',
+        'desc': 'Warmth — cozy gentle',
+    },
+    'bgm_27_anxiety.mp3': {
+        'search_tag': '不安',
+        'desc': 'Anxiety — tense dark',
+    },
+    'bgm_28_hope.mp3': {
+        'search_tag': '希望',
+        'desc': 'Hope — rising bright',
+    },
+    'bgm_29_together.mp3': {
+        'search_tag': '友情',
+        'desc': 'Together — warm friendship',
+    },
+    'bgm_30_starry_night.mp3': {
+        'search_tag': '幻想',
+        'desc': 'Starry night — ethereal dreamy',
+    },
+    'bgm_31_daily_b.mp3': {
+        'search_tag': '日常',
+        'desc': 'Daily life B — cheerful school life',
+    },
+    'bgm_32_peaceful_b.mp3': {
+        'search_tag': '癒し',
+        'desc': 'Peaceful B — healing ambient',
+    },
+}
 
 
 def download_file(url: str, dest: Path) -> bool:
@@ -141,7 +134,7 @@ def download_file(url: str, dest: Path) -> bool:
         resp = requests.get(url, headers=HEADERS, timeout=60, stream=True)
         resp.raise_for_status()
         content_type = resp.headers.get('Content-Type', '')
-        if 'html' in content_type:
+        if 'html' in content_type and 'audio' not in content_type:
             print(f'  [SKIP] Got HTML instead of audio from {url}')
             return False
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -149,6 +142,10 @@ def download_file(url: str, dest: Path) -> bool:
             for chunk in resp.iter_content(8192):
                 f.write(chunk)
         size_kb = dest.stat().st_size / 1024
+        if size_kb < 50:
+            print(f'  [SKIP] File too small ({size_kb:.0f} KB), likely not audio')
+            dest.unlink(missing_ok=True)
+            return False
         print(f'  [OK] Downloaded {dest.name} ({size_kb:.0f} KB)')
         return True
     except requests.RequestException as e:
@@ -156,51 +153,158 @@ def download_file(url: str, dest: Path) -> bool:
         return False
 
 
-def crawl_bgm_for_spec(spec: dict) -> bool:
-    """Try to find and download a BGM matching the spec."""
-    dest = BGM_DIR / spec['filename']
-    print(f'\n--- {spec["filename"]} ---')
-    print(f'  Description: {spec["description"]}')
-    print(f'  Keywords: {spec["keywords"]}')
+def extract_maou_mp3_url(page_url: str) -> str | None:
+    """Extract the MP3 download URL from a maou.audio page."""
+    try:
+        resp = requests.get(page_url, headers=HEADERS, timeout=15)
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        print(f'  [WARN] Could not fetch maou page: {e}')
+        return None
 
-    if dest.exists() and dest.stat().st_size > 500_000:
-        print(f'  [SKIP] Already exists with good size ({dest.stat().st_size / 1024:.0f} KB)')
-        return True
+    soup = BeautifulSoup(resp.text, 'html.parser')
 
-    results = search_dova(spec['keywords'])
-    if not results:
-        print('  [WARN] No DOVA results found')
-        return False
+    for a in soup.find_all('a', href=True):
+        href = a['href']
+        if href.endswith('.mp3'):
+            return urljoin(page_url, href)
 
-    for result in results:
-        print(f'  Trying: {result["title"]} -> {result["url"]}')
-        dl_url = get_dova_download_url(result['url'])
-        if dl_url:
-            if download_file(dl_url, dest):
-                return True
+    for source in soup.find_all('source', src=True):
+        src = source['src']
+        if '.mp3' in src:
+            return urljoin(page_url, src)
+
+    for a in soup.find_all('a', href=True):
+        href = a['href']
+        if 'download' in href.lower() and ('mp3' in href.lower() or 'audio' in href.lower()):
+            return urljoin(page_url, href)
+
+    return None
+
+
+def crawl_maou_tracks() -> int:
+    """Download tracks from maou.audio."""
+    success = 0
+    for filename, info in MAOU_TRACKS.items():
+        dest = BGM_DIR / filename
+        print(f'\n--- {filename} ---')
+        print(f'  {info["desc"]}')
+
+        if dest.exists() and dest.stat().st_size > 50_000:
+            print(f'  [SKIP] Already exists ({dest.stat().st_size / 1024:.0f} KB)')
+            success += 1
+            continue
+
+        mp3_url = extract_maou_mp3_url(info['page'])
+        if mp3_url:
+            print(f'  Found MP3: {mp3_url}')
+            if download_file(mp3_url, dest):
+                success += 1
+                time.sleep(2)
+                continue
+
+        print(f'  [WARN] Could not find download URL for {filename}')
         time.sleep(1)
 
-    print(f'  [WARN] Could not download any matching BGM for {spec["filename"]}')
-    return False
+    return success
+
+
+def search_amacha(tag: str) -> list[str]:
+    """Search amachamusic for download URLs matching a tag."""
+    url = f'{AMACHA_BASE}/image_{quote(tag)}.html'
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=15)
+        resp.raise_for_status()
+    except requests.RequestException:
+        return []
+
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    urls = []
+
+    for a in soup.find_all('a', href=True):
+        href = a['href']
+        if href.endswith('.mp3'):
+            urls.append(urljoin(url, href))
+        elif 'download' in href.lower() and 'mp3' in href.lower():
+            urls.append(urljoin(url, href))
+
+    return urls[:5]
+
+
+def crawl_amacha_tracks() -> int:
+    """Download tracks from amachamusic."""
+    success = 0
+    for filename, info in AMACHA_TRACKS.items():
+        dest = BGM_DIR / filename
+        print(f'\n--- {filename} ---')
+        print(f'  {info["desc"]}')
+
+        if dest.exists() and dest.stat().st_size > 50_000:
+            print(f'  [SKIP] Already exists ({dest.stat().st_size / 1024:.0f} KB)')
+            success += 1
+            continue
+
+        urls = search_amacha(info['search_tag'])
+        if not urls:
+            print(f'  [WARN] No results for tag: {info["search_tag"]}')
+            time.sleep(1)
+            continue
+
+        for dl_url in urls:
+            print(f'  Trying: {dl_url}')
+            if download_file(dl_url, dest):
+                success += 1
+                break
+            time.sleep(1)
+        else:
+            print(f'  [WARN] Could not download for {filename}')
+
+        time.sleep(2)
+
+    return success
+
+
+def check_existing() -> int:
+    """Count how many target files already exist."""
+    all_files = set(MAOU_TRACKS.keys()) | set(AMACHA_TRACKS.keys())
+    existing = 0
+    for f in all_files:
+        path = BGM_DIR / f
+        if path.exists() and path.stat().st_size > 50_000:
+            existing += 1
+    return existing
 
 
 def main():
     BGM_DIR.mkdir(parents=True, exist_ok=True)
+    total = len(MAOU_TRACKS) + len(AMACHA_TRACKS)
+    already = check_existing()
     print(f'BGM output directory: {BGM_DIR}')
-    print(f'Crawling {len(BGM_SPECS)} BGM tracks from DOVA-SYNDROME...\n')
+    print(f'Target: {total} new BGM tracks ({already} already exist)')
 
-    success = 0
-    for spec in BGM_SPECS:
-        if crawl_bgm_for_spec(spec):
-            success += 1
-        time.sleep(2)
+    print(f'\n=== Phase 1: maou.audio ({len(MAOU_TRACKS)} tracks) ===')
+    s1 = crawl_maou_tracks()
 
-    print(f'\n=== Done: {success}/{len(BGM_SPECS)} BGM tracks downloaded ===')
-    if success < len(BGM_SPECS):
-        print('Some tracks could not be downloaded. You can manually download from:')
-        print('  - https://dova-s.jp/')
+    print(f'\n=== Phase 2: amachamusic ({len(AMACHA_TRACKS)} tracks) ===')
+    s2 = crawl_amacha_tracks()
+
+    total_success = s1 + s2
+    print(f'\n=== Done: {total_success}/{total} BGM tracks ready ===')
+
+    missing = []
+    for f in sorted(set(MAOU_TRACKS.keys()) | set(AMACHA_TRACKS.keys())):
+        path = BGM_DIR / f
+        if not path.exists() or path.stat().st_size < 50_000:
+            missing.append(f)
+
+    if missing:
+        print(f'\nMissing {len(missing)} tracks:')
+        for f in missing:
+            print(f'  - {f}')
+        print('\nYou can manually download from:')
         print('  - https://maou.audio/')
         print('  - https://amachamusic.chagasi.com/')
+        print('  - https://dova-s.jp/')
 
 
 if __name__ == '__main__':

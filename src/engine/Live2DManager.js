@@ -37,13 +37,22 @@ function detectPerformanceTier() {
     const canvas = document.createElement('canvas')
     const gl = canvas.getContext('webgl2') || canvas.getContext('webgl')
     if (!gl) return 'fallback'
-    const isMobile = /Android|iPhone|iPad/.test(navigator.userAgent)
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
     const cores = navigator.hardwareConcurrency || 2
     const memory = navigator.deviceMemory || 2
-    if (isMobile && memory < 3) return 'low'
-    if (isMobile || cores <= 2) return 'medium'
+    if (isMobile && memory <= 2) return 'fallback'
+    if (isMobile && memory <= 4) return 'low'
+    if (isMobile) return 'medium'
+    if (cores <= 2) return 'medium'
     return 'high'
   } catch { return 'fallback' }
+}
+
+function _getMobileSafeDPR() {
+  const dpr = window.devicePixelRatio || 1
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+  if (!isMobile) return dpr
+  return Math.min(dpr, 1.5)
 }
 
 const TIER_CONFIG = {
@@ -499,8 +508,8 @@ export function useLive2DManager() {
       view: canvasEl,
       transparent: true,
       backgroundAlpha: 0,
-      antialias: true,
-      resolution: window.devicePixelRatio || 1,
+      antialias: _perfTier === 'high',
+      resolution: _getMobileSafeDPR(),
       autoDensity: true,
       resizeTo: canvasEl.parentElement,
     }))

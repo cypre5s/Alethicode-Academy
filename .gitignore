@@ -7,10 +7,15 @@ dist/
 release/
 
 # env files (contain API keys)
+.env
 .env.local
 .env.*.local
 .env.production
 .env.deploy
+
+# python
+__pycache__/
+*.pyc
 
 # editor / OS
 .cursor/

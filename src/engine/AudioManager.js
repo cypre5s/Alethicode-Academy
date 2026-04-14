@@ -103,17 +103,31 @@ function ensureContext() {
 }
 
 async function loadAudioBuffer(url) {
-  if (bufferCache.has(url)) return bufferCache.get(url)
+  if (bufferCache.has(url)) {
+    try { _memSched.onAudioBufferAccess(url) } catch {}
+    return bufferCache.get(url)
+  }
   try {
     const response = await fetch(url)
     const arrayBuffer = await response.arrayBuffer()
     const buffer = await audioCtx.decodeAudioData(arrayBuffer)
     bufferCache.set(url, buffer)
+    try {
+      _memSched.onAudioBufferAccess(url)
+    } catch {}
     return buffer
   } catch {
     return null
   }
 }
+
+let _memSched = { onAudioBufferAccess() {}, onAudioBufferLoaded() {}, registerAudioCache() {} }
+try {
+  import('./MemoryScheduler.js').then(m => {
+    _memSched = m
+    m.registerAudioCache(bufferCache)
+  }).catch(() => {})
+} catch {}
 
 function cancelFade(key) {
   const handle = activeFades.get(key)
@@ -175,23 +189,33 @@ function stopBgm(fadeOut = 1000) {
   bgmPlaying.value = false
 }
 
+const _isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+const _useBgmStreaming = _isMobileDevice || (navigator.deviceMemory || 8) <= 4
+
 async function playBgm(bgmId, crossfadeDuration = 1500) {
   const assetPath = getAudioAssetPath('bgm', bgmId)
   if (!assetPath) return
 
-  if (!ensureContext()) {
-    playBgmFallback(bgmId, crossfadeDuration)
+  if (currentBgmId.value === bgmId && (currentBgmSource || _fallbackBgmAudio)) {
+    bgmPlaying.value = true
     return
   }
 
-  if (currentBgmId.value === bgmId && currentBgmSource) {
-    bgmPlaying.value = true
+  if (_useBgmStreaming) {
+    playBgmStreaming(bgmId, crossfadeDuration)
+    return
+  }
+
+  if (!ensureContext()) {
+    playBgmStreaming(bgmId, crossfadeDuration)
     return
   }
 
   try {
     const buffer = await loadAudioBuffer(assetPath)
     if (!buffer) return
+
+    try { _memSched.onAudioBufferLoaded(assetPath, buffer) } catch {}
 
     stopCurrentBgm(crossfadeDuration)
 
@@ -222,8 +246,42 @@ async function playBgm(bgmId, crossfadeDuration = 1500) {
       }
     })
   } catch {
-    playBgmFallback(bgmId, crossfadeDuration)
+    playBgmStreaming(bgmId, crossfadeDuration)
   }
+}
+
+function playBgmStreaming(bgmId, crossfadeDuration) {
+  const assetPath = getAudioAssetPath('bgm', bgmId)
+  if (!assetPath) return
+
+  stopCurrentBgm(0)
+
+  if (_fallbackBgmAudio) {
+    _fallbackBgmAudio.pause()
+    _fallbackBgmAudio.src = ''
+    _fallbackBgmAudio.load()
+    _fallbackBgmAudio = null
+  }
+
+  const audio = new Audio()
+  audio.preload = 'auto'
+  audio.loop = true
+  audio.volume = 0
+  audio.src = assetPath
+
+  const targetVol = clampVolume(masterVol.value * bgmVolume.value)
+  const fadeSteps = Math.max(1, Math.round(crossfadeDuration / 50))
+  let step = 0
+  const fadeInterval = setInterval(() => {
+    step++
+    audio.volume = clampVolume((step / fadeSteps) * targetVol)
+    if (step >= fadeSteps) clearInterval(fadeInterval)
+  }, 50)
+
+  audio.play().catch(() => {})
+  _fallbackBgmAudio = audio
+  currentBgmId.value = bgmId
+  bgmPlaying.value = true
 }
 
 let _fallbackBgmAudio = null

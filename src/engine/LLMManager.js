@@ -5,6 +5,7 @@ import { locations, sceneIdFromBackgroundId } from '../data/locations.js'
 import { getRelationshipStage, getStageRules, getStageBoundaries } from '../data/relationshipRules.js'
 import { getPostChallengeEvent } from '../data/postChallengeEvents.js'
 import { knowledgeDomains } from '../data/learningDomains.js'
+import { freeTalkPrompts } from '../data/freeTalkPrompts.js'
 
 const LLM_CONFIG_KEY = 'alethicode_llm_config'
 const MAX_INPUT_LENGTH = 500
@@ -12,9 +13,9 @@ const MAX_RESPONSE_TEXT_LENGTH = 1000
 const MIN_REQUEST_INTERVAL_MS = 2000
 
 let _lastRequestTime = 0
-const ENV_API_KEY = (import.meta.env.VITE_DEEPSEEK_API_KEY || '').trim()
-const ENV_BASE_URL = (import.meta.env.VITE_DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/+$/, '')
-const ENV_MODEL = import.meta.env.VITE_DEEPSEEK_MODEL || 'deepseek-chat'
+const ENV_API_KEY = (import.meta.env.VITE_LLM_API_KEY || import.meta.env.VITE_DEEPSEEK_API_KEY || '').trim()
+const ENV_BASE_URL = (import.meta.env.VITE_LLM_BASE_URL || import.meta.env.VITE_DEEPSEEK_BASE_URL || 'https://api.minimaxi.com/v1').replace(/\/+$/, '')
+const ENV_MODEL = import.meta.env.VITE_LLM_MODEL || import.meta.env.VITE_DEEPSEEK_MODEL || 'MiniMax-M2.7'
 
 const apiKey = ref('')
 const baseUrl = ref(ENV_BASE_URL)
@@ -22,6 +23,50 @@ const model = ref(ENV_MODEL)
 const isGenerating = ref(false)
 const lastError = ref(null)
 const offlineMode = ref(false)
+const localMode = ref(false)
+const localModel = ref('qwen2.5:7b-instruct-q4_K_M')
+const localStatus = ref('disconnected')
+
+function _isElectron() {
+  return typeof window !== 'undefined' && window.electronAPI
+}
+
+async function _localLLMChat(messages, opts = {}) {
+  if (!_isElectron()) throw new Error('Local LLM requires Electron')
+  const result = await window.electronAPI.invoke('local-llm:chat', {
+    messages,
+    model: localModel.value,
+    ...opts,
+  })
+  if (!result.success) throw new Error(result.error || 'Local LLM error')
+  return result
+}
+
+async function _localLLMStream(messages, requestId, opts = {}) {
+  if (!_isElectron()) throw new Error('Local LLM requires Electron')
+  return window.electronAPI.invoke('local-llm:chat-stream', {
+    messages,
+    model: localModel.value,
+    requestId,
+    ...opts,
+  })
+}
+
+async function _checkLocalLLM() {
+  if (!_isElectron()) return false
+  try {
+    const result = await window.electronAPI.invoke('local-llm:model-info')
+    if (result.success && result.models?.length > 0) {
+      localStatus.value = 'connected'
+      return true
+    }
+    localStatus.value = 'no-models'
+    return false
+  } catch {
+    localStatus.value = 'disconnected'
+    return false
+  }
+}
 
 const _OBF_KEY = [0x41, 0x6C, 0x65, 0x74, 0x68, 0x69]
 function _obfuscate(str) {
@@ -98,6 +143,29 @@ function _sanitizeLLMResponse(parsed, characterId) {
 
   const clamp = (v, lo, hi) => Math.min(Math.max(parseInt(v) || 0, lo), hi)
 
+  const validMotions = ['happy_idle', 'lean_forward', 'step_back', 'wave_hand', 'shy_fidget',
+    'teaching_explain', 'react_surprise', 'react_celebration', 'react_comfort']
+  const validGaze = ['player', 'code_area', 'sky', 'memory', 'away', 'wander', 'mouse']
+
+  let live2dHints = null
+  if (parsed.live2d_hints && typeof parsed.live2d_hints === 'object') {
+    const h = parsed.live2d_hints
+    live2dHints = {}
+    if (typeof h.motion === 'string' && validMotions.includes(h.motion)) live2dHints.motion = h.motion
+    if (typeof h.gaze === 'string' && validGaze.includes(h.gaze)) live2dHints.gaze = h.gaze
+    if (h.breath === 'fast' || h.breath === 'slow') live2dHints.breath = h.breath
+    if (typeof h.expression === 'string') live2dHints.expression = validExpressions.includes(h.expression.replace(/[^a-z_]/g, '')) ? h.expression : undefined
+    if (Array.isArray(h.sequence)) {
+      live2dHints.sequence = h.sequence.slice(0, 6).map(s => ({
+        ...(s.expression && typeof s.expression === 'string' ? { expression: s.expression } : {}),
+        ...(s.motion && typeof s.motion === 'string' ? { motion: s.motion } : {}),
+        ...(s.gaze && typeof s.gaze === 'string' ? { gaze: s.gaze } : {}),
+        duration: Math.min(Math.max(parseInt(s.hold || s.duration) || 500, 100), 5000),
+      }))
+    }
+    if (Object.keys(live2dHints).length === 0) live2dHints = null
+  }
+
   return {
     text: _sanitizeText(parsed.text || ''),
     expression: validExpressions.includes(expr) ? expr : 'normal',
@@ -108,6 +176,7 @@ function _sanitizeLLMResponse(parsed, characterId) {
     topicTags: Array.isArray(parsed.topic_tags) ? parsed.topic_tags.filter(t => typeof t === 'string').slice(0, 5) : [],
     memoryCandidate: _sanitizeText(parsed.memory_candidate || ''),
     memoryEmotion: ['warm', 'funny', 'bittersweet', 'tense', 'romantic'].includes(parsed.memory_emotion) ? parsed.memory_emotion : 'warm',
+    live2d_hints: live2dHints,
     source: 'llm'
   }
 }
@@ -235,8 +304,9 @@ function buildSceneCard(character, gameState) {
 
   const freeTalk = gameState.freeTalkData
   if (freeTalk) {
-    if (freeTalk.sceneObjective) lines.push(`本轮小目标：${freeTalk.sceneObjective}`)
-    if (freeTalk.mustMention) lines.push(`本轮必须提及：${freeTalk.mustMention.join('、')}`)
+    if (freeTalk.context) lines.push(`当前情境：${freeTalk.context}`)
+    if (freeTalk.sceneObjective) lines.push(`本轮对话方向：${freeTalk.sceneObjective}`)
+    if (freeTalk.mustMention) lines.push(`可自然提及的关键词（仅在话题相关时提及）：${freeTalk.mustMention.join('、')}`)
     if (freeTalk.mustNotMention) lines.push(`本轮禁止提及：${freeTalk.mustNotMention.join('、')}`)
     if (freeTalk.relationshipTarget) lines.push(`关系推进目标：${freeTalk.relationshipTarget}`)
   }
@@ -262,7 +332,7 @@ function buildSceneCard(character, gameState) {
       lines.push(`涉及知识点：${postEvent.knowledge_point}`)
       lines.push(`常见错误：${postEvent.common_mistakes.join('、')}`)
       lines.push(`情绪基调：${postEvent.emotional_tone}`)
-      if (postEvent.must_mention) lines.push(`本轮必须自然提及：${postEvent.must_mention.join('、')}`)
+      if (postEvent.must_mention) lines.push(`如有机会可自然提及：${postEvent.must_mention.join('、')}（但优先回应玩家发言）`)
       if (postEvent.relationship_goal) lines.push(`关系推进目标：${postEvent.relationship_goal}`)
       lines.push(`参考台词风格：${postEvent.template}`)
       lines.push(`注意：以上仅为基调参考，请用角色自己的方式自然表达，不要照搬原文。`)
@@ -337,6 +407,28 @@ function buildMemoryCard(gameState, characterId) {
   return `【记忆卡】\n${lines.join('\n')}`
 }
 
+function buildFreeTalkHistoryCard(gameState, characterId) {
+  const summaries = gameState.freeTalkSummaries?.[characterId]
+  if (!summaries || summaries.length === 0) return ''
+
+  const recent = summaries.slice(-5)
+  const lines = recent.map((s, i) => {
+    const parts = [`第${i + 1}次`]
+    if (s.chapter) parts.push(`${s.chapter}`)
+    if (s.timeSlot) parts.push(s.timeSlot)
+    if (s.topics?.length) parts.push(`话题：${s.topics.join('、')}`)
+    let detail = parts.join(' | ')
+    if (s.playerSaid) detail += `\n  玩家说了：「${s.playerSaid}」`
+    if (s.npcSaid) detail += `\n  你说了：「${s.npcSaid}」`
+    return detail
+  })
+
+  return `【过往自由对话记录】
+你和玩家之前聊过 ${summaries.length} 次。以下是最近的对话摘要：
+${lines.join('\n')}
+请自然地延续之前的话题，让玩家感到「她记得我们聊过什么」。不要逐字重复上次说过的内容，而是有所推进。`
+}
+
 function buildOutputContract(character) {
   const charId = character.id
   const expressions = (character.expressions || ['normal']).join(', ')
@@ -353,9 +445,10 @@ function buildOutputContract(character) {
 - ${worldviewRule}
 - 不得跳出当前章节剧透后续主线。
 - 不得突然表白、告白或触发关键剧情，除非场景目标明确允许。
-- 不得重复上一轮几乎相同的表达。
+- 严禁重复之前说过的话——即使改写措辞也不行，必须在内容和话题上有推进。
 
 【输出规则】
+- 最高优先级：必须回应玩家这句话的实际内容。如果玩家问了一个问题，先回答问题；如果玩家在闲聊，自然接话。绝对不可忽略玩家说了什么而自顾自讲别的话题。
 - ${lengthRule}
 - 台词优先，不要长篇解释。
 - 必须带有细微动作或神态，但动作要克制。
@@ -379,7 +472,13 @@ function buildOutputContract(character) {
   "comfort_delta": -2到2的整数,
   "topic_tags": ["当前话题标签"],
   "memory_candidate": "值得作为「共同回忆」沉淀的一句话摘要（如'第一次被她夸代码整洁'），没有则空字符串",
-  "memory_emotion": "回忆的情绪标签，从 warm/funny/bittersweet/tense/romantic 中选一个，无回忆则空字符串"
+  "memory_emotion": "回忆的情绪标签，从 warm/funny/bittersweet/tense/romantic 中选一个，无回忆则空字符串",
+  "live2d_hints": {
+    "motion": "可选，从 happy_idle/lean_forward/step_back/wave_hand/shy_fidget/react_surprise/react_celebration 中选一个",
+    "gaze": "可选，从 player/code_area/sky/memory/away/wander 中选一个",
+    "breath": "可选，fast 或 slow",
+    "sequence": [{"expression":"表情","hold":毫秒数}]
+  }
 }`
 }
 
@@ -387,15 +486,48 @@ function buildCharacterPrompt(characterId, gameState) {
   const char = characters[characterId]
   if (!char) return ''
 
+  const promptId = gameState.freeTalkData?.promptId
+  const detailedPrompt = promptId ? freeTalkPrompts[promptId] : null
+
   const persona = buildPersonaCard(char)
   const rel = buildRelationshipCard(char, gameState)
-  const scene = buildSceneCard(char, gameState)
   const memory = buildMemoryCard(gameState, characterId)
+  const ftHistory = buildFreeTalkHistoryCard(gameState, characterId)
   const output = buildOutputContract(char)
 
   const playerLine = `【玩家身份】\n主角名字：${gameState.playerName || '玩家'}`
 
-  return [persona, playerLine, rel, scene, memory, output].join('\n\n')
+  const extraCards = []
+
+  if (detailedPrompt) {
+    extraCards.push(`【本轮对话专属指令（最高优先级）】\n${detailedPrompt.systemPrompt}`)
+    if (detailedPrompt.topicPool?.length) {
+      extraCards.push(`【可选话题池】${detailedPrompt.topicPool.join('、')}`)
+    }
+  }
+
+  if (ftHistory) extraCards.push(ftHistory)
+
+  const scene = buildSceneCard(char, gameState)
+
+  if (gameState._persistentMemoryCard) extraCards.push(gameState._persistentMemoryCard)
+  if (gameState._playerInsightCard) extraCards.push(gameState._playerInsightCard)
+  if (gameState._autonomyCard) extraCards.push(gameState._autonomyCard)
+  if (gameState._emotionCard) extraCards.push(gameState._emotionCard)
+  if (gameState._srsCard) extraCards.push(gameState._srsCard)
+
+  if (gameState._worldStateCard) extraCards.push(gameState._worldStateCard)
+  if (gameState._cognitiveCard) extraCards.push(gameState._cognitiveCard)
+  if (gameState._temporalCodeCard) extraCards.push(gameState._temporalCodeCard)
+  if (gameState._symbioticDNACard) extraCards.push(gameState._symbioticDNACard)
+  if (gameState._realityBridgeCard) extraCards.push(gameState._realityBridgeCard)
+  if (gameState._pedagogyCard) extraCards.push(gameState._pedagogyCard)
+
+  if (gameState._lastNpcLine) {
+    extraCards.push(`【你上一句台词】\n"${gameState._lastNpcLine}"\n注意：绝对不能重复或改写这句话，必须说不同内容。`)
+  }
+
+  return [persona, playerLine, rel, scene, memory, ...extraCards, output].join('\n\n')
 }
 
 // ─── 分层选项生成 Prompt ─────────────────────────────────
@@ -414,13 +546,18 @@ function buildPlayerOptionsPrompt(characterId, gameState, context) {
 
   const safeContext = typeof context === 'string' ? context.slice(0, 200) : ''
 
+  const promptId = gameState.freeTalkData?.promptId
+  const detailedPrompt = promptId ? freeTalkPrompts[promptId] : null
+  const topicHint = detailedPrompt?.openingHint || safeContext
+  const topicPoolStr = detailedPrompt?.topicPool?.length ? `\n可选话题：${detailedPrompt.topicPool.join('、')}` : ''
+
   return `你要为视觉小说生成 3 个玩家可选台词。
 目标不是"都自然"，而是"功能不同、后果不同、都符合当前场景"。
 
 角色：${char.name}
 关系阶段：${stage}
 地点：${locationName}
-当前话题/场景：${safeContext}
+当前话题/场景：${topicHint}${topicPoolStr}
 角色刚才说的话：${gameState._lastNpcLine || '（对话开始）'}
 
 请生成 3 个选项，分别对应：
@@ -505,24 +642,27 @@ export function useLLMManager() {
   }
 
   async function generateCharacterDialogue(characterId, playerInput, gameState) {
-    if (!apiKey.value) return getFallbackDialogue(characterId, gameState)
+    if (localMode.value && _isElectron()) {
+      return _generateLocalDialogue(characterId, playerInput, gameState)
+    }
+    if (!apiKey.value) return getFallbackDialogue(characterId, gameState, playerInput)
     if (offlineMode.value || (typeof navigator !== 'undefined' && !navigator.onLine)) {
       offlineMode.value = true
-      return getFallbackDialogue(characterId, gameState)
+      return getFallbackDialogue(characterId, gameState, playerInput)
     }
 
     const safeInput = _sanitizePlayerInput(playerInput)
-    if (!safeInput) return getFallbackDialogue(characterId, gameState)
+    if (!safeInput) return getFallbackDialogue(characterId, gameState, playerInput)
 
     if (!_throttleCheck()) {
       lastError.value = '请求过于频繁，请稍后再试'
-      return getFallbackDialogue(characterId, gameState)
+      return getFallbackDialogue(characterId, gameState, playerInput)
     }
 
     const endpoint = `${baseUrl.value}/chat/completions`
     if (!_isValidApiUrl(endpoint)) {
       lastError.value = 'API 地址无效'
-      return getFallbackDialogue(characterId, gameState)
+      return getFallbackDialogue(characterId, gameState, playerInput)
     }
 
     isGenerating.value = true
@@ -535,7 +675,10 @@ export function useLLMManager() {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
-        const conversationHistory = gameState.conversationHistory?.[characterId]?.slice(-10) || []
+        let conversationHistory = gameState.conversationHistory?.[characterId]?.slice(-10) || []
+        if (conversationHistory.length > 0 && conversationHistory[conversationHistory.length - 1]?.role === 'user') {
+          conversationHistory = conversationHistory.slice(0, -1)
+        }
 
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -547,7 +690,7 @@ export function useLLMManager() {
           body: JSON.stringify({
             model: model.value,
             max_tokens: 300,
-            temperature: 0.7,
+            temperature: safeInput.length < 10 ? 0.85 : 0.7,
             messages: [
               { role: 'system', content: buildCharacterPrompt(characterId, gameState) },
               ...conversationHistory,
@@ -562,21 +705,36 @@ export function useLLMManager() {
         const data = await response.json()
         const text = data.choices?.[0]?.message?.content || ''
         const parsed = _safeJsonParse(text)
+        const result = _sanitizeLLMResponse(parsed, characterId)
+
+        const recentAssistant = (gameState.conversationHistory?.[characterId] || [])
+          .filter(m => m.role === 'assistant')
+          .slice(-3)
+          .map(m => (m.content || '').replace(/[…。、！？\s]/g, ''))
+        const cleanNew = (result.text || '').replace(/[…。、！？\s]/g, '')
+        if (cleanNew && recentAssistant.some(old => old === cleanNew || (old.length > 5 && cleanNew.includes(old)))) {
+          result.text = ''
+        }
+
+        if (!result.text) {
+          isGenerating.value = false
+          return getFallbackDialogue(characterId, gameState, playerInput)
+        }
 
         isGenerating.value = false
-        return _sanitizeLLMResponse(parsed, characterId)
+        return result
       } catch (error) {
         lastError.value = error.message
         if (attempt === MAX_RETRIES) {
           isGenerating.value = false
-          return getFallbackDialogue(characterId, gameState)
+          return getFallbackDialogue(characterId, gameState, playerInput)
         }
         await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
       }
     }
 
     isGenerating.value = false
-    return getFallbackDialogue(characterId, gameState)
+    return getFallbackDialogue(characterId, gameState, playerInput)
   }
 
   async function generatePlayerOptions(characterId, gameState, context) {
@@ -668,7 +826,68 @@ export function useLLMManager() {
     ]
   }
 
-  function getFallbackDialogue(characterId, gameState) {
+  const _contextualFallbacks = {
+    nene: {
+      identity: { text: '我是綾地寧々，这个学园的 AI 助教哦～有什么编程问题都可以问我！', expression: 'smile' },
+      greeting: { text: '你好呀！今天也一起加油学编程吧～', expression: 'smile' },
+      feeling: { text: '我今天状态很好哦！谢谢你关心我～', expression: 'gentle_smile' },
+      help: { text: '当然可以帮你！你想了解什么呢？', expression: 'smile' },
+    },
+    yoshino: {
+      identity: { text: '朝武芳乃。编程部部长。……不需要更多介绍了吧。', expression: 'cold' },
+      greeting: { text: '嗯，你来了。有什么事就直说。', expression: 'normal' },
+      feeling: { text: '……我的状态跟你无关。说正事。', expression: 'cold' },
+      help: { text: '看你要问什么。如果是基础问题，先自己查文档。', expression: 'glasses_adjust' },
+    },
+    ayase: {
+      identity: { text: '我是三司あやせ！编程竞赛选手！你是来跟我比赛的吗？', expression: 'fired_up' },
+      greeting: { text: '哟！来了来了！今天要不要来比一把？', expression: 'grin' },
+      feeling: { text: '超精神的！刚刷了三道算法题！', expression: 'competitive' },
+      help: { text: '帮忙？可以啊，不过你得答应我之后跟我比一场！', expression: 'grin' },
+    },
+    kanna: {
+      identity: { text: '……明月栞那。', expression: 'normal' },
+      greeting: { text: '……嗯。', expression: 'slight_smile' },
+      feeling: { text: '……还好。', expression: 'contemplative' },
+      help: { text: '……说。', expression: 'normal' },
+    },
+    murasame: {
+      identity: { text: 'ムラサメ。记住就行。', expression: 'cold' },
+      greeting: { text: '……你又来了。', expression: 'normal' },
+      feeling: { text: '不关你的事。有事说事。', expression: 'cold' },
+      help: { text: '帮你？给我一个理由。', expression: 'smirk' },
+    },
+  }
+
+  function _matchContextualFallback(characterId, playerInput) {
+    if (!playerInput) return null
+    const input = playerInput.toLowerCase()
+    const charFallbacks = _contextualFallbacks[characterId]
+    if (!charFallbacks) return null
+
+    if (/你是谁|你叫什么|自我介绍|who are you|你的名字/.test(input)) return charFallbacks.identity
+    if (/你好|嗨|hi|hello|早上好|下午好|晚上好/.test(input)) return charFallbacks.greeting
+    if (/你怎么样|你好吗|你还好吗|心情|状态|how are you/.test(input)) return charFallbacks.feeling
+    if (/帮我|教我|help|能不能|可不可以|请问/.test(input)) return charFallbacks.help
+    return null
+  }
+
+  function getFallbackDialogue(characterId, gameState, playerInput) {
+    const contextual = _matchContextualFallback(characterId, playerInput)
+    if (contextual) {
+      return {
+        text: contextual.text,
+        expression: contextual.expression || 'normal',
+        action: null,
+        affectionDelta: 0,
+        trustDelta: 0,
+        comfortDelta: 0,
+        topicTags: [],
+        memoryCandidate: '',
+        source: 'fallback_contextual'
+      }
+    }
+
     const rel = gameState.relationship?.[characterId]
     const avg = rel ? Math.round((rel.affection + rel.trust + rel.comfort) / 3) : (gameState.affection?.[characterId] || 0)
     const level = avg < 30 ? 'low' : avg < 60 ? 'mid' : 'high'
@@ -725,6 +944,12 @@ export function useLLMManager() {
     const memSummary = mems.slice(-3).map(m => typeof m === 'string' ? m : m.text).join('、') || '无'
     const lastLine = lastAssistant?.content?.slice(0, 80) || '无'
 
+    const ftSummaries = gameState.freeTalkSummaries?.[characterId] || []
+    const lastFtSummary = ftSummaries.length > 0 ? ftSummaries[ftSummaries.length - 1] : null
+    const lastChatInfo = lastFtSummary
+      ? `上次聊天话题：${lastFtSummary.topics?.join('、') || '未知'}，玩家说了「${lastFtSummary.playerSaid || ''}」`
+      : '之前没有单独聊过天'
+
     const prompt = `${buildPersonaCard(char)}
 
 ${buildRelationshipCard(char, gameState)}
@@ -733,6 +958,7 @@ ${buildRelationshipCard(char, gameState)}
 你要生成一句角色的回访开场白。这不是日常对话，而是「再次见面时的第一句话」。
 
 ${visitInfo}
+${lastChatInfo}
 最近共同回忆：${memSummary}
 上次对话最后一句：${lastLine}
 当前时间段：${gameState.currentTimeSlot || '未知'}
@@ -788,13 +1014,342 @@ ${visitInfo}
     }
   }
 
+  async function evaluateTeachBack(characterId, concept, playerExplanation, rubric, gameState) {
+    if (!apiKey.value || offlineMode.value) return _fallbackTeachBackResult()
+
+    const char = characters[characterId]
+    if (!char) return _fallbackTeachBackResult()
+
+    const safeExplanation = _sanitizePlayerInput(playerExplanation)
+    if (!safeExplanation || safeExplanation.length < 10) {
+      return { clarity: 1, accuracy: 1, empathy: 1, feedback_text: '说得太少了，能再详细一点吗？', expression: 'confused', memory_candidate: '', outcome: 'poor_teach', success: false }
+    }
+
+    if (!_throttleCheck()) return _fallbackTeachBackResult()
+
+    const prompt = `${buildPersonaCard(char)}
+
+${buildRelationshipCard(char, gameState)}
+
+【教学评估任务】
+角色刚才问了玩家：「请用你自己的话解释「${concept}」」
+知识点详情：${rubric?.concept_detail || concept}
+
+玩家的解释：
+"${safeExplanation}"
+
+请从三个维度评估（1-5 分）：
+1. clarity（清晰度）：逻辑是否连贯、是否通俗易懂
+2. accuracy（准确性）：关键概念是否正确，关键词参考：${(rubric?.accuracy_keywords || []).join('、')}
+3. empathy（共情度）：是否用了生动的类比/例子，好的类比参考：${(rubric?.good_analogies || []).join('、')}
+
+根据评分给出角色反应。角色要用自己的说话风格回应。
+
+只输出 JSON：
+{
+  "clarity": 1-5,
+  "accuracy": 1-5,
+  "empathy": 1-5,
+  "feedback_text": "角色的回应台词",
+  "expression": "表情",
+  "memory_candidate": "值得记忆的一句话摘要，如'玩家用心跳来比喻循环'，没有则空字符串"
+}`
+
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 12000)
+      const response = await fetch(`${baseUrl.value}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.value}` },
+        signal: controller.signal,
+        body: JSON.stringify({ model: model.value, max_tokens: 300, temperature: 0.7, messages: [{ role: 'system', content: prompt }, { role: 'user', content: '评估玩家的教学解释。' }] })
+      })
+      clearTimeout(timeoutId)
+      _validateApiResponse(response)
+      const data = await response.json()
+      const parsed = _safeJsonParse(data.choices?.[0]?.message?.content || '')
+      const clamp = (v, lo, hi) => Math.min(Math.max(parseInt(v) || 1, lo), hi)
+      const clarity = clamp(parsed.clarity, 1, 5)
+      const accuracy = clamp(parsed.accuracy, 1, 5)
+      const empathy = clamp(parsed.empathy, 1, 5)
+      const avg = (clarity + accuracy + empathy) / 3
+      let outcome = 'poor_teach'
+      if (avg >= 4) outcome = 'excellent_teach'
+      else if (accuracy >= 3 && avg >= 3) outcome = 'accurate_teach'
+      else if (empathy >= 3 && accuracy < 3) outcome = 'warm_but_wrong'
+      return {
+        clarity, accuracy, empathy,
+        feedback_text: _sanitizeText(parsed.feedback_text || ''),
+        expression: parsed.expression || 'normal',
+        memory_candidate: _sanitizeText(parsed.memory_candidate || ''),
+        outcome,
+        success: avg >= 3,
+      }
+    } catch {
+      return _fallbackTeachBackResult()
+    }
+  }
+
+  function _fallbackTeachBackResult() {
+    return { clarity: 3, accuracy: 3, empathy: 3, feedback_text: '嗯……你说的有道理。', expression: 'normal', memory_candidate: '', outcome: 'accurate_teach', success: true }
+  }
+
+  async function evaluatePairDebug(characterId, buggyCode, bugDescription, playerResponse, rubric, gameState) {
+    if (!apiKey.value || offlineMode.value) return _fallbackPairDebugResult()
+
+    const char = characters[characterId]
+    if (!char) return _fallbackPairDebugResult()
+
+    const safeResponse = _sanitizePlayerInput(playerResponse)
+    if (!safeResponse || safeResponse.length < 5) {
+      return { found_bug: false, technical_score: 1, tone_score: 3, feedback_text: '你再仔细看看？', expression: 'confused', relationship_hint: '', outcome: 'thoughtful_fail', success: false }
+    }
+
+    if (!_throttleCheck()) return _fallbackPairDebugResult()
+
+    const prompt = `${buildPersonaCard(char)}
+
+${buildRelationshipCard(char, gameState)}
+
+【Pair Debug 评估任务】
+角色写了这段有 Bug 的代码：
+\`\`\`python
+${buggyCode}
+\`\`\`
+
+Bug 的正确描述：${bugDescription}
+必须识别的关键词：${(rubric?.must_identify || []).join('、')}
+角色写 Bug 的原因：${rubric?.character_personality_in_bug || '粗心'}
+${rubric?.bonus_if_kind ? '注意：这个角色在意你指出 Bug 的语气是否友善。' : ''}
+
+玩家的分析：
+"${safeResponse}"
+
+评估：
+1. found_bug：玩家是否正确找到了 Bug？（关键词是否覆盖）
+2. technical_score（1-5）：技术分析的准确度
+3. tone_score（1-5）：指出 Bug 时的语气是否恰当（对不同角色标准不同）
+
+角色要用自己的方式回应玩家的分析。
+
+只输出 JSON：
+{
+  "found_bug": true/false,
+  "technical_score": 1-5,
+  "tone_score": 1-5,
+  "feedback_text": "角色反应台词",
+  "expression": "表情",
+  "relationship_hint": "一句关系变化说明，如'她欣赏你的坦诚'"
+}`
+
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 12000)
+      const response = await fetch(`${baseUrl.value}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.value}` },
+        signal: controller.signal,
+        body: JSON.stringify({ model: model.value, max_tokens: 300, temperature: 0.7, messages: [{ role: 'system', content: prompt }, { role: 'user', content: '评估玩家的 Bug 分析。' }] })
+      })
+      clearTimeout(timeoutId)
+      _validateApiResponse(response)
+      const data = await response.json()
+      const parsed = _safeJsonParse(data.choices?.[0]?.message?.content || '')
+      const clamp = (v, lo, hi) => Math.min(Math.max(parseInt(v) || 1, lo), hi)
+      return {
+        found_bug: !!parsed.found_bug,
+        technical_score: clamp(parsed.technical_score, 1, 5),
+        tone_score: clamp(parsed.tone_score, 1, 5),
+        feedback_text: _sanitizeText(parsed.feedback_text || ''),
+        expression: parsed.expression || 'normal',
+        relationship_hint: _sanitizeText(parsed.relationship_hint || ''),
+        outcome: parsed.found_bug ? 'solo_pass' : 'thoughtful_fail',
+        success: !!parsed.found_bug,
+      }
+    } catch {
+      return _fallbackPairDebugResult()
+    }
+  }
+
+  function _fallbackPairDebugResult() {
+    return { found_bug: true, technical_score: 3, tone_score: 3, feedback_text: '嗯，你找到了问题所在。', expression: 'normal', relationship_hint: '', outcome: 'solo_pass', success: true }
+  }
+
+  async function evaluateCreativeCode(characterId, code, output, rubric, gameState) {
+    if (!apiKey.value || offlineMode.value) return _fallbackCreativeCodeResult(!!output)
+
+    const char = characters[characterId]
+    if (!char) return _fallbackCreativeCodeResult(!!output)
+
+    if (!_throttleCheck()) return _fallbackCreativeCodeResult(!!output)
+
+    const prompt = `${buildPersonaCard(char)}
+
+${buildRelationshipCard(char, gameState)}
+
+【创意编程评估任务】
+题目：${rubric?.prompt || '创意编程'}
+玩家提交的代码：
+\`\`\`python
+${(code || '').slice(0, 500)}
+\`\`\`
+
+运行输出：
+${(output || '（无输出）').slice(0, 300)}
+
+评估维度：
+1. runs：代码是否成功运行（bool）
+2. elegance（1-5）：代码风格、简洁度、可读性
+3. creativity（1-5）：输出的创意性、美观度
+${rubric?.min_output_lines ? `要求至少输出 ${rubric.min_output_lines} 行` : ''}
+
+角色评价偏好提示：
+- 如果是 Yoshino：最在意代码优雅度
+- 如果是 Ayase：在意是否有趣/炫酷
+- 如果是 Kanna：欣赏极简主义
+- 如果是 Nene：只要能跑就夸
+- 如果是 Murasame：用更高标准要求
+
+只输出 JSON：
+{
+  "runs": true/false,
+  "elegance": 1-5,
+  "creativity": 1-5,
+  "feedback_text": "角色反应台词",
+  "expression": "表情",
+  "memory_candidate": "一句摘要"
+}`
+
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 12000)
+      const response = await fetch(`${baseUrl.value}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.value}` },
+        signal: controller.signal,
+        body: JSON.stringify({ model: model.value, max_tokens: 300, temperature: 0.7, messages: [{ role: 'system', content: prompt }, { role: 'user', content: '评估玩家的创意代码。' }] })
+      })
+      clearTimeout(timeoutId)
+      _validateApiResponse(response)
+      const data = await response.json()
+      const parsed = _safeJsonParse(data.choices?.[0]?.message?.content || '')
+      const clamp = (v, lo, hi) => Math.min(Math.max(parseInt(v) || 1, lo), hi)
+      const elegance = clamp(parsed.elegance, 1, 5)
+      const creativity = clamp(parsed.creativity, 1, 5)
+      return {
+        runs: !!parsed.runs,
+        elegance,
+        creativity,
+        feedback_text: _sanitizeText(parsed.feedback_text || ''),
+        expression: parsed.expression || 'normal',
+        memory_candidate: _sanitizeText(parsed.memory_candidate || ''),
+        outcome: parsed.runs ? (elegance + creativity >= 7 ? 'solo_pass' : 'assisted_pass') : 'thoughtful_fail',
+        success: !!parsed.runs,
+      }
+    } catch {
+      return _fallbackCreativeCodeResult(!!output)
+    }
+  }
+
+  function _fallbackCreativeCodeResult(ran) {
+    return { runs: ran, elegance: 3, creativity: 3, feedback_text: ran ? '代码跑起来了呢！' : '好像哪里有问题……', expression: ran ? 'smile' : 'confused', memory_candidate: '', outcome: ran ? 'assisted_pass' : 'thoughtful_fail', success: ran }
+  }
+
+  function _compressPromptForLocal(fullPrompt) {
+    let compressed = fullPrompt
+    compressed = compressed.replace(/【安全规则】[\s\S]*?(?=【|$)/g, '')
+    compressed = compressed.replace(/- 不可输出任何 HTML[\s\S]*?纯文本台词和动作描写。/g, '')
+
+    if (compressed.length > 3000) {
+      compressed = compressed.replace(/【过往自由对话记录】[\s\S]*?(?=【|$)/g, '')
+    }
+    if (compressed.length > 2500) {
+      compressed = compressed.replace(/【本轮对话专属指令[\s\S]*?(?=【|$)/g, '')
+    }
+
+    return compressed
+  }
+
+  async function _generateLocalDialogue(characterId, playerInput, gameState) {
+    const safeInput = _sanitizePlayerInput(playerInput)
+    if (!safeInput) return getFallbackDialogue(characterId, gameState, playerInput)
+
+    if (!_throttleCheck()) {
+      lastError.value = '请求过于频繁，请稍后再试'
+      return getFallbackDialogue(characterId, gameState, playerInput)
+    }
+
+    isGenerating.value = true
+    lastError.value = null
+
+    try {
+      let conversationHistory = gameState.conversationHistory?.[characterId]?.slice(-6) || []
+      if (conversationHistory.length > 0 && conversationHistory[conversationHistory.length - 1]?.role === 'user') {
+        conversationHistory = conversationHistory.slice(0, -1)
+      }
+
+      const fullPrompt = buildCharacterPrompt(characterId, gameState)
+      const optimizedPrompt = _compressPromptForLocal(fullPrompt)
+
+      const messages = [
+        { role: 'system', content: optimizedPrompt },
+        ...conversationHistory,
+        { role: 'user', content: safeInput }
+      ]
+
+      const result = await _localLLMChat(messages)
+      const text = result.message?.content || ''
+      const parsed = _safeJsonParse(text)
+      const response = _sanitizeLLMResponse(parsed, characterId)
+
+      const recentAssistant = (gameState.conversationHistory?.[characterId] || [])
+        .filter(m => m.role === 'assistant')
+        .slice(-3)
+        .map(m => (m.content || '').replace(/[…。、！？\s]/g, ''))
+      const cleanNew = (response.text || '').replace(/[…。、！？\s]/g, '')
+      if (cleanNew && recentAssistant.some(old => old === cleanNew || (old.length > 5 && cleanNew.includes(old)))) {
+        response.text = ''
+      }
+
+      if (!response.text) {
+        isGenerating.value = false
+        return getFallbackDialogue(characterId, gameState, playerInput)
+      }
+
+      response.source = 'local_llm'
+      isGenerating.value = false
+      return response
+    } catch (error) {
+      lastError.value = `Local LLM: ${error.message}`
+      isGenerating.value = false
+      return getFallbackDialogue(characterId, gameState, playerInput)
+    }
+  }
+
+  function setLocalMode(enabled) {
+    localMode.value = !!enabled
+  }
+
+  function setLocalModel(m) {
+    localModel.value = m || 'qwen2.5:7b-instruct-q4_K_M'
+  }
+
+  async function checkLocalAvailability() {
+    return _checkLocalLLM()
+  }
+
   return {
     apiKey, baseUrl, model, isGenerating, lastError, offlineMode,
+    localMode, localModel, localStatus,
     setApiKey, setBaseUrl, setModel, loadApiKey, testConnection,
+    setLocalMode, setLocalModel, checkLocalAvailability,
     buildCharacterPrompt,
     generateCharacterDialogue,
     generatePlayerOptions,
     generateRevisitGreeting,
-    getFallbackDialogue
+    getFallbackDialogue,
+    evaluateTeachBack,
+    evaluatePairDebug,
+    evaluateCreativeCode,
   }
 }
