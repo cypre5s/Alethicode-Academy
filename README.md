@@ -35,11 +35,12 @@
 
 ## ☆ 特色系统
 
-- 📖 **完整剧情线** — 序章 + 5 章共通线 + 5 条角色线，共 11 个结局（Good End / Normal End / True End）
+- 📖 **超长剧情线** — 序章 + 5 章共通线 + 5 条深度角色线，共 11 个结局（Good End / Normal End / True End），剧本 5500+ 行，100 个场景节点 ✧
 - 💻 **编程挑战** — 20+ 道 Python 题目（选择 / 填空 / 排序），答对涨好感 ↑↑，答错触发角色吐槽 w
 - 🤖 **LLM 智能对话** — 自由时段与角色闲聊，AI 基于角色人设 + 好感度动态生成回复～
-- 👧 **5 位可攻略角色** — 各含立绘 + 8 种表情差分 (˶ᵔ ᵕ ᵔ˶)
+- 👧 **5 位可攻略角色** — 各含立绘 + 8 种表情差分，角色线含日常铺垫 + 尾声场景 (˶ᵔ ᵕ ᵔ˶)
 - ⚙️ **完整系统** — 对话（逐字显示 / 自动 / 快进 / Backlog）、选择肢、存读档、CG 鉴赏、设置面板
+- 📱 **多端适配** — 桌面端 (Electron) / 手机端 (Capacitor) / Web 端 (Cloudflare Pages) 全平台支持
 
 ## ⚡ 前沿引擎技术
 
@@ -56,6 +57,9 @@
 | **智能资源预加载** | 前瞻 30 步的图像 + 音频预加载，AudioBuffer 缓存池 | 领先 |
 | **分离式 Service Worker** | 图片/音频/脚本三级独立缓存 + LRU 淘汰 + PREFETCH 消息接口 | 领先 |
 | **智能代码分包** | ES2022 构建 + engine/routes/vue-vendor 自动分离 | 领先 |
+| **内存调度中枢** | 分区预算制 + LRU/TTL 双淘汰 + 内存压力感知 + 后台冻结，手机端 BGM 流式播放 | 独家 |
+| **帧率自适应** | FPS 实时监测 → 5 级自动降级链 → 自动恢复，保证流畅度 | 独家 |
+| **移动端性能特化** | 4 级设备分层 + backdrop-filter 降级 + DPR 限制 + 粒子缩减 | 独家 |
 | **15+ 子引擎系统** | 认知图谱 / 行为画像 / 叙事织构 / 情感共鸣 / 间隔重复 / 现实桥接 等 | 独家 |
 
 ## 💕 角色一览
@@ -136,10 +140,14 @@ Alethicode-Academy/
 │   │   ├── LipSyncEngine.js      # 音频驱动唇形同步
 │   │   ├── ExperienceEnhancer.js # Haptic/WakeLock/Mood/Transitions
 │   │   ├── AssetPreloader.js     # 智能资源预加载
+│   │   ├── MemoryScheduler.js    # 内存调度中枢 (LRU+TTL)
+│   │   ├── MobilePerformance.js  # 移动端性能特化
+│   │   ├── AdaptiveQuality.js    # 帧率自适应质量
+│   │   ├── ManagedImageCache.js  # 可释放图片缓存
 │   │   ├── CognitiveGraph.js     # 认知图谱
 │   │   ├── PedagogyKernel.js     # 教育学内核
-│   │   └── ...                   # 更多子引擎
-│   ├── scripts/            # 剧情脚本 (~3700行)
+│   │   └── ...                   # 更多子引擎 (20+)
+│   ├── scripts/            # 剧情脚本 (~5500行, 100个场景)
 │   │   ├── prologue.js           # 序章「转入学园」
 │   │   ├── chapter1.js           # 第一章「Hello, World!」
 │   │   ├── chapter2.js           # 第二章「循环的旋律」
